@@ -107,7 +107,6 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CustomerSpending.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CustomerTierProgress.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CustomerUpdateRequest.CustomTypeAdapterFactory());
-        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.Date.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetCustomer200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetJobRequest200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetJobRequestTimeline200Response.CustomTypeAdapterFactory());

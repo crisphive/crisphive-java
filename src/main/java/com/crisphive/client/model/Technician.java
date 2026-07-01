@@ -25,10 +25,10 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -172,7 +172,7 @@ public class Technician {
   public static final String SERIALIZED_NAME_JOIN_DATE = "join_date";
   @SerializedName(SERIALIZED_NAME_JOIN_DATE)
   @javax.annotation.Nullable
-  private Date joinDate;
+  private LocalDate joinDate;
 
   public static final String SERIALIZED_NAME_LAST_LOGIN_AT = "last_login_at";
   @SerializedName(SERIALIZED_NAME_LAST_LOGIN_AT)
@@ -506,7 +506,7 @@ public class Technician {
   }
 
 
-  public Technician joinDate(@javax.annotation.Nullable Date joinDate) {
+  public Technician joinDate(@javax.annotation.Nullable LocalDate joinDate) {
     this.joinDate = joinDate;
     return this;
   }
@@ -516,11 +516,11 @@ public class Technician {
    * @return joinDate
    */
   @javax.annotation.Nullable
-  public Date getJoinDate() {
+  public LocalDate getJoinDate() {
     return joinDate;
   }
 
-  public void setJoinDate(@javax.annotation.Nullable Date joinDate) {
+  public void setJoinDate(@javax.annotation.Nullable LocalDate joinDate) {
     this.joinDate = joinDate;
   }
 
@@ -950,10 +950,6 @@ public class Technician {
       }
       if ((jsonObj.get("job_title") != null && !jsonObj.get("job_title").isJsonNull()) && !jsonObj.get("job_title").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `job_title` to be a primitive type in the JSON string but got `%s`", jsonObj.get("job_title").toString()));
-      }
-      // validate the optional field `join_date`
-      if (jsonObj.get("join_date") != null && !jsonObj.get("join_date").isJsonNull()) {
-        Date.validateJsonElement(jsonObj.get("join_date"));
       }
       if (jsonObj.get("leads") != null && !jsonObj.get("leads").isJsonNull()) {
         JsonArray jsonArrayleads = jsonObj.getAsJsonArray("leads");
