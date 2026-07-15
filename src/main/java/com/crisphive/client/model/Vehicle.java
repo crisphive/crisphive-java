@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -95,6 +95,69 @@ public class Vehicle {
   @javax.annotation.Nullable
   private String name;
 
+  /**
+   * Live operational state derived from the vehicle&#39;s jobs: on_job &#x3D; a job&#39;s scheduled window contains now (the vehicle is out working); assigned &#x3D; attached to an upcoming/open job that is not in progress; other values mirror status.
+   */
+  @JsonAdapter(OperationalStatusEnum.Adapter.class)
+  public enum OperationalStatusEnum {
+    INACTIVE("inactive"),
+    
+    IDLE("idle"),
+    
+    ASSIGNED("assigned"),
+    
+    ON_JOB("on_job"),
+    
+    MAINTENANCE("maintenance");
+
+    private String value;
+
+    OperationalStatusEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static OperationalStatusEnum fromValue(String value) {
+      for (OperationalStatusEnum b : OperationalStatusEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+
+    public static class Adapter extends TypeAdapter<OperationalStatusEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final OperationalStatusEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public OperationalStatusEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return OperationalStatusEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      OperationalStatusEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_OPERATIONAL_STATUS = "operational_status";
+  @SerializedName(SERIALIZED_NAME_OPERATIONAL_STATUS)
+  @javax.annotation.Nullable
+  private OperationalStatusEnum operationalStatus;
+
   public static final String SERIALIZED_NAME_OWNER = "owner";
   @SerializedName(SERIALIZED_NAME_OWNER)
   @javax.annotation.Nullable
@@ -106,7 +169,7 @@ public class Vehicle {
   private String plateNumber;
 
   /**
-   * Operational status.
+   * Stored status. on_job here means \&quot;attached to an open job\&quot; (set at assignment, cleared at complete/archive/unassign) — see operational_status for the live state.
    */
   @JsonAdapter(StatusEnum.Adapter.class)
   public enum StatusEnum {
@@ -400,6 +463,25 @@ public class Vehicle {
   }
 
 
+  public Vehicle operationalStatus(@javax.annotation.Nullable OperationalStatusEnum operationalStatus) {
+    this.operationalStatus = operationalStatus;
+    return this;
+  }
+
+  /**
+   * Live operational state derived from the vehicle&#39;s jobs: on_job &#x3D; a job&#39;s scheduled window contains now (the vehicle is out working); assigned &#x3D; attached to an upcoming/open job that is not in progress; other values mirror status.
+   * @return operationalStatus
+   */
+  @javax.annotation.Nullable
+  public OperationalStatusEnum getOperationalStatus() {
+    return operationalStatus;
+  }
+
+  public void setOperationalStatus(@javax.annotation.Nullable OperationalStatusEnum operationalStatus) {
+    this.operationalStatus = operationalStatus;
+  }
+
+
   public Vehicle owner(@javax.annotation.Nullable VehicleOwner owner) {
     this.owner = owner;
     return this;
@@ -444,7 +526,7 @@ public class Vehicle {
   }
 
   /**
-   * Operational status.
+   * Stored status. on_job here means \&quot;attached to an open job\&quot; (set at assignment, cleared at complete/archive/unassign) — see operational_status for the live state.
    * @return status
    */
   @javax.annotation.Nullable
@@ -578,6 +660,7 @@ public class Vehicle {
         Objects.equals(this.id, vehicle.id) &&
         Objects.equals(this.model, vehicle.model) &&
         Objects.equals(this.name, vehicle.name) &&
+        Objects.equals(this.operationalStatus, vehicle.operationalStatus) &&
         Objects.equals(this.owner, vehicle.owner) &&
         Objects.equals(this.plateNumber, vehicle.plateNumber) &&
         Objects.equals(this.status, vehicle.status) &&
@@ -590,7 +673,7 @@ public class Vehicle {
 
   @Override
   public int hashCode() {
-    return Objects.hash(brand, businessId, createdAt, currentMileage, deletedAt, id, model, name, owner, plateNumber, status, technicianIds, updatedAt, utilizationPercent, vehicleType, year);
+    return Objects.hash(brand, businessId, createdAt, currentMileage, deletedAt, id, model, name, operationalStatus, owner, plateNumber, status, technicianIds, updatedAt, utilizationPercent, vehicleType, year);
   }
 
   @Override
@@ -605,6 +688,7 @@ public class Vehicle {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    model: ").append(toIndentedString(model)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    operationalStatus: ").append(toIndentedString(operationalStatus)).append("\n");
     sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("    plateNumber: ").append(toIndentedString(plateNumber)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
@@ -643,6 +727,7 @@ public class Vehicle {
     openapiFields.add("id");
     openapiFields.add("model");
     openapiFields.add("name");
+    openapiFields.add("operational_status");
     openapiFields.add("owner");
     openapiFields.add("plate_number");
     openapiFields.add("status");
@@ -691,6 +776,13 @@ public class Vehicle {
       }
       if ((jsonObj.get("name") != null && !jsonObj.get("name").isJsonNull()) && !jsonObj.get("name").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
+      }
+      if ((jsonObj.get("operational_status") != null && !jsonObj.get("operational_status").isJsonNull()) && !jsonObj.get("operational_status").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `operational_status` to be a primitive type in the JSON string but got `%s`", jsonObj.get("operational_status").toString()));
+      }
+      // validate the optional field `operational_status`
+      if (jsonObj.get("operational_status") != null && !jsonObj.get("operational_status").isJsonNull()) {
+        OperationalStatusEnum.validateJsonElement(jsonObj.get("operational_status"));
       }
       // validate the optional field `owner`
       if (jsonObj.get("owner") != null && !jsonObj.get("owner").isJsonNull()) {

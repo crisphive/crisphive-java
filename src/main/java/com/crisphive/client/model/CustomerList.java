@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,7 +73,7 @@ public class CustomerList {
   public static final String SERIALIZED_NAME_NEXT_SINCE = "next_since";
   @SerializedName(SERIALIZED_NAME_NEXT_SINCE)
   @javax.annotation.Nullable
-  private String nextSince;
+  private OffsetDateTime nextSince;
 
   public CustomerList() {
   }
@@ -142,7 +143,7 @@ public class CustomerList {
   }
 
 
-  public CustomerList nextSince(@javax.annotation.Nullable String nextSince) {
+  public CustomerList nextSince(@javax.annotation.Nullable OffsetDateTime nextSince) {
     this.nextSince = nextSince;
     return this;
   }
@@ -152,11 +153,11 @@ public class CustomerList {
    * @return nextSince
    */
   @javax.annotation.Nullable
-  public String getNextSince() {
+  public OffsetDateTime getNextSince() {
     return nextSince;
   }
 
-  public void setNextSince(@javax.annotation.Nullable String nextSince) {
+  public void setNextSince(@javax.annotation.Nullable OffsetDateTime nextSince) {
     this.nextSince = nextSince;
   }
 
@@ -259,9 +260,6 @@ public class CustomerList {
       // validate the optional field `meta`
       if (jsonObj.get("meta") != null && !jsonObj.get("meta").isJsonNull()) {
         Pagination.validateJsonElement(jsonObj.get("meta"));
-      }
-      if ((jsonObj.get("next_since") != null && !jsonObj.get("next_since").isJsonNull()) && !jsonObj.get("next_since").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `next_since` to be a primitive type in the JSON string but got `%s`", jsonObj.get("next_since").toString()));
       }
   }
 

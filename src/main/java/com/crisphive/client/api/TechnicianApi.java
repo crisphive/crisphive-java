@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -27,9 +27,17 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import com.crisphive.client.model.CreateTechnician200Response;
 import com.crisphive.client.model.GetTechnician200Response;
 import com.crisphive.client.model.ListTechnicians200Response;
+import com.crisphive.client.model.ReplaceTechnicianServiceAreas200Response;
 import com.crisphive.client.model.ResponseEnvelope;
+import com.crisphive.client.model.TechnicianBuddiesRequest;
+import com.crisphive.client.model.TechnicianCreateRequest;
+import com.crisphive.client.model.TechnicianLeadsRequest;
+import com.crisphive.client.model.TechnicianServiceAreasRequest;
+import com.crisphive.client.model.TechnicianUpdateRequest;
+import com.crisphive.client.model.TechnicianVehiclesRequest;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -75,6 +83,309 @@ public class TechnicianApi {
     }
 
     /**
+     * Build call for createTechnician
+     * @param technicianCreateRequest Technician details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createTechnicianCall(TechnicianCreateRequest technicianCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianCreateRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call createTechnicianValidateBeforeCall(TechnicianCreateRequest technicianCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'technicianCreateRequest' is set
+        if (technicianCreateRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianCreateRequest' when calling createTechnician(Async)");
+        }
+
+        return createTechnicianCall(technicianCreateRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Add a technician
+     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created (no invite email — login is passwordless later). Either way the membership starts active. If the technician was previously removed (deactive) they are reactivated instead. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * @param technicianCreateRequest Technician details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CreateTechnician200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CreateTechnician200Response createTechnician(TechnicianCreateRequest technicianCreateRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CreateTechnician200Response> localVarResp = createTechnicianWithHttpInfo(technicianCreateRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Add a technician
+     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created (no invite email — login is passwordless later). Either way the membership starts active. If the technician was previously removed (deactive) they are reactivated instead. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * @param technicianCreateRequest Technician details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CreateTechnician200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CreateTechnician200Response> createTechnicianWithHttpInfo(TechnicianCreateRequest technicianCreateRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = createTechnicianValidateBeforeCall(technicianCreateRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CreateTechnician200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Add a technician (asynchronously)
+     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created (no invite email — login is passwordless later). Either way the membership starts active. If the technician was previously removed (deactive) they are reactivated instead. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * @param technicianCreateRequest Technician details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createTechnicianAsync(TechnicianCreateRequest technicianCreateRequest, String idempotencyKey, final ApiCallback<CreateTechnician200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = createTechnicianValidateBeforeCall(technicianCreateRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CreateTechnician200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for deleteTechnician
+     * @param id Technician ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteTechnicianCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteTechnicianValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling deleteTechnician(Async)");
+        }
+
+        return deleteTechnicianCall(id, _callback);
+
+    }
+
+    /**
+     * Remove a technician
+     * Soft-removes a technician from the business by setting status to deactive
+     * @param id Technician ID (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope deleteTechnician(String id) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = deleteTechnicianWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Remove a technician
+     * Soft-removes a technician from the business by setting status to deactive
+     * @param id Technician ID (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> deleteTechnicianWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = deleteTechnicianValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Remove a technician (asynchronously)
+     * Soft-removes a technician from the business by setting status to deactive
+     * @param id Technician ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteTechnicianAsync(String id, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteTechnicianValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getTechnician
      * @param id Technician ID (required)
      * @param _callback Callback for upload/download progress
@@ -87,6 +398,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getTechnicianCall(String id, final ApiCallback _callback) throws ApiException {
@@ -147,7 +459,7 @@ public class TechnicianApi {
 
     /**
      * Get a technician
-     * Returns details for a specific technician
+     * Returns one technician&#39;s full profile: contact info, employment status, assignment tier, skills/qualifications, buddy (crew) relations and assigned vehicles — the dispatch-ready view of a field worker.
      * @param id Technician ID (required)
      * @return GetTechnician200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -158,6 +470,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public GetTechnician200Response getTechnician(String id) throws ApiException {
@@ -167,7 +480,7 @@ public class TechnicianApi {
 
     /**
      * Get a technician
-     * Returns details for a specific technician
+     * Returns one technician&#39;s full profile: contact info, employment status, assignment tier, skills/qualifications, buddy (crew) relations and assigned vehicles — the dispatch-ready view of a field worker.
      * @param id Technician ID (required)
      * @return ApiResponse&lt;GetTechnician200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -178,6 +491,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<GetTechnician200Response> getTechnicianWithHttpInfo(String id) throws ApiException {
@@ -188,7 +502,7 @@ public class TechnicianApi {
 
     /**
      * Get a technician (asynchronously)
-     * Returns details for a specific technician
+     * Returns one technician&#39;s full profile: contact info, employment status, assignment tier, skills/qualifications, buddy (crew) relations and assigned vehicles — the dispatch-ready view of a field worker.
      * @param id Technician ID (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -200,6 +514,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getTechnicianAsync(String id, final ApiCallback<GetTechnician200Response> _callback) throws ApiException {
@@ -228,6 +543,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listTechniciansCall(Integer page, Integer limit, String status, String assignmentTier, String keyword, String sort, String since, final ApiCallback _callback) throws ApiException {
@@ -310,7 +626,7 @@ public class TechnicianApi {
 
     /**
      * List technicians
-     * Returns a paginated list of technicians for the current business
+     * Returns the field workforce roster: paginated technicians (field workers / engineers) with status, assignment tier (lead, buddy, float), skills and crew relations — the people the dispatch engine schedules onto jobs. Discover the &#x60;preferred_technician_id&#x60; accepted on customer records here. Supports the &#x60;since&#x60; cursor for incremental workforce sync.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param status Filter by status (active, onboarding, deactive) (optional)
@@ -327,6 +643,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListTechnicians200Response listTechnicians(Integer page, Integer limit, String status, String assignmentTier, String keyword, String sort, String since) throws ApiException {
@@ -336,7 +653,7 @@ public class TechnicianApi {
 
     /**
      * List technicians
-     * Returns a paginated list of technicians for the current business
+     * Returns the field workforce roster: paginated technicians (field workers / engineers) with status, assignment tier (lead, buddy, float), skills and crew relations — the people the dispatch engine schedules onto jobs. Discover the &#x60;preferred_technician_id&#x60; accepted on customer records here. Supports the &#x60;since&#x60; cursor for incremental workforce sync.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param status Filter by status (active, onboarding, deactive) (optional)
@@ -353,6 +670,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListTechnicians200Response> listTechniciansWithHttpInfo(Integer page, Integer limit, String status, String assignmentTier, String keyword, String sort, String since) throws ApiException {
@@ -363,7 +681,7 @@ public class TechnicianApi {
 
     /**
      * List technicians (asynchronously)
-     * Returns a paginated list of technicians for the current business
+     * Returns the field workforce roster: paginated technicians (field workers / engineers) with status, assignment tier (lead, buddy, float), skills and crew relations — the people the dispatch engine schedules onto jobs. Discover the &#x60;preferred_technician_id&#x60; accepted on customer records here. Supports the &#x60;since&#x60; cursor for incremental workforce sync.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param status Filter by status (active, onboarding, deactive) (optional)
@@ -381,12 +699,786 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listTechniciansAsync(Integer page, Integer limit, String status, String assignmentTier, String keyword, String sort, String since, final ApiCallback<ListTechnicians200Response> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listTechniciansValidateBeforeCall(page, limit, status, assignmentTier, keyword, sort, since, _callback);
         Type localVarReturnType = new TypeToken<ListTechnicians200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for replaceTechnicianBuddies
+     * @param id Technician ID (required)
+     * @param technicianBuddiesRequest Buddy IDs (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianBuddiesCall(String id, TechnicianBuddiesRequest technicianBuddiesRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianBuddiesRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/buddies"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call replaceTechnicianBuddiesValidateBeforeCall(String id, TechnicianBuddiesRequest technicianBuddiesRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling replaceTechnicianBuddies(Async)");
+        }
+
+        // verify the required parameter 'technicianBuddiesRequest' is set
+        if (technicianBuddiesRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianBuddiesRequest' when calling replaceTechnicianBuddies(Async)");
+        }
+
+        return replaceTechnicianBuddiesCall(id, technicianBuddiesRequest, _callback);
+
+    }
+
+    /**
+     * Replace a technician&#39;s buddies
+     * Overwrites the technician&#39;s buddy list with the provided set of technician IDs. Sending an empty list clears all buddies. Each buddy ID must be an active technician of the same business; a technician cannot be their own buddy.
+     * @param id Technician ID (required)
+     * @param technicianBuddiesRequest Buddy IDs (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope replaceTechnicianBuddies(String id, TechnicianBuddiesRequest technicianBuddiesRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = replaceTechnicianBuddiesWithHttpInfo(id, technicianBuddiesRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Replace a technician&#39;s buddies
+     * Overwrites the technician&#39;s buddy list with the provided set of technician IDs. Sending an empty list clears all buddies. Each buddy ID must be an active technician of the same business; a technician cannot be their own buddy.
+     * @param id Technician ID (required)
+     * @param technicianBuddiesRequest Buddy IDs (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> replaceTechnicianBuddiesWithHttpInfo(String id, TechnicianBuddiesRequest technicianBuddiesRequest) throws ApiException {
+        okhttp3.Call localVarCall = replaceTechnicianBuddiesValidateBeforeCall(id, technicianBuddiesRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Replace a technician&#39;s buddies (asynchronously)
+     * Overwrites the technician&#39;s buddy list with the provided set of technician IDs. Sending an empty list clears all buddies. Each buddy ID must be an active technician of the same business; a technician cannot be their own buddy.
+     * @param id Technician ID (required)
+     * @param technicianBuddiesRequest Buddy IDs (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianBuddiesAsync(String id, TechnicianBuddiesRequest technicianBuddiesRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = replaceTechnicianBuddiesValidateBeforeCall(id, technicianBuddiesRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for replaceTechnicianLeads
+     * @param id Buddy technician ID (required)
+     * @param technicianLeadsRequest Lead IDs payload (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianLeadsCall(String id, TechnicianLeadsRequest technicianLeadsRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianLeadsRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/leads"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call replaceTechnicianLeadsValidateBeforeCall(String id, TechnicianLeadsRequest technicianLeadsRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling replaceTechnicianLeads(Async)");
+        }
+
+        // verify the required parameter 'technicianLeadsRequest' is set
+        if (technicianLeadsRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianLeadsRequest' when calling replaceTechnicianLeads(Async)");
+        }
+
+        return replaceTechnicianLeadsCall(id, technicianLeadsRequest, _callback);
+
+    }
+
+    /**
+     * Replace a buddy&#39;s leaders (buddy side)
+     * Sets the full set of leads this buddy belongs to (many-to-many favorites). Replace-semantics — lead_ids is the complete new list; [] clears every leader. Managed by business staff.
+     * @param id Buddy technician ID (required)
+     * @param technicianLeadsRequest Lead IDs payload (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope replaceTechnicianLeads(String id, TechnicianLeadsRequest technicianLeadsRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = replaceTechnicianLeadsWithHttpInfo(id, technicianLeadsRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Replace a buddy&#39;s leaders (buddy side)
+     * Sets the full set of leads this buddy belongs to (many-to-many favorites). Replace-semantics — lead_ids is the complete new list; [] clears every leader. Managed by business staff.
+     * @param id Buddy technician ID (required)
+     * @param technicianLeadsRequest Lead IDs payload (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> replaceTechnicianLeadsWithHttpInfo(String id, TechnicianLeadsRequest technicianLeadsRequest) throws ApiException {
+        okhttp3.Call localVarCall = replaceTechnicianLeadsValidateBeforeCall(id, technicianLeadsRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Replace a buddy&#39;s leaders (buddy side) (asynchronously)
+     * Sets the full set of leads this buddy belongs to (many-to-many favorites). Replace-semantics — lead_ids is the complete new list; [] clears every leader. Managed by business staff.
+     * @param id Buddy technician ID (required)
+     * @param technicianLeadsRequest Lead IDs payload (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianLeadsAsync(String id, TechnicianLeadsRequest technicianLeadsRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = replaceTechnicianLeadsValidateBeforeCall(id, technicianLeadsRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for replaceTechnicianServiceAreas
+     * @param id Technician ID (required)
+     * @param technicianServiceAreasRequest Service area IDs (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianServiceAreasCall(String id, TechnicianServiceAreasRequest technicianServiceAreasRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianServiceAreasRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/service-areas"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call replaceTechnicianServiceAreasValidateBeforeCall(String id, TechnicianServiceAreasRequest technicianServiceAreasRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling replaceTechnicianServiceAreas(Async)");
+        }
+
+        // verify the required parameter 'technicianServiceAreasRequest' is set
+        if (technicianServiceAreasRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianServiceAreasRequest' when calling replaceTechnicianServiceAreas(Async)");
+        }
+
+        return replaceTechnicianServiceAreasCall(id, technicianServiceAreasRequest, _callback);
+
+    }
+
+    /**
+     * Replace a technician&#39;s service areas
+     * Overwrites the technician&#39;s service-area assignments with the provided set of service area IDs. Sending an empty list clears all. Each service area ID must belong to the same business — any missing id → 404 SERVICE_AREA_NOT_FOUND with &#x60;missing_ids&#x60; and no writes. The resolved set is returned and also embedded as &#x60;service_areas&#x60; in the technician GET/list response. Managed by business staff (Booking Coordinator), not tech self-service.
+     * @param id Technician ID (required)
+     * @param technicianServiceAreasRequest Service area IDs (required)
+     * @return ReplaceTechnicianServiceAreas200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ReplaceTechnicianServiceAreas200Response replaceTechnicianServiceAreas(String id, TechnicianServiceAreasRequest technicianServiceAreasRequest) throws ApiException {
+        ApiResponse<ReplaceTechnicianServiceAreas200Response> localVarResp = replaceTechnicianServiceAreasWithHttpInfo(id, technicianServiceAreasRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Replace a technician&#39;s service areas
+     * Overwrites the technician&#39;s service-area assignments with the provided set of service area IDs. Sending an empty list clears all. Each service area ID must belong to the same business — any missing id → 404 SERVICE_AREA_NOT_FOUND with &#x60;missing_ids&#x60; and no writes. The resolved set is returned and also embedded as &#x60;service_areas&#x60; in the technician GET/list response. Managed by business staff (Booking Coordinator), not tech self-service.
+     * @param id Technician ID (required)
+     * @param technicianServiceAreasRequest Service area IDs (required)
+     * @return ApiResponse&lt;ReplaceTechnicianServiceAreas200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ReplaceTechnicianServiceAreas200Response> replaceTechnicianServiceAreasWithHttpInfo(String id, TechnicianServiceAreasRequest technicianServiceAreasRequest) throws ApiException {
+        okhttp3.Call localVarCall = replaceTechnicianServiceAreasValidateBeforeCall(id, technicianServiceAreasRequest, null);
+        Type localVarReturnType = new TypeToken<ReplaceTechnicianServiceAreas200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Replace a technician&#39;s service areas (asynchronously)
+     * Overwrites the technician&#39;s service-area assignments with the provided set of service area IDs. Sending an empty list clears all. Each service area ID must belong to the same business — any missing id → 404 SERVICE_AREA_NOT_FOUND with &#x60;missing_ids&#x60; and no writes. The resolved set is returned and also embedded as &#x60;service_areas&#x60; in the technician GET/list response. Managed by business staff (Booking Coordinator), not tech self-service.
+     * @param id Technician ID (required)
+     * @param technicianServiceAreasRequest Service area IDs (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianServiceAreasAsync(String id, TechnicianServiceAreasRequest technicianServiceAreasRequest, final ApiCallback<ReplaceTechnicianServiceAreas200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = replaceTechnicianServiceAreasValidateBeforeCall(id, technicianServiceAreasRequest, _callback);
+        Type localVarReturnType = new TypeToken<ReplaceTechnicianServiceAreas200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for replaceTechnicianVehicles
+     * @param id Technician ID (required)
+     * @param technicianVehiclesRequest Vehicle IDs (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianVehiclesCall(String id, TechnicianVehiclesRequest technicianVehiclesRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianVehiclesRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/vehicles"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call replaceTechnicianVehiclesValidateBeforeCall(String id, TechnicianVehiclesRequest technicianVehiclesRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling replaceTechnicianVehicles(Async)");
+        }
+
+        // verify the required parameter 'technicianVehiclesRequest' is set
+        if (technicianVehiclesRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianVehiclesRequest' when calling replaceTechnicianVehicles(Async)");
+        }
+
+        return replaceTechnicianVehiclesCall(id, technicianVehiclesRequest, _callback);
+
+    }
+
+    /**
+     * Replace a technician&#39;s vehicles
+     * Overwrites the technician&#39;s vehicle list with the provided set of vehicle IDs (the vehicles this technician uses). Sending an empty list clears all. Each vehicle ID must belong to the same business. The list is also embedded as &#x60;vehicle_ids&#x60; in the technician GET/list response.
+     * @param id Technician ID (required)
+     * @param technicianVehiclesRequest Vehicle IDs (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope replaceTechnicianVehicles(String id, TechnicianVehiclesRequest technicianVehiclesRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = replaceTechnicianVehiclesWithHttpInfo(id, technicianVehiclesRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Replace a technician&#39;s vehicles
+     * Overwrites the technician&#39;s vehicle list with the provided set of vehicle IDs (the vehicles this technician uses). Sending an empty list clears all. Each vehicle ID must belong to the same business. The list is also embedded as &#x60;vehicle_ids&#x60; in the technician GET/list response.
+     * @param id Technician ID (required)
+     * @param technicianVehiclesRequest Vehicle IDs (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> replaceTechnicianVehiclesWithHttpInfo(String id, TechnicianVehiclesRequest technicianVehiclesRequest) throws ApiException {
+        okhttp3.Call localVarCall = replaceTechnicianVehiclesValidateBeforeCall(id, technicianVehiclesRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Replace a technician&#39;s vehicles (asynchronously)
+     * Overwrites the technician&#39;s vehicle list with the provided set of vehicle IDs (the vehicles this technician uses). Sending an empty list clears all. Each vehicle ID must belong to the same business. The list is also embedded as &#x60;vehicle_ids&#x60; in the technician GET/list response.
+     * @param id Technician ID (required)
+     * @param technicianVehiclesRequest Vehicle IDs (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianVehiclesAsync(String id, TechnicianVehiclesRequest technicianVehiclesRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = replaceTechnicianVehiclesValidateBeforeCall(id, technicianVehiclesRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateTechnician
+     * @param id Technician ID (required)
+     * @param technicianUpdateRequest Technician details (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateTechnicianCall(String id, TechnicianUpdateRequest technicianUpdateRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianUpdateRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateTechnicianValidateBeforeCall(String id, TechnicianUpdateRequest technicianUpdateRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling updateTechnician(Async)");
+        }
+
+        // verify the required parameter 'technicianUpdateRequest' is set
+        if (technicianUpdateRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianUpdateRequest' when calling updateTechnician(Async)");
+        }
+
+        return updateTechnicianCall(id, technicianUpdateRequest, _callback);
+
+    }
+
+    /**
+     * Update a technician
+     * Updates mutable technician profile fields. &#x60;start_location_type&#x3D;office&#x60; re-snapshots the current business address + coordinates (body &#x60;address&#x60;/&#x60;start_location_lat&#x60;/&#x60;start_location_long&#x60; ignored; requires business coordinates, else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * @param id Technician ID (required)
+     * @param technicianUpdateRequest Technician details (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope updateTechnician(String id, TechnicianUpdateRequest technicianUpdateRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = updateTechnicianWithHttpInfo(id, technicianUpdateRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Update a technician
+     * Updates mutable technician profile fields. &#x60;start_location_type&#x3D;office&#x60; re-snapshots the current business address + coordinates (body &#x60;address&#x60;/&#x60;start_location_lat&#x60;/&#x60;start_location_long&#x60; ignored; requires business coordinates, else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * @param id Technician ID (required)
+     * @param technicianUpdateRequest Technician details (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> updateTechnicianWithHttpInfo(String id, TechnicianUpdateRequest technicianUpdateRequest) throws ApiException {
+        okhttp3.Call localVarCall = updateTechnicianValidateBeforeCall(id, technicianUpdateRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Update a technician (asynchronously)
+     * Updates mutable technician profile fields. &#x60;start_location_type&#x3D;office&#x60; re-snapshots the current business address + coordinates (body &#x60;address&#x60;/&#x60;start_location_lat&#x60;/&#x60;start_location_long&#x60; ignored; requires business coordinates, else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * @param id Technician ID (required)
+     * @param technicianUpdateRequest Technician details (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateTechnicianAsync(String id, TechnicianUpdateRequest technicianUpdateRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateTechnicianValidateBeforeCall(id, technicianUpdateRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

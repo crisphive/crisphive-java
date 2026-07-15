@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -21,7 +21,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,7 +57,7 @@ public class JobRequestJobDateRequest {
   public static final String SERIALIZED_NAME_DATE = "date";
   @SerializedName(SERIALIZED_NAME_DATE)
   @javax.annotation.Nonnull
-  private OffsetDateTime date;
+  private LocalDate date;
 
   public static final String SERIALIZED_NAME_PERIODS = "periods";
   @SerializedName(SERIALIZED_NAME_PERIODS)
@@ -67,7 +67,7 @@ public class JobRequestJobDateRequest {
   public JobRequestJobDateRequest() {
   }
 
-  public JobRequestJobDateRequest date(@javax.annotation.Nonnull OffsetDateTime date) {
+  public JobRequestJobDateRequest date(@javax.annotation.Nonnull LocalDate date) {
     this.date = date;
     return this;
   }
@@ -77,11 +77,11 @@ public class JobRequestJobDateRequest {
    * @return date
    */
   @javax.annotation.Nonnull
-  public OffsetDateTime getDate() {
+  public LocalDate getDate() {
     return date;
   }
 
-  public void setDate(@javax.annotation.Nonnull OffsetDateTime date) {
+  public void setDate(@javax.annotation.Nonnull LocalDate date) {
     this.date = date;
   }
 

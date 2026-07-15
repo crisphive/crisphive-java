@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -93,8 +93,11 @@ public class JSON {
         gsonBuilder.registerTypeAdapter(OffsetDateTime.class, offsetDateTimeTypeAdapter);
         gsonBuilder.registerTypeAdapter(LocalDate.class, localDateTypeAdapter);
         gsonBuilder.registerTypeAdapter(byte[].class, byteArrayAdapter);
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CommitEmergencyReschedule200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CommitJobRequestMove200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CreateCustomer200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CreateJobRequest200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CreateTechnician200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.Customer.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CustomerAddress.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.CustomerAddressRequest.CustomTypeAdapterFactory());
@@ -113,6 +116,7 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetJobType200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetServiceArea200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetTechnician200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetTechnicianSchedule200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.GetVehicle200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobDate.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobDateBusinessRange.CustomTypeAdapterFactory());
@@ -126,42 +130,81 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestArrivalWindow.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestAssignedVehicle.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestAssignmentSummary.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestAttentionSummary.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestAvailableVehicle.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestBookingWindows.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestBuddySlotCandidates.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestBusinessTimeRange.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestChanges.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestConfirmRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCreateRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCreateResponse.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCrewCandidates.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCrewChange.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCrewMember.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCrewMemberInput.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCrewRecommendation.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestCustomerSummary.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestDayWindows.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestEmergencyCandidate.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestEmergencyCandidates.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestEmergencyCandidatesRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestEmergencyCommitRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestEmergencyPlan.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestEmergencyPreviewRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestJobDateBusinessRangeRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestJobDatePeriodRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestJobDateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestLeadCandidate.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestList.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestMoveCommitReq.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestMoveMember.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestMovePlan.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestMovePreviewReq.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestMoveWarning.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestPeriod.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestQuoteRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestQuoteSummary.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestRatingSummary.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestRescheduleDay.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestRescheduleMove.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestRescheduleReassignment.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestSchedule.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestSession.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestSkillSummary.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestStatusSummary.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTechCandidate.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTechnicianInfo.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimeSegments.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimeSegmentsBusinessTime.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimeSegmentsDay.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimeSegmentsSlot.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimeSegmentsWorker.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimeline.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimelineAction.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestTimelineEvent.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobRequestUpdatePriorityRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.JobType.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListCrewCandidates200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListCustomers200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListEmergencyCandidates200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListJobRequestBookingWindows200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListJobRequestChanges200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListJobRequests200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListJobTypes200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListMatchingSlots200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListNearbyTechnicians200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListServiceAreas200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListSkillCategories200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListSkills200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListSkillsByCategory200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListTechnicianSkills200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListTechnicians200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ListVehicles200Response.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.NearbyTechnician.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.NearbyTechnicians.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.Pagination.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ReplaceTechnicianServiceAreas200Response.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ResponseEnvelope.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ServiceArea.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.ServiceAreaList.CustomTypeAdapterFactory());
@@ -173,9 +216,24 @@ public class JSON {
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.SkillSummary.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.Technician.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianAddress.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianAddressInput.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianBuddiesRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianCreateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianCreateResponse.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianLeadRef.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianLeadsRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianList.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianSchedule.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianScheduleBlock.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianScheduleSession.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianServiceAreaRef.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianServiceAreasRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianServiceAreasResponse.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianSkill.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianSkillList.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianSkillsRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianUpdateRequest.CustomTypeAdapterFactory());
+        gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.TechnicianVehiclesRequest.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.Vehicle.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.VehicleList.CustomTypeAdapterFactory());
         gsonBuilder.registerTypeAdapterFactory(new com.crisphive.client.model.VehicleOwner.CustomTypeAdapterFactory());

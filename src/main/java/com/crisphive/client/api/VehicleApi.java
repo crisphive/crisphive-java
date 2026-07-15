@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -87,6 +87,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getVehicleCall(String id, final ApiCallback _callback) throws ApiException {
@@ -147,7 +148,7 @@ public class VehicleApi {
 
     /**
      * Get a vehicle
-     * Returns details of a specific vehicle
+     * Returns one fleet vehicle (service van/truck): identity, plate, operational status (idle, on job, maintenance) and which technicians use it — the fleet-management view of a single asset.
      * @param id Vehicle ID (required)
      * @return GetVehicle200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -158,6 +159,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public GetVehicle200Response getVehicle(String id) throws ApiException {
@@ -167,7 +169,7 @@ public class VehicleApi {
 
     /**
      * Get a vehicle
-     * Returns details of a specific vehicle
+     * Returns one fleet vehicle (service van/truck): identity, plate, operational status (idle, on job, maintenance) and which technicians use it — the fleet-management view of a single asset.
      * @param id Vehicle ID (required)
      * @return ApiResponse&lt;GetVehicle200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -178,6 +180,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<GetVehicle200Response> getVehicleWithHttpInfo(String id) throws ApiException {
@@ -188,7 +191,7 @@ public class VehicleApi {
 
     /**
      * Get a vehicle (asynchronously)
-     * Returns details of a specific vehicle
+     * Returns one fleet vehicle (service van/truck): identity, plate, operational status (idle, on job, maintenance) and which technicians use it — the fleet-management view of a single asset.
      * @param id Vehicle ID (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -200,6 +203,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getVehicleAsync(String id, final ApiCallback<GetVehicle200Response> _callback) throws ApiException {
@@ -224,7 +228,9 @@ public class VehicleApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listVehiclesCall(Integer page, Integer limit, String status, String keyword, String since, final ApiCallback _callback) throws ApiException {
@@ -299,7 +305,7 @@ public class VehicleApi {
 
     /**
      * List vehicles
-     * Returns a paginated list of vehicles for the business
+     * Returns the business&#39;s fleet: paginated service vehicles (vans/trucks) with operational status (idle, on job, maintenance) — the fleet inventory behind crew carpooling and job mobilization. Supports the &#x60;since&#x60; cursor for incremental fleet sync.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param status Filter by status (inactive, idle, on_job, maintenance) (optional)
@@ -312,7 +318,9 @@ public class VehicleApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListVehicles200Response listVehicles(Integer page, Integer limit, String status, String keyword, String since) throws ApiException {
@@ -322,7 +330,7 @@ public class VehicleApi {
 
     /**
      * List vehicles
-     * Returns a paginated list of vehicles for the business
+     * Returns the business&#39;s fleet: paginated service vehicles (vans/trucks) with operational status (idle, on job, maintenance) — the fleet inventory behind crew carpooling and job mobilization. Supports the &#x60;since&#x60; cursor for incremental fleet sync.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param status Filter by status (inactive, idle, on_job, maintenance) (optional)
@@ -335,7 +343,9 @@ public class VehicleApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListVehicles200Response> listVehiclesWithHttpInfo(Integer page, Integer limit, String status, String keyword, String since) throws ApiException {
@@ -346,7 +356,7 @@ public class VehicleApi {
 
     /**
      * List vehicles (asynchronously)
-     * Returns a paginated list of vehicles for the business
+     * Returns the business&#39;s fleet: paginated service vehicles (vans/trucks) with operational status (idle, on job, maintenance) — the fleet inventory behind crew carpooling and job mobilization. Supports the &#x60;since&#x60; cursor for incremental fleet sync.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param status Filter by status (inactive, idle, on_job, maintenance) (optional)
@@ -360,7 +370,9 @@ public class VehicleApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listVehiclesAsync(Integer page, Integer limit, String status, String keyword, String since, final ApiCallback<ListVehicles200Response> _callback) throws ApiException {

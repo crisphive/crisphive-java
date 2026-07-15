@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -105,7 +105,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get city
+   * City / locality. Max 100 chars.
    * @return city
    */
   @javax.annotation.Nullable
@@ -124,7 +124,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get country
+   * Country (free-form or ISO code). Max 100 chars.
    * @return country
    */
   @javax.annotation.Nullable
@@ -143,7 +143,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get formatted
+   * Human-readable single-line address; when set it wins over the discrete parts for display. Max 500 chars.
    * @return formatted
    */
   @javax.annotation.Nullable
@@ -162,7 +162,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get latitude
+   * Geographic latitude in decimal degrees (-90..90). Omit if unknown.
    * minimum: -90
    * maximum: 90
    * @return latitude
@@ -183,7 +183,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get line
+   * Street address, line 1 (e.g. \&quot;123 Main St\&quot;). Max 255 chars.
    * @return line
    */
   @javax.annotation.Nullable
@@ -202,7 +202,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get line2
+   * Street address, line 2 (apartment, suite, unit). Max 255 chars.
    * @return line2
    */
   @javax.annotation.Nullable
@@ -221,7 +221,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get longitude
+   * Geographic longitude in decimal degrees (-180..180). Omit if unknown.
    * minimum: -180
    * maximum: 180
    * @return longitude
@@ -242,7 +242,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get postalCode
+   * Postal / ZIP code. Max 32 chars.
    * @return postalCode
    */
   @javax.annotation.Nullable
@@ -261,7 +261,7 @@ public class CustomerAddressRequest {
   }
 
   /**
-   * Get state
+   * State / province / region. Max 100 chars.
    * @return state
    */
   @javax.annotation.Nullable

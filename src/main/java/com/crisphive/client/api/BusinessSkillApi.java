@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -30,7 +30,9 @@ import java.io.IOException;
 import com.crisphive.client.model.ListSkillCategories200Response;
 import com.crisphive.client.model.ListSkills200Response;
 import com.crisphive.client.model.ListSkillsByCategory200Response;
+import com.crisphive.client.model.ListTechnicianSkills200Response;
 import com.crisphive.client.model.ResponseEnvelope;
+import com.crisphive.client.model.TechnicianSkillsRequest;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -89,6 +91,7 @@ public class BusinessSkillApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSkillCategoriesCall(Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
@@ -151,7 +154,7 @@ public class BusinessSkillApi {
 
     /**
      * List skill categories
-     * Returns paginated skill categories for the current business, ordered alphabetically.
+     * Returns paginated skill categories — how the business groups technician qualifications by trade or specialty (e.g. HVAC, plumbing, electrical) — ordered alphabetically.
      * @param page Page number (default: 1) (optional)
      * @param limit Page size (default: 15, max: 1000) (optional)
      * @return ListSkillCategories200Response
@@ -163,6 +166,7 @@ public class BusinessSkillApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListSkillCategories200Response listSkillCategories(Integer page, Integer limit) throws ApiException {
@@ -172,7 +176,7 @@ public class BusinessSkillApi {
 
     /**
      * List skill categories
-     * Returns paginated skill categories for the current business, ordered alphabetically.
+     * Returns paginated skill categories — how the business groups technician qualifications by trade or specialty (e.g. HVAC, plumbing, electrical) — ordered alphabetically.
      * @param page Page number (default: 1) (optional)
      * @param limit Page size (default: 15, max: 1000) (optional)
      * @return ApiResponse&lt;ListSkillCategories200Response&gt;
@@ -184,6 +188,7 @@ public class BusinessSkillApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListSkillCategories200Response> listSkillCategoriesWithHttpInfo(Integer page, Integer limit) throws ApiException {
@@ -194,7 +199,7 @@ public class BusinessSkillApi {
 
     /**
      * List skill categories (asynchronously)
-     * Returns paginated skill categories for the current business, ordered alphabetically.
+     * Returns paginated skill categories — how the business groups technician qualifications by trade or specialty (e.g. HVAC, plumbing, electrical) — ordered alphabetically.
      * @param page Page number (default: 1) (optional)
      * @param limit Page size (default: 15, max: 1000) (optional)
      * @param _callback The callback to be executed when the API call finishes
@@ -207,6 +212,7 @@ public class BusinessSkillApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSkillCategoriesAsync(Integer page, Integer limit, final ApiCallback<ListSkillCategories200Response> _callback) throws ApiException {
@@ -227,6 +233,7 @@ public class BusinessSkillApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSkillsCall(final ApiCallback _callback) throws ApiException {
@@ -281,7 +288,7 @@ public class BusinessSkillApi {
 
     /**
      * List all skills
-     * Returns the flat list of all active skills for the current business across every category. Use this to discover the skill UUIDs accepted in &#x60;skill_ids&#x60; when creating a job request. (For a category-grouped view, use GET /skill-categories and GET /skill-categories/{id}/skills.)
+     * Returns the flat list of all active technician skills / qualifications for the current business — the vocabulary the dispatch engine uses for skill-based matching when assigning technicians and crews. Use it to discover the skill UUIDs accepted in &#x60;skill_ids&#x60; when creating a job request. (For a category-grouped view, use GET /skill-categories and GET /skill-categories/{id}/skills.)
      * @return ListSkills200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -290,6 +297,7 @@ public class BusinessSkillApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListSkills200Response listSkills() throws ApiException {
@@ -299,7 +307,7 @@ public class BusinessSkillApi {
 
     /**
      * List all skills
-     * Returns the flat list of all active skills for the current business across every category. Use this to discover the skill UUIDs accepted in &#x60;skill_ids&#x60; when creating a job request. (For a category-grouped view, use GET /skill-categories and GET /skill-categories/{id}/skills.)
+     * Returns the flat list of all active technician skills / qualifications for the current business — the vocabulary the dispatch engine uses for skill-based matching when assigning technicians and crews. Use it to discover the skill UUIDs accepted in &#x60;skill_ids&#x60; when creating a job request. (For a category-grouped view, use GET /skill-categories and GET /skill-categories/{id}/skills.)
      * @return ApiResponse&lt;ListSkills200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -308,6 +316,7 @@ public class BusinessSkillApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListSkills200Response> listSkillsWithHttpInfo() throws ApiException {
@@ -318,7 +327,7 @@ public class BusinessSkillApi {
 
     /**
      * List all skills (asynchronously)
-     * Returns the flat list of all active skills for the current business across every category. Use this to discover the skill UUIDs accepted in &#x60;skill_ids&#x60; when creating a job request. (For a category-grouped view, use GET /skill-categories and GET /skill-categories/{id}/skills.)
+     * Returns the flat list of all active technician skills / qualifications for the current business — the vocabulary the dispatch engine uses for skill-based matching when assigning technicians and crews. Use it to discover the skill UUIDs accepted in &#x60;skill_ids&#x60; when creating a job request. (For a category-grouped view, use GET /skill-categories and GET /skill-categories/{id}/skills.)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -328,6 +337,7 @@ public class BusinessSkillApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSkillsAsync(final ApiCallback<ListSkills200Response> _callback) throws ApiException {
@@ -353,6 +363,7 @@ public class BusinessSkillApi {
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SKILL_CATEGORY_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSkillsByCategoryCall(String id, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
@@ -421,7 +432,7 @@ public class BusinessSkillApi {
 
     /**
      * List skills in a category
-     * Returns paginated skills belonging to the given category, ordered alphabetically. The &#x60;members&#x60; field on each skill is the count of active technicians currently assigned to it.
+     * Returns paginated skills (technician qualifications/certifications) belonging to the given trade/specialty category, ordered alphabetically. The &#x60;members&#x60; field on each skill is the count of active technicians currently holding it — a quick capacity check per capability.
      * @param id Skill category ID (UUID) (required)
      * @param page Page number (default: 1) (optional)
      * @param limit Page size (default: 15, max: 1000) (optional)
@@ -435,6 +446,7 @@ public class BusinessSkillApi {
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SKILL_CATEGORY_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListSkillsByCategory200Response listSkillsByCategory(String id, Integer page, Integer limit) throws ApiException {
@@ -444,7 +456,7 @@ public class BusinessSkillApi {
 
     /**
      * List skills in a category
-     * Returns paginated skills belonging to the given category, ordered alphabetically. The &#x60;members&#x60; field on each skill is the count of active technicians currently assigned to it.
+     * Returns paginated skills (technician qualifications/certifications) belonging to the given trade/specialty category, ordered alphabetically. The &#x60;members&#x60; field on each skill is the count of active technicians currently holding it — a quick capacity check per capability.
      * @param id Skill category ID (UUID) (required)
      * @param page Page number (default: 1) (optional)
      * @param limit Page size (default: 15, max: 1000) (optional)
@@ -458,6 +470,7 @@ public class BusinessSkillApi {
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SKILL_CATEGORY_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListSkillsByCategory200Response> listSkillsByCategoryWithHttpInfo(String id, Integer page, Integer limit) throws ApiException {
@@ -468,7 +481,7 @@ public class BusinessSkillApi {
 
     /**
      * List skills in a category (asynchronously)
-     * Returns paginated skills belonging to the given category, ordered alphabetically. The &#x60;members&#x60; field on each skill is the count of active technicians currently assigned to it.
+     * Returns paginated skills (technician qualifications/certifications) belonging to the given trade/specialty category, ordered alphabetically. The &#x60;members&#x60; field on each skill is the count of active technicians currently holding it — a quick capacity check per capability.
      * @param id Skill category ID (UUID) (required)
      * @param page Page number (default: 1) (optional)
      * @param limit Page size (default: 15, max: 1000) (optional)
@@ -483,12 +496,337 @@ public class BusinessSkillApi {
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SKILL_CATEGORY_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listSkillsByCategoryAsync(String id, Integer page, Integer limit, final ApiCallback<ListSkillsByCategory200Response> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = listSkillsByCategoryValidateBeforeCall(id, page, limit, _callback);
         Type localVarReturnType = new TypeToken<ListSkillsByCategory200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listTechnicianSkills
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param eligibleOnly true (default) &#x3D; active skills only; false &#x3D; all assigned skills including inactive (optional)
+     * @param page Page number (default: 1) (optional)
+     * @param limit Page size (default: 15, max: 1000) (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listTechnicianSkillsCall(String id, Boolean eligibleOnly, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/skills"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (eligibleOnly != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("eligible_only", eligibleOnly));
+        }
+
+        if (page != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("page", page));
+        }
+
+        if (limit != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("limit", limit));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listTechnicianSkillsValidateBeforeCall(String id, Boolean eligibleOnly, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling listTechnicianSkills(Async)");
+        }
+
+        return listTechnicianSkillsCall(id, eligibleOnly, page, limit, _callback);
+
+    }
+
+    /**
+     * List skills for a technician
+     * Returns paginated skills assigned to the technician. By default (&#x60;eligible_only&#x60; omitted or &#x60;true&#x60;) only active skills are returned — pass &#x60;eligible_only&#x3D;false&#x60; to include inactive skills.
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param eligibleOnly true (default) &#x3D; active skills only; false &#x3D; all assigned skills including inactive (optional)
+     * @param page Page number (default: 1) (optional)
+     * @param limit Page size (default: 15, max: 1000) (optional)
+     * @return ListTechnicianSkills200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ListTechnicianSkills200Response listTechnicianSkills(String id, Boolean eligibleOnly, Integer page, Integer limit) throws ApiException {
+        ApiResponse<ListTechnicianSkills200Response> localVarResp = listTechnicianSkillsWithHttpInfo(id, eligibleOnly, page, limit);
+        return localVarResp.getData();
+    }
+
+    /**
+     * List skills for a technician
+     * Returns paginated skills assigned to the technician. By default (&#x60;eligible_only&#x60; omitted or &#x60;true&#x60;) only active skills are returned — pass &#x60;eligible_only&#x3D;false&#x60; to include inactive skills.
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param eligibleOnly true (default) &#x3D; active skills only; false &#x3D; all assigned skills including inactive (optional)
+     * @param page Page number (default: 1) (optional)
+     * @param limit Page size (default: 15, max: 1000) (optional)
+     * @return ApiResponse&lt;ListTechnicianSkills200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ListTechnicianSkills200Response> listTechnicianSkillsWithHttpInfo(String id, Boolean eligibleOnly, Integer page, Integer limit) throws ApiException {
+        okhttp3.Call localVarCall = listTechnicianSkillsValidateBeforeCall(id, eligibleOnly, page, limit, null);
+        Type localVarReturnType = new TypeToken<ListTechnicianSkills200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * List skills for a technician (asynchronously)
+     * Returns paginated skills assigned to the technician. By default (&#x60;eligible_only&#x60; omitted or &#x60;true&#x60;) only active skills are returned — pass &#x60;eligible_only&#x3D;false&#x60; to include inactive skills.
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param eligibleOnly true (default) &#x3D; active skills only; false &#x3D; all assigned skills including inactive (optional)
+     * @param page Page number (default: 1) (optional)
+     * @param limit Page size (default: 15, max: 1000) (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listTechnicianSkillsAsync(String id, Boolean eligibleOnly, Integer page, Integer limit, final ApiCallback<ListTechnicianSkills200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listTechnicianSkillsValidateBeforeCall(id, eligibleOnly, page, limit, _callback);
+        Type localVarReturnType = new TypeToken<ListTechnicianSkills200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for replaceTechnicianSkills
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param technicianSkillsRequest Full list of skill_ids (business_skills.id), 0–100 UUIDs (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianSkillsCall(String id, TechnicianSkillsRequest technicianSkillsRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = technicianSkillsRequest;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/skills"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PATCH", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call replaceTechnicianSkillsValidateBeforeCall(String id, TechnicianSkillsRequest technicianSkillsRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling replaceTechnicianSkills(Async)");
+        }
+
+        // verify the required parameter 'technicianSkillsRequest' is set
+        if (technicianSkillsRequest == null) {
+            throw new ApiException("Missing the required parameter 'technicianSkillsRequest' when calling replaceTechnicianSkills(Async)");
+        }
+
+        return replaceTechnicianSkillsCall(id, technicianSkillsRequest, _callback);
+
+    }
+
+    /**
+     * Replace a technician&#39;s skills
+     * Sets the technician&#39;s full skill set in one call (replace semantics): skills not in the list are removed, new ones added. Pass an empty list to clear all. All skills must be active and belong to the business — on SKILL_NOT_FOUND (404) the &#x60;data&#x60; field contains &#x60;{\&quot;missing_ids\&quot;: [\&quot;uuid\&quot;, ...]}&#x60;; on SKILL_INACTIVE (409) it contains &#x60;{\&quot;inactive_ids\&quot;: [\&quot;uuid\&quot;, ...]}&#x60;.
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param technicianSkillsRequest Full list of skill_ids (business_skills.id), 0–100 UUIDs (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope replaceTechnicianSkills(String id, TechnicianSkillsRequest technicianSkillsRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = replaceTechnicianSkillsWithHttpInfo(id, technicianSkillsRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Replace a technician&#39;s skills
+     * Sets the technician&#39;s full skill set in one call (replace semantics): skills not in the list are removed, new ones added. Pass an empty list to clear all. All skills must be active and belong to the business — on SKILL_NOT_FOUND (404) the &#x60;data&#x60; field contains &#x60;{\&quot;missing_ids\&quot;: [\&quot;uuid\&quot;, ...]}&#x60;; on SKILL_INACTIVE (409) it contains &#x60;{\&quot;inactive_ids\&quot;: [\&quot;uuid\&quot;, ...]}&#x60;.
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param technicianSkillsRequest Full list of skill_ids (business_skills.id), 0–100 UUIDs (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> replaceTechnicianSkillsWithHttpInfo(String id, TechnicianSkillsRequest technicianSkillsRequest) throws ApiException {
+        okhttp3.Call localVarCall = replaceTechnicianSkillsValidateBeforeCall(id, technicianSkillsRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Replace a technician&#39;s skills (asynchronously)
+     * Sets the technician&#39;s full skill set in one call (replace semantics): skills not in the list are removed, new ones added. Pass an empty list to clear all. All skills must be active and belong to the business — on SKILL_NOT_FOUND (404) the &#x60;data&#x60; field contains &#x60;{\&quot;missing_ids\&quot;: [\&quot;uuid\&quot;, ...]}&#x60;; on SKILL_INACTIVE (409) it contains &#x60;{\&quot;inactive_ids\&quot;: [\&quot;uuid\&quot;, ...]}&#x60;.
+     * @param id Technician ID — business_user_profiles.id (UUID) (required)
+     * @param technicianSkillsRequest Full list of skill_ids (business_skills.id), 0–100 UUIDs (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call replaceTechnicianSkillsAsync(String id, TechnicianSkillsRequest technicianSkillsRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = replaceTechnicianSkillsValidateBeforeCall(id, technicianSkillsRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

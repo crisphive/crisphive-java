@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -27,13 +27,30 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import java.math.BigDecimal;
+import com.crisphive.client.model.CommitEmergencyReschedule200Response;
+import com.crisphive.client.model.CommitJobRequestMove200Response;
 import com.crisphive.client.model.CreateJobRequest200Response;
 import com.crisphive.client.model.GetJobRequest200Response;
 import com.crisphive.client.model.GetJobRequestTimeline200Response;
+import com.crisphive.client.model.GetTechnicianSchedule200Response;
+import com.crisphive.client.model.JobRequestConfirmRequest;
 import com.crisphive.client.model.JobRequestCreateRequest;
+import com.crisphive.client.model.JobRequestEmergencyCandidatesRequest;
+import com.crisphive.client.model.JobRequestEmergencyCommitRequest;
+import com.crisphive.client.model.JobRequestEmergencyPreviewRequest;
+import com.crisphive.client.model.JobRequestMoveCommitReq;
+import com.crisphive.client.model.JobRequestMovePreviewReq;
+import com.crisphive.client.model.JobRequestQuoteRequest;
+import com.crisphive.client.model.JobRequestUpdatePriorityRequest;
+import com.crisphive.client.model.ListCrewCandidates200Response;
+import com.crisphive.client.model.ListEmergencyCandidates200Response;
 import com.crisphive.client.model.ListJobRequestBookingWindows200Response;
 import com.crisphive.client.model.ListJobRequestChanges200Response;
 import com.crisphive.client.model.ListJobRequests200Response;
+import com.crisphive.client.model.ListMatchingSlots200Response;
+import com.crisphive.client.model.ListNearbyTechnicians200Response;
+import com.crisphive.client.model.ResponseEnvelope;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -79,9 +96,9 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Build call for createJobRequest
-     * @param jobRequestCreateRequest Booking payload (required)
-     * @param xTimezone Customer IANA timezone (optional)
+     * Build call for commitEmergencyReschedule
+     * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
@@ -90,9 +107,512 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createJobRequestCall(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call commitEmergencyRescheduleCall(JobRequestEmergencyCommitRequest jobRequestEmergencyCommitRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestEmergencyCommitRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/emergency/commit";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call commitEmergencyRescheduleValidateBeforeCall(JobRequestEmergencyCommitRequest jobRequestEmergencyCommitRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobRequestEmergencyCommitRequest' is set
+        if (jobRequestEmergencyCommitRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestEmergencyCommitRequest' when calling commitEmergencyReschedule(Async)");
+        }
+
+        return commitEmergencyRescheduleCall(jobRequestEmergencyCommitRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Commit emergency insert + cascade reschedule
+     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day): another tech or time. Other codes — same remedies as /candidates.
+     * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CommitEmergencyReschedule200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CommitEmergencyReschedule200Response commitEmergencyReschedule(JobRequestEmergencyCommitRequest jobRequestEmergencyCommitRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CommitEmergencyReschedule200Response> localVarResp = commitEmergencyRescheduleWithHttpInfo(jobRequestEmergencyCommitRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Commit emergency insert + cascade reschedule
+     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day): another tech or time. Other codes — same remedies as /candidates.
+     * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CommitEmergencyReschedule200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CommitEmergencyReschedule200Response> commitEmergencyRescheduleWithHttpInfo(JobRequestEmergencyCommitRequest jobRequestEmergencyCommitRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = commitEmergencyRescheduleValidateBeforeCall(jobRequestEmergencyCommitRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CommitEmergencyReschedule200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Commit emergency insert + cascade reschedule (asynchronously)
+     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day): another tech or time. Other codes — same remedies as /candidates.
+     * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call commitEmergencyRescheduleAsync(JobRequestEmergencyCommitRequest jobRequestEmergencyCommitRequest, String idempotencyKey, final ApiCallback<CommitEmergencyReschedule200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = commitEmergencyRescheduleValidateBeforeCall(jobRequestEmergencyCommitRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CommitEmergencyReschedule200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for commitJobRequestMove
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMoveCommitReq move spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call commitJobRequestMoveCall(String id, JobRequestMoveCommitReq jobRequestMoveCommitReq, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestMoveCommitReq;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/move/commit"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call commitJobRequestMoveValidateBeforeCall(String id, JobRequestMoveCommitReq jobRequestMoveCommitReq, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling commitJobRequestMove(Async)");
+        }
+
+        // verify the required parameter 'jobRequestMoveCommitReq' is set
+        if (jobRequestMoveCommitReq == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestMoveCommitReq' when calling commitJobRequestMove(Async)");
+        }
+
+        return commitJobRequestMoveCall(id, jobRequestMoveCommitReq, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Commit a schedule-board job move
+     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids no longer match): re-preview, show the fresh plan, commit again. All other codes — same remedies as /move/preview.
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMoveCommitReq move spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CommitJobRequestMove200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CommitJobRequestMove200Response commitJobRequestMove(String id, JobRequestMoveCommitReq jobRequestMoveCommitReq, String idempotencyKey) throws ApiException {
+        ApiResponse<CommitJobRequestMove200Response> localVarResp = commitJobRequestMoveWithHttpInfo(id, jobRequestMoveCommitReq, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Commit a schedule-board job move
+     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids no longer match): re-preview, show the fresh plan, commit again. All other codes — same remedies as /move/preview.
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMoveCommitReq move spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CommitJobRequestMove200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CommitJobRequestMove200Response> commitJobRequestMoveWithHttpInfo(String id, JobRequestMoveCommitReq jobRequestMoveCommitReq, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = commitJobRequestMoveValidateBeforeCall(id, jobRequestMoveCommitReq, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CommitJobRequestMove200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Commit a schedule-board job move (asynchronously)
+     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids no longer match): re-preview, show the fresh plan, commit again. All other codes — same remedies as /move/preview.
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMoveCommitReq move spec (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call commitJobRequestMoveAsync(String id, JobRequestMoveCommitReq jobRequestMoveCommitReq, String idempotencyKey, final ApiCallback<CommitJobRequestMove200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = commitJobRequestMoveValidateBeforeCall(id, jobRequestMoveCommitReq, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CommitJobRequestMove200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for confirmJobRequest
+     * @param id Job request ID (required)
+     * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call confirmJobRequestCall(String id, JobRequestConfirmRequest jobRequestConfirmRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestConfirmRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/confirm"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call confirmJobRequestValidateBeforeCall(String id, JobRequestConfirmRequest jobRequestConfirmRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling confirmJobRequest(Async)");
+        }
+
+        // verify the required parameter 'jobRequestConfirmRequest' is set
+        if (jobRequestConfirmRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestConfirmRequest' when calling confirmJobRequest(Async)");
+        }
+
+        return confirmJobRequestCall(id, jobRequestConfirmRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Confirm a booking on behalf of the customer
+     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why: cannot_arrive_in_time (commute/shift-start — &#x60;data.earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site → offer it) | missing_required_skills | not_available_today | not_lead_tier. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
+     * @param id Job request ID (required)
+     * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope confirmJobRequest(String id, JobRequestConfirmRequest jobRequestConfirmRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = confirmJobRequestWithHttpInfo(id, jobRequestConfirmRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Confirm a booking on behalf of the customer
+     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why: cannot_arrive_in_time (commute/shift-start — &#x60;data.earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site → offer it) | missing_required_skills | not_available_today | not_lead_tier. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
+     * @param id Job request ID (required)
+     * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> confirmJobRequestWithHttpInfo(String id, JobRequestConfirmRequest jobRequestConfirmRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = confirmJobRequestValidateBeforeCall(id, jobRequestConfirmRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Confirm a booking on behalf of the customer (asynchronously)
+     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why: cannot_arrive_in_time (commute/shift-start — &#x60;data.earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site → offer it) | missing_required_skills | not_available_today | not_lead_tier. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
+     * @param id Job request ID (required)
+     * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call confirmJobRequestAsync(String id, JobRequestConfirmRequest jobRequestConfirmRequest, String idempotencyKey, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = confirmJobRequestValidateBeforeCall(id, jobRequestConfirmRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for createJobRequest
+     * @param jobRequestCreateRequest Booking payload (required)
+     * @param xTimezone Customer IANA timezone (optional)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createJobRequestCall(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, String idempotencyKey, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -138,26 +658,32 @@ public class JobRequestBusinessApi {
         }
 
 
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
         String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
         return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createJobRequestValidateBeforeCall(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createJobRequestValidateBeforeCall(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, String idempotencyKey, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'jobRequestCreateRequest' is set
         if (jobRequestCreateRequest == null) {
             throw new ApiException("Missing the required parameter 'jobRequestCreateRequest' when calling createJobRequest(Async)");
         }
 
-        return createJobRequestCall(jobRequestCreateRequest, xTimezone, _callback);
+        return createJobRequestCall(jobRequestCreateRequest, xTimezone, idempotencyKey, _callback);
 
     }
 
     /**
-     * Create a job request (business actor)
-     * 
+     * Create a job request
+     * Books a field-service job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
      * @param jobRequestCreateRequest Booking payload (required)
      * @param xTimezone Customer IANA timezone (optional)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
      * @return CreateJobRequest200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -165,18 +691,25 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public CreateJobRequest200Response createJobRequest(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone) throws ApiException {
-        ApiResponse<CreateJobRequest200Response> localVarResp = createJobRequestWithHttpInfo(jobRequestCreateRequest, xTimezone);
+    public CreateJobRequest200Response createJobRequest(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, String idempotencyKey) throws ApiException {
+        ApiResponse<CreateJobRequest200Response> localVarResp = createJobRequestWithHttpInfo(jobRequestCreateRequest, xTimezone, idempotencyKey);
         return localVarResp.getData();
     }
 
     /**
-     * Create a job request (business actor)
-     * 
+     * Create a job request
+     * Books a field-service job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
      * @param jobRequestCreateRequest Booking payload (required)
      * @param xTimezone Customer IANA timezone (optional)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
      * @return ApiResponse&lt;CreateJobRequest200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -184,19 +717,26 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<CreateJobRequest200Response> createJobRequestWithHttpInfo(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone) throws ApiException {
-        okhttp3.Call localVarCall = createJobRequestValidateBeforeCall(jobRequestCreateRequest, xTimezone, null);
+    public ApiResponse<CreateJobRequest200Response> createJobRequestWithHttpInfo(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = createJobRequestValidateBeforeCall(jobRequestCreateRequest, xTimezone, idempotencyKey, null);
         Type localVarReturnType = new TypeToken<CreateJobRequest200Response>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
-     * Create a job request (business actor) (asynchronously)
-     * 
+     * Create a job request (asynchronously)
+     * Books a field-service job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
      * @param jobRequestCreateRequest Booking payload (required)
      * @param xTimezone Customer IANA timezone (optional)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -205,11 +745,17 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createJobRequestAsync(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, final ApiCallback<CreateJobRequest200Response> _callback) throws ApiException {
+    public okhttp3.Call createJobRequestAsync(JobRequestCreateRequest jobRequestCreateRequest, String xTimezone, String idempotencyKey, final ApiCallback<CreateJobRequest200Response> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = createJobRequestValidateBeforeCall(jobRequestCreateRequest, xTimezone, _callback);
+        okhttp3.Call localVarCall = createJobRequestValidateBeforeCall(jobRequestCreateRequest, xTimezone, idempotencyKey, _callback);
         Type localVarReturnType = new TypeToken<CreateJobRequest200Response>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
@@ -225,6 +771,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getJobRequestCall(String id, final ApiCallback _callback) throws ApiException {
@@ -285,7 +835,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Get a job request
-     * 
+     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-service system needs to track one job.
      * @param id Job request ID (UUID or short_code) (required)
      * @return GetJobRequest200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -294,6 +844,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public GetJobRequest200Response getJobRequest(String id) throws ApiException {
@@ -303,7 +857,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Get a job request
-     * 
+     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-service system needs to track one job.
      * @param id Job request ID (UUID or short_code) (required)
      * @return ApiResponse&lt;GetJobRequest200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -312,6 +866,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<GetJobRequest200Response> getJobRequestWithHttpInfo(String id) throws ApiException {
@@ -322,7 +880,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Get a job request (asynchronously)
-     * 
+     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-service system needs to track one job.
      * @param id Job request ID (UUID or short_code) (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -332,6 +890,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getJobRequestAsync(String id, final ApiCallback<GetJobRequest200Response> _callback) throws ApiException {
@@ -352,6 +914,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getJobRequestTimelineCall(String id, final ApiCallback _callback) throws ApiException {
@@ -411,8 +977,8 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Job timeline (business surface — also serves tech via BusinessAuth)
-     * Per-status events[] composed from workflow snapshot + scattered typed cols + action_audit. FE renders as the Job Timeline panel (completed step &#x3D; filled check, current &#x3D; outline ring, upcoming &#x3D; empty). entered_at nil for upcoming steps + older jobs missing the typed-col backfill.
+     * Job timeline
+     * Per-status progress of a job&#39;s lifecycle (e.g. booked → confirmed → on the way → arrived → completed, following the business&#39;s configured workflow) — render it as a job-tracking timeline. Each status carries its state (completed | current | upcoming), when the job entered it, and the actions fired within it. entered_at may be null for upcoming steps and for older jobs predating the backfill.
      * @param id Job request ID (UUID or short_code) (required)
      * @return GetJobRequestTimeline200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -421,6 +987,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public GetJobRequestTimeline200Response getJobRequestTimeline(String id) throws ApiException {
@@ -429,8 +999,8 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Job timeline (business surface — also serves tech via BusinessAuth)
-     * Per-status events[] composed from workflow snapshot + scattered typed cols + action_audit. FE renders as the Job Timeline panel (completed step &#x3D; filled check, current &#x3D; outline ring, upcoming &#x3D; empty). entered_at nil for upcoming steps + older jobs missing the typed-col backfill.
+     * Job timeline
+     * Per-status progress of a job&#39;s lifecycle (e.g. booked → confirmed → on the way → arrived → completed, following the business&#39;s configured workflow) — render it as a job-tracking timeline. Each status carries its state (completed | current | upcoming), when the job entered it, and the actions fired within it. entered_at may be null for upcoming steps and for older jobs predating the backfill.
      * @param id Job request ID (UUID or short_code) (required)
      * @return ApiResponse&lt;GetJobRequestTimeline200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -439,6 +1009,10 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<GetJobRequestTimeline200Response> getJobRequestTimelineWithHttpInfo(String id) throws ApiException {
@@ -448,8 +1022,8 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Job timeline (business surface — also serves tech via BusinessAuth) (asynchronously)
-     * Per-status events[] composed from workflow snapshot + scattered typed cols + action_audit. FE renders as the Job Timeline panel (completed step &#x3D; filled check, current &#x3D; outline ring, upcoming &#x3D; empty). entered_at nil for upcoming steps + older jobs missing the typed-col backfill.
+     * Job timeline (asynchronously)
+     * Per-status progress of a job&#39;s lifecycle (e.g. booked → confirmed → on the way → arrived → completed, following the business&#39;s configured workflow) — render it as a job-tracking timeline. Each status carries its state (completed | current | upcoming), when the job entered it, and the actions fired within it. entered_at may be null for upcoming steps and for older jobs predating the backfill.
      * @param id Job request ID (UUID or short_code) (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -459,12 +1033,497 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getJobRequestTimelineAsync(String id, final ApiCallback<GetJobRequestTimeline200Response> _callback) throws ApiException {
 
         okhttp3.Call localVarCall = getJobRequestTimelineValidateBeforeCall(id, _callback);
         Type localVarReturnType = new TypeToken<GetJobRequestTimeline200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for getTechnicianSchedule
+     * @param id Technician ID (required)
+     * @param from Start date (YYYY-MM-DD, business-local; default today) (optional)
+     * @param to End date (YYYY-MM-DD, inclusive; default from+7d; max range 31 days) (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getTechnicianScheduleCall(String id, String from, String to, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/technicians/{id}/schedule"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (from != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("from", from));
+        }
+
+        if (to != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("to", to));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call getTechnicianScheduleValidateBeforeCall(String id, String from, String to, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling getTechnicianSchedule(Async)");
+        }
+
+        return getTechnicianScheduleCall(id, from, to, _callback);
+
+    }
+
+    /**
+     * One technician&#39;s real schedule (sessions + time off)
+     * The technician&#39;s ACTUAL occupancy over a date range: every job session on their lane (solo/lead and crew) plus approved time-off blocks. Weekly recurring working hours come from the technician-availability endpoints — combine both for the full availability picture (\&quot;get crew availability\&quot;). from/to are business-local dates (YYYY-MM-DD, inclusive); omitted &#x3D; today .. +7 days; range max 31 days.
+     * @param id Technician ID (required)
+     * @param from Start date (YYYY-MM-DD, business-local; default today) (optional)
+     * @param to End date (YYYY-MM-DD, inclusive; default from+7d; max range 31 days) (optional)
+     * @return GetTechnicianSchedule200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public GetTechnicianSchedule200Response getTechnicianSchedule(String id, String from, String to) throws ApiException {
+        ApiResponse<GetTechnicianSchedule200Response> localVarResp = getTechnicianScheduleWithHttpInfo(id, from, to);
+        return localVarResp.getData();
+    }
+
+    /**
+     * One technician&#39;s real schedule (sessions + time off)
+     * The technician&#39;s ACTUAL occupancy over a date range: every job session on their lane (solo/lead and crew) plus approved time-off blocks. Weekly recurring working hours come from the technician-availability endpoints — combine both for the full availability picture (\&quot;get crew availability\&quot;). from/to are business-local dates (YYYY-MM-DD, inclusive); omitted &#x3D; today .. +7 days; range max 31 days.
+     * @param id Technician ID (required)
+     * @param from Start date (YYYY-MM-DD, business-local; default today) (optional)
+     * @param to End date (YYYY-MM-DD, inclusive; default from+7d; max range 31 days) (optional)
+     * @return ApiResponse&lt;GetTechnicianSchedule200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<GetTechnicianSchedule200Response> getTechnicianScheduleWithHttpInfo(String id, String from, String to) throws ApiException {
+        okhttp3.Call localVarCall = getTechnicianScheduleValidateBeforeCall(id, from, to, null);
+        Type localVarReturnType = new TypeToken<GetTechnicianSchedule200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * One technician&#39;s real schedule (sessions + time off) (asynchronously)
+     * The technician&#39;s ACTUAL occupancy over a date range: every job session on their lane (solo/lead and crew) plus approved time-off blocks. Weekly recurring working hours come from the technician-availability endpoints — combine both for the full availability picture (\&quot;get crew availability\&quot;). from/to are business-local dates (YYYY-MM-DD, inclusive); omitted &#x3D; today .. +7 days; range max 31 days.
+     * @param id Technician ID (required)
+     * @param from Start date (YYYY-MM-DD, business-local; default today) (optional)
+     * @param to End date (YYYY-MM-DD, inclusive; default from+7d; max range 31 days) (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call getTechnicianScheduleAsync(String id, String from, String to, final ApiCallback<GetTechnicianSchedule200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = getTechnicianScheduleValidateBeforeCall(id, from, to, _callback);
+        Type localVarReturnType = new TypeToken<GetTechnicianSchedule200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listCrewCandidates
+     * @param id Job request ID or short_code (required)
+     * @param includeBuddies Also return buddy candidate pools (optional)
+     * @param includeVehicle Also return the available-vehicle list (optional)
+     * @param forceLeadId Check a specific technician as lead — returns only that lead if feasible, else 409 (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listCrewCandidatesCall(String id, Boolean includeBuddies, Boolean includeVehicle, String forceLeadId, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/crew-candidates"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (includeBuddies != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("include_buddies", includeBuddies));
+        }
+
+        if (includeVehicle != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("include_vehicle", includeVehicle));
+        }
+
+        if (forceLeadId != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("force_lead_id", forceLeadId));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listCrewCandidatesValidateBeforeCall(String id, Boolean includeBuddies, Boolean includeVehicle, String forceLeadId, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling listCrewCandidates(Async)");
+        }
+
+        return listCrewCandidatesCall(id, includeBuddies, includeVehicle, forceLeadId, _callback);
+
+    }
+
+    /**
+     * Matching crew candidates for a job
+     * Technicians who can actually take this job, matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each candidate carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
+     * @param id Job request ID or short_code (required)
+     * @param includeBuddies Also return buddy candidate pools (optional)
+     * @param includeVehicle Also return the available-vehicle list (optional)
+     * @param forceLeadId Check a specific technician as lead — returns only that lead if feasible, else 409 (optional)
+     * @return ListCrewCandidates200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ListCrewCandidates200Response listCrewCandidates(String id, Boolean includeBuddies, Boolean includeVehicle, String forceLeadId) throws ApiException {
+        ApiResponse<ListCrewCandidates200Response> localVarResp = listCrewCandidatesWithHttpInfo(id, includeBuddies, includeVehicle, forceLeadId);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Matching crew candidates for a job
+     * Technicians who can actually take this job, matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each candidate carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
+     * @param id Job request ID or short_code (required)
+     * @param includeBuddies Also return buddy candidate pools (optional)
+     * @param includeVehicle Also return the available-vehicle list (optional)
+     * @param forceLeadId Check a specific technician as lead — returns only that lead if feasible, else 409 (optional)
+     * @return ApiResponse&lt;ListCrewCandidates200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ListCrewCandidates200Response> listCrewCandidatesWithHttpInfo(String id, Boolean includeBuddies, Boolean includeVehicle, String forceLeadId) throws ApiException {
+        okhttp3.Call localVarCall = listCrewCandidatesValidateBeforeCall(id, includeBuddies, includeVehicle, forceLeadId, null);
+        Type localVarReturnType = new TypeToken<ListCrewCandidates200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Matching crew candidates for a job (asynchronously)
+     * Technicians who can actually take this job, matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each candidate carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
+     * @param id Job request ID or short_code (required)
+     * @param includeBuddies Also return buddy candidate pools (optional)
+     * @param includeVehicle Also return the available-vehicle list (optional)
+     * @param forceLeadId Check a specific technician as lead — returns only that lead if feasible, else 409 (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listCrewCandidatesAsync(String id, Boolean includeBuddies, Boolean includeVehicle, String forceLeadId, final ApiCallback<ListCrewCandidates200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listCrewCandidatesValidateBeforeCall(id, includeBuddies, includeVehicle, forceLeadId, _callback);
+        Type localVarReturnType = new TypeToken<ListCrewCandidates200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listEmergencyCandidates
+     * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listEmergencyCandidatesCall(JobRequestEmergencyCandidatesRequest jobRequestEmergencyCandidatesRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestEmergencyCandidatesRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/emergency/candidates";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listEmergencyCandidatesValidateBeforeCall(JobRequestEmergencyCandidatesRequest jobRequestEmergencyCandidatesRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobRequestEmergencyCandidatesRequest' is set
+        if (jobRequestEmergencyCandidatesRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestEmergencyCandidatesRequest' when calling listEmergencyCandidates(Async)");
+        }
+
+        return listEmergencyCandidatesCall(jobRequestEmergencyCandidatesRequest, _callback);
+
+    }
+
+    /**
+     * Rank technicians for a P0 emergency insert
+     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted (not P0, already started/completed/archived, or not quoted): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — a confirmed multi-day job cannot be re-inserted (v1): use the normal reassign flow. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours: pick a working day. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time.
+     * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
+     * @return ListEmergencyCandidates200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ListEmergencyCandidates200Response listEmergencyCandidates(JobRequestEmergencyCandidatesRequest jobRequestEmergencyCandidatesRequest) throws ApiException {
+        ApiResponse<ListEmergencyCandidates200Response> localVarResp = listEmergencyCandidatesWithHttpInfo(jobRequestEmergencyCandidatesRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Rank technicians for a P0 emergency insert
+     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted (not P0, already started/completed/archived, or not quoted): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — a confirmed multi-day job cannot be re-inserted (v1): use the normal reassign flow. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours: pick a working day. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time.
+     * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
+     * @return ApiResponse&lt;ListEmergencyCandidates200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ListEmergencyCandidates200Response> listEmergencyCandidatesWithHttpInfo(JobRequestEmergencyCandidatesRequest jobRequestEmergencyCandidatesRequest) throws ApiException {
+        okhttp3.Call localVarCall = listEmergencyCandidatesValidateBeforeCall(jobRequestEmergencyCandidatesRequest, null);
+        Type localVarReturnType = new TypeToken<ListEmergencyCandidates200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Rank technicians for a P0 emergency insert (asynchronously)
+     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted (not P0, already started/completed/archived, or not quoted): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — a confirmed multi-day job cannot be re-inserted (v1): use the normal reassign flow. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours: pick a working day. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time.
+     * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listEmergencyCandidatesAsync(JobRequestEmergencyCandidatesRequest jobRequestEmergencyCandidatesRequest, final ApiCallback<ListEmergencyCandidates200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listEmergencyCandidatesValidateBeforeCall(jobRequestEmergencyCandidatesRequest, _callback);
+        Type localVarReturnType = new TypeToken<ListEmergencyCandidates200Response>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
@@ -481,6 +1540,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listJobRequestBookingWindowsCall(String xTimezone, String from, String to, final ApiCallback _callback) throws ApiException {
@@ -552,8 +1614,8 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Booking availability (business actor)
-     * 
+     * Booking availability
+     * Real-time appointment availability from the scheduling engine: returns the bookable date + time-period windows given technician capacity, working hours and service-territory coverage. Call this before creating a job request and offer the customer ONLY the returned windows — it prevents unschedulable bookings.
      * @param xTimezone Customer IANA timezone (required)
      * @param from Start YYYY-MM-DD (optional)
      * @param to End YYYY-MM-DD (optional)
@@ -564,6 +1626,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListJobRequestBookingWindows200Response listJobRequestBookingWindows(String xTimezone, String from, String to) throws ApiException {
@@ -572,8 +1637,8 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Booking availability (business actor)
-     * 
+     * Booking availability
+     * Real-time appointment availability from the scheduling engine: returns the bookable date + time-period windows given technician capacity, working hours and service-territory coverage. Call this before creating a job request and offer the customer ONLY the returned windows — it prevents unschedulable bookings.
      * @param xTimezone Customer IANA timezone (required)
      * @param from Start YYYY-MM-DD (optional)
      * @param to End YYYY-MM-DD (optional)
@@ -584,6 +1649,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListJobRequestBookingWindows200Response> listJobRequestBookingWindowsWithHttpInfo(String xTimezone, String from, String to) throws ApiException {
@@ -593,8 +1661,8 @@ public class JobRequestBusinessApi {
     }
 
     /**
-     * Booking availability (business actor) (asynchronously)
-     * 
+     * Booking availability (asynchronously)
+     * Real-time appointment availability from the scheduling engine: returns the bookable date + time-period windows given technician capacity, working hours and service-territory coverage. Call this before creating a job request and offer the customer ONLY the returned windows — it prevents unschedulable bookings.
      * @param xTimezone Customer IANA timezone (required)
      * @param from Start YYYY-MM-DD (optional)
      * @param to End YYYY-MM-DD (optional)
@@ -606,6 +1674,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listJobRequestBookingWindowsAsync(String xTimezone, String from, String to, final ApiCallback<ListJobRequestBookingWindows200Response> _callback) throws ApiException {
@@ -618,11 +1689,11 @@ public class JobRequestBusinessApi {
     /**
      * Build call for listJobRequestChanges
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
-     * @param priority Priority filter (normal|emergency) (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
      * @param technicianId Only changes to jobs assigned to this technician (UUID) (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param since RFC3339 cursor from the prior response&#39;s next_since. OMIT on the first poll to prime the cursor at server-now. (optional)
      * @param limit Max changes per poll (default 15, max 1000). If the page fills, has_more&#x3D;true. (optional)
      * @param _callback Callback for upload/download progress
@@ -633,6 +1704,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listJobRequestChangesCall(String statusKeys, String priority, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String since, Integer limit, final ApiCallback _callback) throws ApiException {
@@ -719,13 +1793,13 @@ public class JobRequestBusinessApi {
 
     /**
      * Poll for new &amp; changed job requests (sync feed)
-     * Keep your own copy of bookings in sync WITHOUT re-listing everything: returns the job requests whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
+     * Keep an external system (your CRM, ERP or field-service tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
-     * @param priority Priority filter (normal|emergency) (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
      * @param technicianId Only changes to jobs assigned to this technician (UUID) (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param since RFC3339 cursor from the prior response&#39;s next_since. OMIT on the first poll to prime the cursor at server-now. (optional)
      * @param limit Max changes per poll (default 15, max 1000). If the page fills, has_more&#x3D;true. (optional)
      * @return ListJobRequestChanges200Response
@@ -735,6 +1809,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListJobRequestChanges200Response listJobRequestChanges(String statusKeys, String priority, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String since, Integer limit) throws ApiException {
@@ -744,13 +1821,13 @@ public class JobRequestBusinessApi {
 
     /**
      * Poll for new &amp; changed job requests (sync feed)
-     * Keep your own copy of bookings in sync WITHOUT re-listing everything: returns the job requests whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
+     * Keep an external system (your CRM, ERP or field-service tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
-     * @param priority Priority filter (normal|emergency) (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
      * @param technicianId Only changes to jobs assigned to this technician (UUID) (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param since RFC3339 cursor from the prior response&#39;s next_since. OMIT on the first poll to prime the cursor at server-now. (optional)
      * @param limit Max changes per poll (default 15, max 1000). If the page fills, has_more&#x3D;true. (optional)
      * @return ApiResponse&lt;ListJobRequestChanges200Response&gt;
@@ -760,6 +1837,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListJobRequestChanges200Response> listJobRequestChangesWithHttpInfo(String statusKeys, String priority, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String since, Integer limit) throws ApiException {
@@ -770,13 +1850,13 @@ public class JobRequestBusinessApi {
 
     /**
      * Poll for new &amp; changed job requests (sync feed) (asynchronously)
-     * Keep your own copy of bookings in sync WITHOUT re-listing everything: returns the job requests whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
+     * Keep an external system (your CRM, ERP or field-service tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
-     * @param priority Priority filter (normal|emergency) (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
      * @param technicianId Only changes to jobs assigned to this technician (UUID) (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param since RFC3339 cursor from the prior response&#39;s next_since. OMIT on the first poll to prime the cursor at server-now. (optional)
      * @param limit Max changes per poll (default 15, max 1000). If the page fills, has_more&#x3D;true. (optional)
      * @param _callback The callback to be executed when the API call finishes
@@ -787,6 +1867,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listJobRequestChangesAsync(String statusKeys, String priority, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String since, Integer limit, final ApiCallback<ListJobRequestChanges200Response> _callback) throws ApiException {
@@ -800,12 +1883,14 @@ public class JobRequestBusinessApi {
      * Build call for listJobRequests
      * @param statusKeys Comma-separated status slugs (optional)
      * @param status active (default) | archived | all (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Customer UUID (optional)
      * @param technicianId Technician UUID (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param serviceAreaId Service-area UUID (board zone filter) (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
-     * @param sort Sort key (optional)
+     * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
      * @param limit Page size (optional)
      * @param _callback Callback for upload/download progress
@@ -816,9 +1901,12 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listJobRequestsCall(String statusKeys, String status, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listJobRequestsCall(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -851,12 +1939,20 @@ public class JobRequestBusinessApi {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("status", status));
         }
 
+        if (priority != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("priority", priority));
+        }
+
         if (customerId != null) {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("customer_id", customerId));
         }
 
         if (technicianId != null) {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("technician_id", technicianId));
+        }
+
+        if (serviceAreaId != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("service_area_id", serviceAreaId));
         }
 
         if (scheduledFrom != null) {
@@ -903,22 +1999,24 @@ public class JobRequestBusinessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listJobRequestsValidateBeforeCall(String statusKeys, String status, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
-        return listJobRequestsCall(statusKeys, status, customerId, technicianId, scheduledFrom, scheduledTo, q, sort, page, limit, _callback);
+    private okhttp3.Call listJobRequestsValidateBeforeCall(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
+        return listJobRequestsCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit, _callback);
 
     }
 
     /**
      * List job requests
-     * 
+     * Paginated list of the business&#39;s bookings (work orders) with dispatch-oriented filters: workflow status, customer, assigned technician, scheduled date range and free-text search over code/description. This is also the SCHEDULE query: combine technician_id + scheduled_from/scheduled_to to read one technician&#39;s agenda for a day or week (e.g. \&quot;what is Alex doing tomorrow\&quot;), or just the date range for the whole team&#39;s calendar.
      * @param statusKeys Comma-separated status slugs (optional)
      * @param status active (default) | archived | all (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Customer UUID (optional)
      * @param technicianId Technician UUID (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param serviceAreaId Service-area UUID (board zone filter) (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
-     * @param sort Sort key (optional)
+     * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
      * @param limit Page size (optional)
      * @return ListJobRequests200Response
@@ -928,24 +2026,29 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ListJobRequests200Response listJobRequests(String statusKeys, String status, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit) throws ApiException {
-        ApiResponse<ListJobRequests200Response> localVarResp = listJobRequestsWithHttpInfo(statusKeys, status, customerId, technicianId, scheduledFrom, scheduledTo, q, sort, page, limit);
+    public ListJobRequests200Response listJobRequests(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit) throws ApiException {
+        ApiResponse<ListJobRequests200Response> localVarResp = listJobRequestsWithHttpInfo(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit);
         return localVarResp.getData();
     }
 
     /**
      * List job requests
-     * 
+     * Paginated list of the business&#39;s bookings (work orders) with dispatch-oriented filters: workflow status, customer, assigned technician, scheduled date range and free-text search over code/description. This is also the SCHEDULE query: combine technician_id + scheduled_from/scheduled_to to read one technician&#39;s agenda for a day or week (e.g. \&quot;what is Alex doing tomorrow\&quot;), or just the date range for the whole team&#39;s calendar.
      * @param statusKeys Comma-separated status slugs (optional)
      * @param status active (default) | archived | all (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Customer UUID (optional)
      * @param technicianId Technician UUID (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param serviceAreaId Service-area UUID (board zone filter) (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
-     * @param sort Sort key (optional)
+     * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
      * @param limit Page size (optional)
      * @return ApiResponse&lt;ListJobRequests200Response&gt;
@@ -955,25 +2058,30 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ListJobRequests200Response> listJobRequestsWithHttpInfo(String statusKeys, String status, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit) throws ApiException {
-        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, customerId, technicianId, scheduledFrom, scheduledTo, q, sort, page, limit, null);
+    public ApiResponse<ListJobRequests200Response> listJobRequestsWithHttpInfo(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit) throws ApiException {
+        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit, null);
         Type localVarReturnType = new TypeToken<ListJobRequests200Response>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * List job requests (asynchronously)
-     * 
+     * Paginated list of the business&#39;s bookings (work orders) with dispatch-oriented filters: workflow status, customer, assigned technician, scheduled date range and free-text search over code/description. This is also the SCHEDULE query: combine technician_id + scheduled_from/scheduled_to to read one technician&#39;s agenda for a day or week (e.g. \&quot;what is Alex doing tomorrow\&quot;), or just the date range for the whole team&#39;s calendar.
      * @param statusKeys Comma-separated status slugs (optional)
      * @param status active (default) | archived | all (optional)
+     * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Customer UUID (optional)
      * @param technicianId Technician UUID (optional)
-     * @param scheduledFrom Filter from (YYYY-MM-DD or RFC3339); range is [from, to) (optional)
-     * @param scheduledTo Filter to (YYYY-MM-DD or RFC3339), exclusive (optional)
+     * @param serviceAreaId Service-area UUID (board zone filter) (optional)
+     * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
+     * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
-     * @param sort Sort key (optional)
+     * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
      * @param limit Page size (optional)
      * @param _callback The callback to be executed when the API call finishes
@@ -984,12 +2092,983 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listJobRequestsAsync(String statusKeys, String status, String customerId, String technicianId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback<ListJobRequests200Response> _callback) throws ApiException {
+    public okhttp3.Call listJobRequestsAsync(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback<ListJobRequests200Response> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, customerId, technicianId, scheduledFrom, scheduledTo, q, sort, page, limit, _callback);
+        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit, _callback);
         Type localVarReturnType = new TypeToken<ListJobRequests200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listMatchingSlots
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param stepMinutes Slot step in minutes (default: business arrival window, 5–240) (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listMatchingSlotsCall(String id, Integer stepMinutes, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/time-segments"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (stepMinutes != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("step_minutes", stepMinutes));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listMatchingSlotsValidateBeforeCall(String id, Integer stepMinutes, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling listMatchingSlots(Async)");
+        }
+
+        return listMatchingSlotsCall(id, stepMinutes, _callback);
+
+    }
+
+    /**
+     * Matching time slots for a quoted job
+     * Bookable arrival-window slots for a quoted job, computed by the smart-assignment matching engine: each slot lists the technicians actually available to start then (skills, weekly availability, existing schedule, time off and travel all checked), with a per-technician match score. Use it to find and offer appointment times an agent or integration can then confirm (POST /job-requests/{id}/confirm with the slot&#39;s business_time.datetime). Same grid the end-customer&#39;s slot picker shows; slot width defaults to the business&#39;s arrival window — override via ?step_minutes (5–240). The job must be quoted first (the quote sets the visit duration the matcher schedules).
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param stepMinutes Slot step in minutes (default: business arrival window, 5–240) (optional)
+     * @return ListMatchingSlots200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ListMatchingSlots200Response listMatchingSlots(String id, Integer stepMinutes) throws ApiException {
+        ApiResponse<ListMatchingSlots200Response> localVarResp = listMatchingSlotsWithHttpInfo(id, stepMinutes);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Matching time slots for a quoted job
+     * Bookable arrival-window slots for a quoted job, computed by the smart-assignment matching engine: each slot lists the technicians actually available to start then (skills, weekly availability, existing schedule, time off and travel all checked), with a per-technician match score. Use it to find and offer appointment times an agent or integration can then confirm (POST /job-requests/{id}/confirm with the slot&#39;s business_time.datetime). Same grid the end-customer&#39;s slot picker shows; slot width defaults to the business&#39;s arrival window — override via ?step_minutes (5–240). The job must be quoted first (the quote sets the visit duration the matcher schedules).
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param stepMinutes Slot step in minutes (default: business arrival window, 5–240) (optional)
+     * @return ApiResponse&lt;ListMatchingSlots200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ListMatchingSlots200Response> listMatchingSlotsWithHttpInfo(String id, Integer stepMinutes) throws ApiException {
+        okhttp3.Call localVarCall = listMatchingSlotsValidateBeforeCall(id, stepMinutes, null);
+        Type localVarReturnType = new TypeToken<ListMatchingSlots200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Matching time slots for a quoted job (asynchronously)
+     * Bookable arrival-window slots for a quoted job, computed by the smart-assignment matching engine: each slot lists the technicians actually available to start then (skills, weekly availability, existing schedule, time off and travel all checked), with a per-technician match score. Use it to find and offer appointment times an agent or integration can then confirm (POST /job-requests/{id}/confirm with the slot&#39;s business_time.datetime). Same grid the end-customer&#39;s slot picker shows; slot width defaults to the business&#39;s arrival window — override via ?step_minutes (5–240). The job must be quoted first (the quote sets the visit duration the matcher schedules).
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param stepMinutes Slot step in minutes (default: business arrival window, 5–240) (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listMatchingSlotsAsync(String id, Integer stepMinutes, final ApiCallback<ListMatchingSlots200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listMatchingSlotsValidateBeforeCall(id, stepMinutes, _callback);
+        Type localVarReturnType = new TypeToken<ListMatchingSlots200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for listNearbyTechnicians
+     * @param lat Latitude of the service location (required)
+     * @param lng Longitude of the service location (required)
+     * @param at Visit start (RFC3339, e.g. 2026-07-20T14:00:00Z; default now) (optional)
+     * @param durationMinutes Visit length in minutes (default 60; 15–480) (optional)
+     * @param skillIds Comma-separated skill UUIDs to require/match (optional)
+     * @param limit Max candidates (default 10, max 20) (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listNearbyTechniciansCall(BigDecimal lat, BigDecimal lng, String at, Integer durationMinutes, String skillIds, Integer limit, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/technicians/nearby";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        if (lat != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("lat", lat));
+        }
+
+        if (lng != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("lng", lng));
+        }
+
+        if (at != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("at", at));
+        }
+
+        if (durationMinutes != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("duration_minutes", durationMinutes));
+        }
+
+        if (skillIds != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("skill_ids", skillIds));
+        }
+
+        if (limit != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("limit", limit));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "GET", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call listNearbyTechniciansValidateBeforeCall(BigDecimal lat, BigDecimal lng, String at, Integer durationMinutes, String skillIds, Integer limit, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'lat' is set
+        if (lat == null) {
+            throw new ApiException("Missing the required parameter 'lat' when calling listNearbyTechnicians(Async)");
+        }
+
+        // verify the required parameter 'lng' is set
+        if (lng == null) {
+            throw new ApiException("Missing the required parameter 'lng' when calling listNearbyTechnicians(Async)");
+        }
+
+        return listNearbyTechniciansCall(lat, lng, at, durationMinutes, skillIds, limit, _callback);
+
+    }
+
+    /**
+     * Find nearby feasible technicians (job-less location query)
+     * Ranks who could serve a hypothetical visit at (lat,lng) starting &#x60;at&#x60; for &#x60;duration_minutes&#x60; — the engine applies the REAL hard filters (weekly hours, existing schedule, approved time-off, geographic service areas, optional skill floor) and returns candidates nearest-arrival first. ETA origin is each technician&#39;s start location (no live GPS). Use before creating a booking to propose realistic arrivals.
+     * @param lat Latitude of the service location (required)
+     * @param lng Longitude of the service location (required)
+     * @param at Visit start (RFC3339, e.g. 2026-07-20T14:00:00Z; default now) (optional)
+     * @param durationMinutes Visit length in minutes (default 60; 15–480) (optional)
+     * @param skillIds Comma-separated skill UUIDs to require/match (optional)
+     * @param limit Max candidates (default 10, max 20) (optional)
+     * @return ListNearbyTechnicians200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
+     </table>
+     */
+    public ListNearbyTechnicians200Response listNearbyTechnicians(BigDecimal lat, BigDecimal lng, String at, Integer durationMinutes, String skillIds, Integer limit) throws ApiException {
+        ApiResponse<ListNearbyTechnicians200Response> localVarResp = listNearbyTechniciansWithHttpInfo(lat, lng, at, durationMinutes, skillIds, limit);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Find nearby feasible technicians (job-less location query)
+     * Ranks who could serve a hypothetical visit at (lat,lng) starting &#x60;at&#x60; for &#x60;duration_minutes&#x60; — the engine applies the REAL hard filters (weekly hours, existing schedule, approved time-off, geographic service areas, optional skill floor) and returns candidates nearest-arrival first. ETA origin is each technician&#39;s start location (no live GPS). Use before creating a booking to propose realistic arrivals.
+     * @param lat Latitude of the service location (required)
+     * @param lng Longitude of the service location (required)
+     * @param at Visit start (RFC3339, e.g. 2026-07-20T14:00:00Z; default now) (optional)
+     * @param durationMinutes Visit length in minutes (default 60; 15–480) (optional)
+     * @param skillIds Comma-separated skill UUIDs to require/match (optional)
+     * @param limit Max candidates (default 10, max 20) (optional)
+     * @return ApiResponse&lt;ListNearbyTechnicians200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ListNearbyTechnicians200Response> listNearbyTechniciansWithHttpInfo(BigDecimal lat, BigDecimal lng, String at, Integer durationMinutes, String skillIds, Integer limit) throws ApiException {
+        okhttp3.Call localVarCall = listNearbyTechniciansValidateBeforeCall(lat, lng, at, durationMinutes, skillIds, limit, null);
+        Type localVarReturnType = new TypeToken<ListNearbyTechnicians200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Find nearby feasible technicians (job-less location query) (asynchronously)
+     * Ranks who could serve a hypothetical visit at (lat,lng) starting &#x60;at&#x60; for &#x60;duration_minutes&#x60; — the engine applies the REAL hard filters (weekly hours, existing schedule, approved time-off, geographic service areas, optional skill floor) and returns candidates nearest-arrival first. ETA origin is each technician&#39;s start location (no live GPS). Use before creating a booking to propose realistic arrivals.
+     * @param lat Latitude of the service location (required)
+     * @param lng Longitude of the service location (required)
+     * @param at Visit start (RFC3339, e.g. 2026-07-20T14:00:00Z; default now) (optional)
+     * @param durationMinutes Visit length in minutes (default 60; 15–480) (optional)
+     * @param skillIds Comma-separated skill UUIDs to require/match (optional)
+     * @param limit Max candidates (default 10, max 20) (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call listNearbyTechniciansAsync(BigDecimal lat, BigDecimal lng, String at, Integer durationMinutes, String skillIds, Integer limit, final ApiCallback<ListNearbyTechnicians200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = listNearbyTechniciansValidateBeforeCall(lat, lng, at, durationMinutes, skillIds, limit, _callback);
+        Type localVarReturnType = new TypeToken<ListNearbyTechnicians200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for previewEmergencyReschedule
+     * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call previewEmergencyRescheduleCall(JobRequestEmergencyPreviewRequest jobRequestEmergencyPreviewRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestEmergencyPreviewRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/emergency/preview";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call previewEmergencyRescheduleValidateBeforeCall(JobRequestEmergencyPreviewRequest jobRequestEmergencyPreviewRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobRequestEmergencyPreviewRequest' is set
+        if (jobRequestEmergencyPreviewRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestEmergencyPreviewRequest' when calling previewEmergencyReschedule(Async)");
+        }
+
+        return previewEmergencyRescheduleCall(jobRequestEmergencyPreviewRequest, _callback);
+
+    }
+
+    /**
+     * Preview emergency insert + cascade reschedule
+     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / NO_WORKING_DAY / IN_PAST — same remedies as /candidates.
+     * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
+     * @return CommitEmergencyReschedule200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CommitEmergencyReschedule200Response previewEmergencyReschedule(JobRequestEmergencyPreviewRequest jobRequestEmergencyPreviewRequest) throws ApiException {
+        ApiResponse<CommitEmergencyReschedule200Response> localVarResp = previewEmergencyRescheduleWithHttpInfo(jobRequestEmergencyPreviewRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Preview emergency insert + cascade reschedule
+     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / NO_WORKING_DAY / IN_PAST — same remedies as /candidates.
+     * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
+     * @return ApiResponse&lt;CommitEmergencyReschedule200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CommitEmergencyReschedule200Response> previewEmergencyRescheduleWithHttpInfo(JobRequestEmergencyPreviewRequest jobRequestEmergencyPreviewRequest) throws ApiException {
+        okhttp3.Call localVarCall = previewEmergencyRescheduleValidateBeforeCall(jobRequestEmergencyPreviewRequest, null);
+        Type localVarReturnType = new TypeToken<CommitEmergencyReschedule200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Preview emergency insert + cascade reschedule (asynchronously)
+     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / NO_WORKING_DAY / IN_PAST — same remedies as /candidates.
+     * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call previewEmergencyRescheduleAsync(JobRequestEmergencyPreviewRequest jobRequestEmergencyPreviewRequest, final ApiCallback<CommitEmergencyReschedule200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = previewEmergencyRescheduleValidateBeforeCall(jobRequestEmergencyPreviewRequest, _callback);
+        Type localVarReturnType = new TypeToken<CommitEmergencyReschedule200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for previewJobRequestMove
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMovePreviewReq move spec (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call previewJobRequestMoveCall(String id, JobRequestMovePreviewReq jobRequestMovePreviewReq, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestMovePreviewReq;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/move/preview"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call previewJobRequestMoveValidateBeforeCall(String id, JobRequestMovePreviewReq jobRequestMovePreviewReq, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling previewJobRequestMove(Async)");
+        }
+
+        // verify the required parameter 'jobRequestMovePreviewReq' is set
+        if (jobRequestMovePreviewReq == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestMovePreviewReq' when calling previewJobRequestMove(Async)");
+        }
+
+        return previewJobRequestMoveCall(id, jobRequestMovePreviewReq, _callback);
+
+    }
+
+    /**
+     * Preview a schedule-board job move
+     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; &#x3D; &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;missing_required_skills&#x60; | &#x60;not_available_today&#x60; (no working hours, approved time off, or outside the service area) | &#x60;not_lead_tier&#x60;. For a P0 move this warning is advisory (coordinator may commit anyway); for p1/p2/p3 the same condition is the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — not movable) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time) · SCHEDULE_MOVE_OUTSIDE_WINDOW (landing time outside the customer-confirmed window — hard block; pick a time inside it) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — see the TECH_NOT_FEASIBLE warning reasons; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1) · SCHEDULE_MOVE_NO_WORKING_DAY (pick a working day) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — free capacity only, unless the owner enables allow_non_p0_displacement) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time).
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMovePreviewReq move spec (required)
+     * @return CommitJobRequestMove200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CommitJobRequestMove200Response previewJobRequestMove(String id, JobRequestMovePreviewReq jobRequestMovePreviewReq) throws ApiException {
+        ApiResponse<CommitJobRequestMove200Response> localVarResp = previewJobRequestMoveWithHttpInfo(id, jobRequestMovePreviewReq);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Preview a schedule-board job move
+     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; &#x3D; &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;missing_required_skills&#x60; | &#x60;not_available_today&#x60; (no working hours, approved time off, or outside the service area) | &#x60;not_lead_tier&#x60;. For a P0 move this warning is advisory (coordinator may commit anyway); for p1/p2/p3 the same condition is the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — not movable) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time) · SCHEDULE_MOVE_OUTSIDE_WINDOW (landing time outside the customer-confirmed window — hard block; pick a time inside it) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — see the TECH_NOT_FEASIBLE warning reasons; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1) · SCHEDULE_MOVE_NO_WORKING_DAY (pick a working day) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — free capacity only, unless the owner enables allow_non_p0_displacement) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time).
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMovePreviewReq move spec (required)
+     * @return ApiResponse&lt;CommitJobRequestMove200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CommitJobRequestMove200Response> previewJobRequestMoveWithHttpInfo(String id, JobRequestMovePreviewReq jobRequestMovePreviewReq) throws ApiException {
+        okhttp3.Call localVarCall = previewJobRequestMoveValidateBeforeCall(id, jobRequestMovePreviewReq, null);
+        Type localVarReturnType = new TypeToken<CommitJobRequestMove200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Preview a schedule-board job move (asynchronously)
+     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; &#x3D; &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;missing_required_skills&#x60; | &#x60;not_available_today&#x60; (no working hours, approved time off, or outside the service area) | &#x60;not_lead_tier&#x60;. For a P0 move this warning is advisory (coordinator may commit anyway); for p1/p2/p3 the same condition is the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — not movable) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time) · SCHEDULE_MOVE_OUTSIDE_WINDOW (landing time outside the customer-confirmed window — hard block; pick a time inside it) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — see the TECH_NOT_FEASIBLE warning reasons; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1) · SCHEDULE_MOVE_NO_WORKING_DAY (pick a working day) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — free capacity only, unless the owner enables allow_non_p0_displacement) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time).
+     * @param id Job request ID (UUID or short_code) (required)
+     * @param jobRequestMovePreviewReq move spec (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call previewJobRequestMoveAsync(String id, JobRequestMovePreviewReq jobRequestMovePreviewReq, final ApiCallback<CommitJobRequestMove200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = previewJobRequestMoveValidateBeforeCall(id, jobRequestMovePreviewReq, _callback);
+        Type localVarReturnType = new TypeToken<CommitJobRequestMove200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for quoteJobRequest
+     * @param id Job request ID (required)
+     * @param jobRequestQuoteRequest Quote payload (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call quoteJobRequestCall(String id, JobRequestQuoteRequest jobRequestQuoteRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestQuoteRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/quote"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call quoteJobRequestValidateBeforeCall(String id, JobRequestQuoteRequest jobRequestQuoteRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling quoteJobRequest(Async)");
+        }
+
+        // verify the required parameter 'jobRequestQuoteRequest' is set
+        if (jobRequestQuoteRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestQuoteRequest' when calling quoteJobRequest(Async)");
+        }
+
+        return quoteJobRequestCall(id, jobRequestQuoteRequest, _callback);
+
+    }
+
+    /**
+     * Fire quote (FIXED action — business)
+     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;.
+     * @param id Job request ID (required)
+     * @param jobRequestQuoteRequest Quote payload (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope quoteJobRequest(String id, JobRequestQuoteRequest jobRequestQuoteRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = quoteJobRequestWithHttpInfo(id, jobRequestQuoteRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Fire quote (FIXED action — business)
+     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;.
+     * @param id Job request ID (required)
+     * @param jobRequestQuoteRequest Quote payload (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> quoteJobRequestWithHttpInfo(String id, JobRequestQuoteRequest jobRequestQuoteRequest) throws ApiException {
+        okhttp3.Call localVarCall = quoteJobRequestValidateBeforeCall(id, jobRequestQuoteRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Fire quote (FIXED action — business) (asynchronously)
+     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;.
+     * @param id Job request ID (required)
+     * @param jobRequestQuoteRequest Quote payload (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call quoteJobRequestAsync(String id, JobRequestQuoteRequest jobRequestQuoteRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = quoteJobRequestValidateBeforeCall(id, jobRequestQuoteRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateJobPriority
+     * @param id Job request ID or short_code (required)
+     * @param jobRequestUpdatePriorityRequest Priority payload (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION (job archived/completed — priority no longer editable) | JOB_REQUEST_STAGE_CONFLICT (job changed — re-GET, retry with fresh status_version) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateJobPriorityCall(String id, JobRequestUpdatePriorityRequest jobRequestUpdatePriorityRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestUpdatePriorityRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/{id}/priority"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PATCH", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateJobPriorityValidateBeforeCall(String id, JobRequestUpdatePriorityRequest jobRequestUpdatePriorityRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling updateJobPriority(Async)");
+        }
+
+        // verify the required parameter 'jobRequestUpdatePriorityRequest' is set
+        if (jobRequestUpdatePriorityRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestUpdatePriorityRequest' when calling updateJobPriority(Async)");
+        }
+
+        return updateJobPriorityCall(id, jobRequestUpdatePriorityRequest, _callback);
+
+    }
+
+    /**
+     * Set job priority (scheduling staff)
+     * Sets the P0–P3 priority on a non-archived, non-completed job (Owner / Administrator / Booking Coordinator). Allowed values: \&quot;p0\&quot; (emergency, interrupt-driven) | \&quot;p1\&quot; (top — displaced only by p0; may carry an sla_deadline arming auto-escalation) | \&quot;p2\&quot; (standard) | \&quot;p3\&quot; (deferrable, first displacement victim). sla_deadline is only valid with p1 and must be in the future (business-local naive datetime); moving away from p1 disarms the SLA clock. Accepts UUID or short_code in :id.
+     * @param id Job request ID or short_code (required)
+     * @param jobRequestUpdatePriorityRequest Priority payload (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION (job archived/completed — priority no longer editable) | JOB_REQUEST_STAGE_CONFLICT (job changed — re-GET, retry with fresh status_version) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope updateJobPriority(String id, JobRequestUpdatePriorityRequest jobRequestUpdatePriorityRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = updateJobPriorityWithHttpInfo(id, jobRequestUpdatePriorityRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Set job priority (scheduling staff)
+     * Sets the P0–P3 priority on a non-archived, non-completed job (Owner / Administrator / Booking Coordinator). Allowed values: \&quot;p0\&quot; (emergency, interrupt-driven) | \&quot;p1\&quot; (top — displaced only by p0; may carry an sla_deadline arming auto-escalation) | \&quot;p2\&quot; (standard) | \&quot;p3\&quot; (deferrable, first displacement victim). sla_deadline is only valid with p1 and must be in the future (business-local naive datetime); moving away from p1 disarms the SLA clock. Accepts UUID or short_code in :id.
+     * @param id Job request ID or short_code (required)
+     * @param jobRequestUpdatePriorityRequest Priority payload (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION (job archived/completed — priority no longer editable) | JOB_REQUEST_STAGE_CONFLICT (job changed — re-GET, retry with fresh status_version) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> updateJobPriorityWithHttpInfo(String id, JobRequestUpdatePriorityRequest jobRequestUpdatePriorityRequest) throws ApiException {
+        okhttp3.Call localVarCall = updateJobPriorityValidateBeforeCall(id, jobRequestUpdatePriorityRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Set job priority (scheduling staff) (asynchronously)
+     * Sets the P0–P3 priority on a non-archived, non-completed job (Owner / Administrator / Booking Coordinator). Allowed values: \&quot;p0\&quot; (emergency, interrupt-driven) | \&quot;p1\&quot; (top — displaced only by p0; may carry an sla_deadline arming auto-escalation) | \&quot;p2\&quot; (standard) | \&quot;p3\&quot; (deferrable, first displacement victim). sla_deadline is only valid with p1 and must be in the future (business-local naive datetime); moving away from p1 disarms the SLA clock. Accepts UUID or short_code in :id.
+     * @param id Job request ID or short_code (required)
+     * @param jobRequestUpdatePriorityRequest Priority payload (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION (job archived/completed — priority no longer editable) | JOB_REQUEST_STAGE_CONFLICT (job changed — re-GET, retry with fresh status_version) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateJobPriorityAsync(String id, JobRequestUpdatePriorityRequest jobRequestUpdatePriorityRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateJobPriorityValidateBeforeCall(id, jobRequestUpdatePriorityRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

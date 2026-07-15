@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -172,7 +172,7 @@ public class JobRequestCrewMember {
   }
 
   /**
-   * Get email
+   * Crew member&#39;s email; null if not available.
    * @return email
    */
   @javax.annotation.Nullable
@@ -210,7 +210,7 @@ public class JobRequestCrewMember {
   }
 
   /**
-   * JobTitle/Phone/Email — crew member&#39;s contact (resolved like the customer block). Empty for a planned-but-unassigned slot.
+   * Crew member&#39;s job title. Empty for a planned-but-unassigned slot.
    * @return jobTitle
    */
   @javax.annotation.Nullable
@@ -229,7 +229,7 @@ public class JobRequestCrewMember {
   }
 
   /**
-   * Get phone
+   * Crew member&#39;s phone; null if not available.
    * @return phone
    */
   @javax.annotation.Nullable
@@ -348,7 +348,7 @@ public class JobRequestCrewMember {
   }
 
   /**
-   * TechnicianID/Name identify the assigned technician. Empty for a planned- but-unassigned crew member (quoted, not yet confirmed/assigned).
+   * UUID of the assigned technician. Empty for a planned-but-unassigned crew member (quoted, not yet confirmed/assigned).
    * @return technicianId
    */
   @javax.annotation.Nullable
@@ -367,7 +367,7 @@ public class JobRequestCrewMember {
   }
 
   /**
-   * Get technicianName
+   * Full name of the assigned technician. Empty for a planned-but-unassigned slot.
    * @return technicianName
    */
   @javax.annotation.Nullable

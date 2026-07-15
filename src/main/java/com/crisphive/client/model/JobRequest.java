@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -20,6 +20,7 @@ import com.crisphive.client.model.JobRequestAddressSummary;
 import com.crisphive.client.model.JobRequestArchiveSummary;
 import com.crisphive.client.model.JobRequestAssignedVehicle;
 import com.crisphive.client.model.JobRequestAssignmentSummary;
+import com.crisphive.client.model.JobRequestAttentionSummary;
 import com.crisphive.client.model.JobRequestCrewMember;
 import com.crisphive.client.model.JobRequestCustomerSummary;
 import com.crisphive.client.model.JobRequestQuoteSummary;
@@ -94,6 +95,11 @@ public class JobRequest {
   @javax.annotation.Nullable
   private JobRequestAssignmentSummary assignment;
 
+  public static final String SERIALIZED_NAME_ATTENTION = "attention";
+  @SerializedName(SERIALIZED_NAME_ATTENTION)
+  @javax.annotation.Nullable
+  private JobRequestAttentionSummary attention;
+
   public static final String SERIALIZED_NAME_BUSINESS_ID = "business_id";
   @SerializedName(SERIALIZED_NAME_BUSINESS_ID)
   @javax.annotation.Nullable
@@ -165,13 +171,17 @@ public class JobRequest {
   private List<JobRequestActionSummary> nextActions = new ArrayList<>();
 
   /**
-   * Job priority.
+   * Scheduling priority. p0&#x3D;emergency (interrupt-driven), p1&#x3D;top (displaced only by p0), p2&#x3D;standard, p3&#x3D;deferrable (first candidate for displacement).
    */
   @JsonAdapter(PriorityEnum.Adapter.class)
   public enum PriorityEnum {
-    NORMAL("normal"),
+    P0("p0"),
     
-    EMERGENCY("emergency");
+    P1("p1"),
+    
+    P2("p2"),
+    
+    P3("p3");
 
     private String value;
 
@@ -245,6 +255,21 @@ public class JobRequest {
   @SerializedName(SERIALIZED_NAME_SKILLS)
   @javax.annotation.Nullable
   private List<JobRequestSkillSummary> skills = new ArrayList<>();
+
+  public static final String SERIALIZED_NAME_SLA_DEADLINE = "sla_deadline";
+  @SerializedName(SERIALIZED_NAME_SLA_DEADLINE)
+  @javax.annotation.Nullable
+  private OffsetDateTime slaDeadline;
+
+  public static final String SERIALIZED_NAME_SLA_ESCALATED_AT = "sla_escalated_at";
+  @SerializedName(SERIALIZED_NAME_SLA_ESCALATED_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime slaEscalatedAt;
+
+  public static final String SERIALIZED_NAME_SLA_WARNED_AT = "sla_warned_at";
+  @SerializedName(SERIALIZED_NAME_SLA_WARNED_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime slaWarnedAt;
 
   public static final String SERIALIZED_NAME_STATUS_VERSION = "status_version";
   @SerializedName(SERIALIZED_NAME_STATUS_VERSION)
@@ -369,6 +394,25 @@ public class JobRequest {
 
   public void setAssignment(@javax.annotation.Nullable JobRequestAssignmentSummary assignment) {
     this.assignment = assignment;
+  }
+
+
+  public JobRequest attention(@javax.annotation.Nullable JobRequestAttentionSummary attention) {
+    this.attention = attention;
+    return this;
+  }
+
+  /**
+   * Attention is the dispatch-board \&quot;needs attention\&quot; marker (exception tray); null when the job needs no attention.
+   * @return attention
+   */
+  @javax.annotation.Nullable
+  public JobRequestAttentionSummary getAttention() {
+    return attention;
+  }
+
+  public void setAttention(@javax.annotation.Nullable JobRequestAttentionSummary attention) {
+    this.attention = attention;
   }
 
 
@@ -660,7 +704,7 @@ public class JobRequest {
   }
 
   /**
-   * Job priority.
+   * Scheduling priority. p0&#x3D;emergency (interrupt-driven), p1&#x3D;top (displaced only by p0), p2&#x3D;standard, p3&#x3D;deferrable (first candidate for displacement).
    * @return priority
    */
   @javax.annotation.Nullable
@@ -776,6 +820,63 @@ public class JobRequest {
   }
 
 
+  public JobRequest slaDeadline(@javax.annotation.Nullable OffsetDateTime slaDeadline) {
+    this.slaDeadline = slaDeadline;
+    return this;
+  }
+
+  /**
+   * SLA deadline (UTC) armed on a p1 job; omitted when no SLA.
+   * @return slaDeadline
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getSlaDeadline() {
+    return slaDeadline;
+  }
+
+  public void setSlaDeadline(@javax.annotation.Nullable OffsetDateTime slaDeadline) {
+    this.slaDeadline = slaDeadline;
+  }
+
+
+  public JobRequest slaEscalatedAt(@javax.annotation.Nullable OffsetDateTime slaEscalatedAt) {
+    this.slaEscalatedAt = slaEscalatedAt;
+    return this;
+  }
+
+  /**
+   * When the SLA sweep auto-escalated this job to p0 (UTC); omitted if never.
+   * @return slaEscalatedAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getSlaEscalatedAt() {
+    return slaEscalatedAt;
+  }
+
+  public void setSlaEscalatedAt(@javax.annotation.Nullable OffsetDateTime slaEscalatedAt) {
+    this.slaEscalatedAt = slaEscalatedAt;
+  }
+
+
+  public JobRequest slaWarnedAt(@javax.annotation.Nullable OffsetDateTime slaWarnedAt) {
+    this.slaWarnedAt = slaWarnedAt;
+    return this;
+  }
+
+  /**
+   * When the sweep fired the one-shot pre-escalation warning (UTC); omitted if never.
+   * @return slaWarnedAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getSlaWarnedAt() {
+    return slaWarnedAt;
+  }
+
+  public void setSlaWarnedAt(@javax.annotation.Nullable OffsetDateTime slaWarnedAt) {
+    this.slaWarnedAt = slaWarnedAt;
+  }
+
+
   public JobRequest statusVersion(@javax.annotation.Nullable Integer statusVersion) {
     this.statusVersion = statusVersion;
     return this;
@@ -867,6 +968,7 @@ public class JobRequest {
         Objects.equals(this.archive, jobRequest.archive) &&
         Objects.equals(this.assignedVehicle, jobRequest.assignedVehicle) &&
         Objects.equals(this.assignment, jobRequest.assignment) &&
+        Objects.equals(this.attention, jobRequest.attention) &&
         Objects.equals(this.businessId, jobRequest.businessId) &&
         Objects.equals(this.completedAt, jobRequest.completedAt) &&
         Objects.equals(this.completedByUserId, jobRequest.completedByUserId) &&
@@ -887,6 +989,9 @@ public class JobRequest {
         Objects.equals(this.schedule, jobRequest.schedule) &&
         Objects.equals(this.shortCode, jobRequest.shortCode) &&
         Objects.equals(this.skills, jobRequest.skills) &&
+        Objects.equals(this.slaDeadline, jobRequest.slaDeadline) &&
+        Objects.equals(this.slaEscalatedAt, jobRequest.slaEscalatedAt) &&
+        Objects.equals(this.slaWarnedAt, jobRequest.slaWarnedAt) &&
         Objects.equals(this.statusVersion, jobRequest.statusVersion) &&
         Objects.equals(this.updatedAt, jobRequest.updatedAt) &&
         Objects.equals(this.workflowId, jobRequest.workflowId) &&
@@ -895,7 +1000,7 @@ public class JobRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(actionAudit, address, archive, assignedVehicle, assignment, businessId, completedAt, completedByUserId, createdAt, crew, currentStatus, customer, customerUrl, deletedAt, description, id, jobTypeId, jobTypeName, nextActions, priority, quote, rating, schedule, shortCode, skills, statusVersion, updatedAt, workflowId, workflowName);
+    return Objects.hash(actionAudit, address, archive, assignedVehicle, assignment, attention, businessId, completedAt, completedByUserId, createdAt, crew, currentStatus, customer, customerUrl, deletedAt, description, id, jobTypeId, jobTypeName, nextActions, priority, quote, rating, schedule, shortCode, skills, slaDeadline, slaEscalatedAt, slaWarnedAt, statusVersion, updatedAt, workflowId, workflowName);
   }
 
   @Override
@@ -907,6 +1012,7 @@ public class JobRequest {
     sb.append("    archive: ").append(toIndentedString(archive)).append("\n");
     sb.append("    assignedVehicle: ").append(toIndentedString(assignedVehicle)).append("\n");
     sb.append("    assignment: ").append(toIndentedString(assignment)).append("\n");
+    sb.append("    attention: ").append(toIndentedString(attention)).append("\n");
     sb.append("    businessId: ").append(toIndentedString(businessId)).append("\n");
     sb.append("    completedAt: ").append(toIndentedString(completedAt)).append("\n");
     sb.append("    completedByUserId: ").append(toIndentedString(completedByUserId)).append("\n");
@@ -927,6 +1033,9 @@ public class JobRequest {
     sb.append("    schedule: ").append(toIndentedString(schedule)).append("\n");
     sb.append("    shortCode: ").append(toIndentedString(shortCode)).append("\n");
     sb.append("    skills: ").append(toIndentedString(skills)).append("\n");
+    sb.append("    slaDeadline: ").append(toIndentedString(slaDeadline)).append("\n");
+    sb.append("    slaEscalatedAt: ").append(toIndentedString(slaEscalatedAt)).append("\n");
+    sb.append("    slaWarnedAt: ").append(toIndentedString(slaWarnedAt)).append("\n");
     sb.append("    statusVersion: ").append(toIndentedString(statusVersion)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("    workflowId: ").append(toIndentedString(workflowId)).append("\n");
@@ -958,6 +1067,7 @@ public class JobRequest {
     openapiFields.add("archive");
     openapiFields.add("assigned_vehicle");
     openapiFields.add("assignment");
+    openapiFields.add("attention");
     openapiFields.add("business_id");
     openapiFields.add("completed_at");
     openapiFields.add("completed_by_user_id");
@@ -978,6 +1088,9 @@ public class JobRequest {
     openapiFields.add("schedule");
     openapiFields.add("short_code");
     openapiFields.add("skills");
+    openapiFields.add("sla_deadline");
+    openapiFields.add("sla_escalated_at");
+    openapiFields.add("sla_warned_at");
     openapiFields.add("status_version");
     openapiFields.add("updated_at");
     openapiFields.add("workflow_id");
@@ -1023,6 +1136,10 @@ public class JobRequest {
       // validate the optional field `assignment`
       if (jsonObj.get("assignment") != null && !jsonObj.get("assignment").isJsonNull()) {
         JobRequestAssignmentSummary.validateJsonElement(jsonObj.get("assignment"));
+      }
+      // validate the optional field `attention`
+      if (jsonObj.get("attention") != null && !jsonObj.get("attention").isJsonNull()) {
+        JobRequestAttentionSummary.validateJsonElement(jsonObj.get("attention"));
       }
       if ((jsonObj.get("business_id") != null && !jsonObj.get("business_id").isJsonNull()) && !jsonObj.get("business_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `business_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("business_id").toString()));

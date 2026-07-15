@@ -1,7 +1,7 @@
-# CrispHive Java
+# Crisphive Java
 
 The official Java SDK for the
-[CrispHive API](https://docs.crisphive.com/).
+[Crisphive API](https://docs.crisphive.com/).
 
 Typed access to the public `/v1` API — customers, bookings, catalog, team and
 fleet.
@@ -31,7 +31,7 @@ implementation "com.crisphive:crisphive-java:0.1.0"
 ## Authentication
 
 Every request is authenticated with a secret API key sent as a bearer token.
-Create keys from your CrispHive business dashboard. **The key prefix selects the
+Create keys from your Crisphive business dashboard. **The key prefix selects the
 data environment:**
 
 - `chsk_live_…` → live (production) data
@@ -95,7 +95,7 @@ never create a duplicate.
 ## Errors
 
 Non-2xx responses throw `ApiException`; inspect `e.getCode()` and
-`e.getResponseBody()` for the CrispHive error code.
+`e.getResponseBody()` for the Crisphive error code.
 
 ## Documentation
 

@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -87,6 +87,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getServiceAreaCall(String id, final ApiCallback _callback) throws ApiException {
@@ -147,7 +148,7 @@ public class ServiceAreaApi {
 
     /**
      * Get a service area
-     * Returns details of a specific service area
+     * Returns one service area — a geographic coverage zone (service territory) the business operates in, with its name and geometry metadata. Reference its UUID as &#x60;service_area_id&#x60; on customer records for territory-aware dispatch.
      * @param id Service Area ID (required)
      * @return GetServiceArea200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -158,6 +159,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public GetServiceArea200Response getServiceArea(String id) throws ApiException {
@@ -167,7 +169,7 @@ public class ServiceAreaApi {
 
     /**
      * Get a service area
-     * Returns details of a specific service area
+     * Returns one service area — a geographic coverage zone (service territory) the business operates in, with its name and geometry metadata. Reference its UUID as &#x60;service_area_id&#x60; on customer records for territory-aware dispatch.
      * @param id Service Area ID (required)
      * @return ApiResponse&lt;GetServiceArea200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -178,6 +180,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<GetServiceArea200Response> getServiceAreaWithHttpInfo(String id) throws ApiException {
@@ -188,7 +191,7 @@ public class ServiceAreaApi {
 
     /**
      * Get a service area (asynchronously)
-     * Returns details of a specific service area
+     * Returns one service area — a geographic coverage zone (service territory) the business operates in, with its name and geometry metadata. Reference its UUID as &#x60;service_area_id&#x60; on customer records for territory-aware dispatch.
      * @param id Service Area ID (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -200,6 +203,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getServiceAreaAsync(String id, final ApiCallback<GetServiceArea200Response> _callback) throws ApiException {
@@ -221,7 +225,9 @@ public class ServiceAreaApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listServiceAreasCall(Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
@@ -284,7 +290,7 @@ public class ServiceAreaApi {
 
     /**
      * List service areas
-     * Returns a paginated list of service areas for the business
+     * Returns the business&#39;s geographic coverage: paginated service areas (service territories / coverage zones) used for routing jobs to the right teams. Discover the &#x60;service_area_id&#x60; values accepted on customer create/update here.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @return ListServiceAreas200Response
@@ -294,7 +300,9 @@ public class ServiceAreaApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListServiceAreas200Response listServiceAreas(Integer page, Integer limit) throws ApiException {
@@ -304,7 +312,7 @@ public class ServiceAreaApi {
 
     /**
      * List service areas
-     * Returns a paginated list of service areas for the business
+     * Returns the business&#39;s geographic coverage: paginated service areas (service territories / coverage zones) used for routing jobs to the right teams. Discover the &#x60;service_area_id&#x60; values accepted on customer create/update here.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @return ApiResponse&lt;ListServiceAreas200Response&gt;
@@ -314,7 +322,9 @@ public class ServiceAreaApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListServiceAreas200Response> listServiceAreasWithHttpInfo(Integer page, Integer limit) throws ApiException {
@@ -325,7 +335,7 @@ public class ServiceAreaApi {
 
     /**
      * List service areas (asynchronously)
-     * Returns a paginated list of service areas for the business
+     * Returns the business&#39;s geographic coverage: paginated service areas (service territories / coverage zones) used for routing jobs to the right teams. Discover the &#x60;service_area_id&#x60; values accepted on customer create/update here.
      * @param page Page number (default 1) (optional)
      * @param limit Items per page (default 15, max 1000) (optional)
      * @param _callback The callback to be executed when the API call finishes
@@ -336,7 +346,9 @@ public class ServiceAreaApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listServiceAreasAsync(Integer page, Integer limit, final ApiCallback<ListServiceAreas200Response> _callback) throws ApiException {

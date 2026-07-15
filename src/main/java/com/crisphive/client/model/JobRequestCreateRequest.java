@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -74,10 +74,76 @@ public class JobRequestCreateRequest {
   @javax.annotation.Nullable
   private UUID jobTypeId;
 
+  /**
+   * Scheduling priority. Optional; omitted bookings receive the business&#39;s default_priority setting (assignment settings, default p2). p0&#x3D;emergency (interrupt-driven insert), p1&#x3D;top (displaced only by p0), p2&#x3D;standard, p3&#x3D;deferrable (first candidate for displacement).
+   */
+  @JsonAdapter(PriorityEnum.Adapter.class)
+  public enum PriorityEnum {
+    P0("p0"),
+    
+    P1("p1"),
+    
+    P2("p2"),
+    
+    P3("p3");
+
+    private String value;
+
+    PriorityEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static PriorityEnum fromValue(String value) {
+      for (PriorityEnum b : PriorityEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+
+    public static class Adapter extends TypeAdapter<PriorityEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final PriorityEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public PriorityEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return PriorityEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      PriorityEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_PRIORITY = "priority";
+  @SerializedName(SERIALIZED_NAME_PRIORITY)
+  @javax.annotation.Nullable
+  private PriorityEnum priority;
+
   public static final String SERIALIZED_NAME_SKILL_IDS = "skill_ids";
   @SerializedName(SERIALIZED_NAME_SKILL_IDS)
   @javax.annotation.Nullable
   private List<UUID> skillIds = new ArrayList<>();
+
+  public static final String SERIALIZED_NAME_SLA_DEADLINE = "sla_deadline";
+  @SerializedName(SERIALIZED_NAME_SLA_DEADLINE)
+  @javax.annotation.Nullable
+  private String slaDeadline;
 
   public JobRequestCreateRequest() {
   }
@@ -166,6 +232,25 @@ public class JobRequestCreateRequest {
   }
 
 
+  public JobRequestCreateRequest priority(@javax.annotation.Nullable PriorityEnum priority) {
+    this.priority = priority;
+    return this;
+  }
+
+  /**
+   * Scheduling priority. Optional; omitted bookings receive the business&#39;s default_priority setting (assignment settings, default p2). p0&#x3D;emergency (interrupt-driven insert), p1&#x3D;top (displaced only by p0), p2&#x3D;standard, p3&#x3D;deferrable (first candidate for displacement).
+   * @return priority
+   */
+  @javax.annotation.Nullable
+  public PriorityEnum getPriority() {
+    return priority;
+  }
+
+  public void setPriority(@javax.annotation.Nullable PriorityEnum priority) {
+    this.priority = priority;
+  }
+
+
   public JobRequestCreateRequest skillIds(@javax.annotation.Nullable List<UUID> skillIds) {
     this.skillIds = skillIds;
     return this;
@@ -193,6 +278,25 @@ public class JobRequestCreateRequest {
   }
 
 
+  public JobRequestCreateRequest slaDeadline(@javax.annotation.Nullable String slaDeadline) {
+    this.slaDeadline = slaDeadline;
+    return this;
+  }
+
+  /**
+   * SLA deadline (business-local naive datetime, e.g. \&quot;2030-06-14T17:00:00\&quot;). Optional; ONLY valid together with priority&#x3D;p1 — arms the auto-escalation clock (the job escalates to p0 as breach risk crosses the business&#39;s safety buffer). Must be in the future.
+   * @return slaDeadline
+   */
+  @javax.annotation.Nullable
+  public String getSlaDeadline() {
+    return slaDeadline;
+  }
+
+  public void setSlaDeadline(@javax.annotation.Nullable String slaDeadline) {
+    this.slaDeadline = slaDeadline;
+  }
+
+
 
   @Override
   public boolean equals(Object o) {
@@ -207,12 +311,14 @@ public class JobRequestCreateRequest {
         Objects.equals(this.description, jobRequestCreateRequest.description) &&
         Objects.equals(this.jobDates, jobRequestCreateRequest.jobDates) &&
         Objects.equals(this.jobTypeId, jobRequestCreateRequest.jobTypeId) &&
-        Objects.equals(this.skillIds, jobRequestCreateRequest.skillIds);
+        Objects.equals(this.priority, jobRequestCreateRequest.priority) &&
+        Objects.equals(this.skillIds, jobRequestCreateRequest.skillIds) &&
+        Objects.equals(this.slaDeadline, jobRequestCreateRequest.slaDeadline);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(customerId, description, jobDates, jobTypeId, skillIds);
+    return Objects.hash(customerId, description, jobDates, jobTypeId, priority, skillIds, slaDeadline);
   }
 
   @Override
@@ -223,7 +329,9 @@ public class JobRequestCreateRequest {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    jobDates: ").append(toIndentedString(jobDates)).append("\n");
     sb.append("    jobTypeId: ").append(toIndentedString(jobTypeId)).append("\n");
+    sb.append("    priority: ").append(toIndentedString(priority)).append("\n");
     sb.append("    skillIds: ").append(toIndentedString(skillIds)).append("\n");
+    sb.append("    slaDeadline: ").append(toIndentedString(slaDeadline)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -250,7 +358,9 @@ public class JobRequestCreateRequest {
     openapiFields.add("description");
     openapiFields.add("job_dates");
     openapiFields.add("job_type_id");
+    openapiFields.add("priority");
     openapiFields.add("skill_ids");
+    openapiFields.add("sla_deadline");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -305,9 +415,19 @@ public class JobRequestCreateRequest {
       if ((jsonObj.get("job_type_id") != null && !jsonObj.get("job_type_id").isJsonNull()) && !jsonObj.get("job_type_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `job_type_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("job_type_id").toString()));
       }
+      if ((jsonObj.get("priority") != null && !jsonObj.get("priority").isJsonNull()) && !jsonObj.get("priority").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `priority` to be a primitive type in the JSON string but got `%s`", jsonObj.get("priority").toString()));
+      }
+      // validate the optional field `priority`
+      if (jsonObj.get("priority") != null && !jsonObj.get("priority").isJsonNull()) {
+        PriorityEnum.validateJsonElement(jsonObj.get("priority"));
+      }
       // ensure the optional json data is an array if present
       if (jsonObj.get("skill_ids") != null && !jsonObj.get("skill_ids").isJsonNull() && !jsonObj.get("skill_ids").isJsonArray()) {
         throw new IllegalArgumentException(String.format("Expected the field `skill_ids` to be an array in the JSON string but got `%s`", jsonObj.get("skill_ids").toString()));
+      }
+      if ((jsonObj.get("sla_deadline") != null && !jsonObj.get("sla_deadline").isJsonNull()) && !jsonObj.get("sla_deadline").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `sla_deadline` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sla_deadline").toString()));
       }
   }
 

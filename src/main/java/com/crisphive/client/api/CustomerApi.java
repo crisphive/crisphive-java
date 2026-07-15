@@ -1,6 +1,6 @@
 /*
- * CrispHive Developer API
- * Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+ * Crisphive Developer API
+ * Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
  *
  * The version of the OpenAPI document: 1.0
  * 
@@ -80,6 +80,7 @@ public class CustomerApi {
     /**
      * Build call for createCustomer
      * @param customerCreateRequest Customer details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @param _callback Callback for upload/download progress
      * @return Call to execute
      * @throws ApiException If fail to serialize the request body object
@@ -92,9 +93,10 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createCustomerCall(CustomerCreateRequest customerCreateRequest, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call createCustomerCall(CustomerCreateRequest customerCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -135,25 +137,31 @@ public class CustomerApi {
             localVarHeaderParams.put("Content-Type", localVarContentType);
         }
 
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
         String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
         return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call createCustomerValidateBeforeCall(CustomerCreateRequest customerCreateRequest, final ApiCallback _callback) throws ApiException {
+    private okhttp3.Call createCustomerValidateBeforeCall(CustomerCreateRequest customerCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
         // verify the required parameter 'customerCreateRequest' is set
         if (customerCreateRequest == null) {
             throw new ApiException("Missing the required parameter 'customerCreateRequest' when calling createCustomer(Async)");
         }
 
-        return createCustomerCall(customerCreateRequest, _callback);
+        return createCustomerCall(customerCreateRequest, idempotencyKey, _callback);
 
     }
 
     /**
      * Create a customer
-     * Adds a new customer record to the current business. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested &#x60;address&#x60; object. service_area_id must be a valid service area UUID belonging to this business.
+     * Creates a customer record — the client/account profile a job request (work order) is booked against; use it to import or sync customers from your own CRM, website lead form or intake flow. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested &#x60;address&#x60; object. service_area_id must be a valid service area UUID belonging to this business.
      * @param customerCreateRequest Customer details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @return CreateCustomer200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -165,17 +173,19 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public CreateCustomer200Response createCustomer(CustomerCreateRequest customerCreateRequest) throws ApiException {
-        ApiResponse<CreateCustomer200Response> localVarResp = createCustomerWithHttpInfo(customerCreateRequest);
+    public CreateCustomer200Response createCustomer(CustomerCreateRequest customerCreateRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CreateCustomer200Response> localVarResp = createCustomerWithHttpInfo(customerCreateRequest, idempotencyKey);
         return localVarResp.getData();
     }
 
     /**
      * Create a customer
-     * Adds a new customer record to the current business. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested &#x60;address&#x60; object. service_area_id must be a valid service area UUID belonging to this business.
+     * Creates a customer record — the client/account profile a job request (work order) is booked against; use it to import or sync customers from your own CRM, website lead form or intake flow. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested &#x60;address&#x60; object. service_area_id must be a valid service area UUID belonging to this business.
      * @param customerCreateRequest Customer details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @return ApiResponse&lt;CreateCustomer200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
      * @http.response.details
@@ -187,18 +197,20 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<CreateCustomer200Response> createCustomerWithHttpInfo(CustomerCreateRequest customerCreateRequest) throws ApiException {
-        okhttp3.Call localVarCall = createCustomerValidateBeforeCall(customerCreateRequest, null);
+    public ApiResponse<CreateCustomer200Response> createCustomerWithHttpInfo(CustomerCreateRequest customerCreateRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = createCustomerValidateBeforeCall(customerCreateRequest, idempotencyKey, null);
         Type localVarReturnType = new TypeToken<CreateCustomer200Response>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
 
     /**
      * Create a customer (asynchronously)
-     * Adds a new customer record to the current business. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested &#x60;address&#x60; object. service_area_id must be a valid service area UUID belonging to this business.
+     * Creates a customer record — the client/account profile a job request (work order) is booked against; use it to import or sync customers from your own CRM, website lead form or intake flow. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested &#x60;address&#x60; object. service_area_id must be a valid service area UUID belonging to this business.
      * @param customerCreateRequest Customer details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
      * @throws ApiException If fail to process the API call, e.g. serializing the request body object
@@ -211,11 +223,12 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call createCustomerAsync(CustomerCreateRequest customerCreateRequest, final ApiCallback<CreateCustomer200Response> _callback) throws ApiException {
+    public okhttp3.Call createCustomerAsync(CustomerCreateRequest customerCreateRequest, String idempotencyKey, final ApiCallback<CreateCustomer200Response> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = createCustomerValidateBeforeCall(customerCreateRequest, _callback);
+        okhttp3.Call localVarCall = createCustomerValidateBeforeCall(customerCreateRequest, idempotencyKey, _callback);
         Type localVarReturnType = new TypeToken<CreateCustomer200Response>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
@@ -233,6 +246,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deleteCustomerCall(String id, final ApiCallback _callback) throws ApiException {
@@ -293,7 +307,7 @@ public class CustomerApi {
 
     /**
      * Delete a customer
-     * Soft-deletes a customer record.
+     * Soft-deletes a customer record, removing it from the active customer directory; existing bookings keep their customer snapshot.
      * @param id Customer ID (required)
      * @return ResponseEnvelope
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -304,6 +318,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ResponseEnvelope deleteCustomer(String id) throws ApiException {
@@ -313,7 +328,7 @@ public class CustomerApi {
 
     /**
      * Delete a customer
-     * Soft-deletes a customer record.
+     * Soft-deletes a customer record, removing it from the active customer directory; existing bookings keep their customer snapshot.
      * @param id Customer ID (required)
      * @return ApiResponse&lt;ResponseEnvelope&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -324,6 +339,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ResponseEnvelope> deleteCustomerWithHttpInfo(String id) throws ApiException {
@@ -334,7 +350,7 @@ public class CustomerApi {
 
     /**
      * Delete a customer (asynchronously)
-     * Soft-deletes a customer record.
+     * Soft-deletes a customer record, removing it from the active customer directory; existing bookings keep their customer snapshot.
      * @param id Customer ID (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -346,6 +362,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call deleteCustomerAsync(String id, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
@@ -368,6 +385,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getCustomerCall(String id, final ApiCallback _callback) throws ApiException {
@@ -428,7 +446,7 @@ public class CustomerApi {
 
     /**
      * Get a customer
-     * Returns the full profile, contact details and spending summary. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
+     * Returns the full customer record: profile, contact details, tier and lifetime spending summary — a 360° client view for support, upsell or CRM enrichment. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
      * @param id Customer ID (UUID) (required)
      * @return GetCustomer200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -439,6 +457,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public GetCustomer200Response getCustomer(String id) throws ApiException {
@@ -448,7 +467,7 @@ public class CustomerApi {
 
     /**
      * Get a customer
-     * Returns the full profile, contact details and spending summary. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
+     * Returns the full customer record: profile, contact details, tier and lifetime spending summary — a 360° client view for support, upsell or CRM enrichment. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
      * @param id Customer ID (UUID) (required)
      * @return ApiResponse&lt;GetCustomer200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -459,6 +478,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<GetCustomer200Response> getCustomerWithHttpInfo(String id) throws ApiException {
@@ -469,7 +489,7 @@ public class CustomerApi {
 
     /**
      * Get a customer (asynchronously)
-     * Returns the full profile, contact details and spending summary. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
+     * Returns the full customer record: profile, contact details, tier and lifetime spending summary — a 360° client view for support, upsell or CRM enrichment. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
      * @param id Customer ID (UUID) (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -481,6 +501,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call getCustomerAsync(String id, final ApiCallback<GetCustomer200Response> _callback) throws ApiException {
@@ -510,6 +531,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listCustomersCall(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback _callback) throws ApiException {
@@ -596,7 +618,7 @@ public class CustomerApi {
 
     /**
      * List customers
-     * Returns a paginated, searchable list of customers for the current business.
+     * Returns a paginated, searchable directory of the business&#39;s customer records — the customer database (CRM) behind every booking and work order. Supports the &#x60;since&#x60;/&#x60;next_since&#x60; cursor for incremental sync into an external CRM, ERP or marketing tool.
      * @param q Search name, UID, phone, email (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
@@ -614,6 +636,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ListCustomers200Response listCustomers(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since) throws ApiException {
@@ -623,7 +646,7 @@ public class CustomerApi {
 
     /**
      * List customers
-     * Returns a paginated, searchable list of customers for the current business.
+     * Returns a paginated, searchable directory of the business&#39;s customer records — the customer database (CRM) behind every booking and work order. Supports the &#x60;since&#x60;/&#x60;next_since&#x60; cursor for incremental sync into an external CRM, ERP or marketing tool.
      * @param q Search name, UID, phone, email (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
@@ -641,6 +664,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ListCustomers200Response> listCustomersWithHttpInfo(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since) throws ApiException {
@@ -651,7 +675,7 @@ public class CustomerApi {
 
     /**
      * List customers (asynchronously)
-     * Returns a paginated, searchable list of customers for the current business.
+     * Returns a paginated, searchable directory of the business&#39;s customer records — the customer database (CRM) behind every booking and work order. Supports the &#x60;since&#x60;/&#x60;next_since&#x60; cursor for incremental sync into an external CRM, ERP or marketing tool.
      * @param q Search name, UID, phone, email (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
@@ -670,6 +694,7 @@ public class CustomerApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call listCustomersAsync(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback<ListCustomers200Response> _callback) throws ApiException {
@@ -695,6 +720,7 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call updateCustomerCall(String id, CustomerUpdateRequest customerUpdateRequest, final ApiCallback _callback) throws ApiException {
@@ -761,7 +787,7 @@ public class CustomerApi {
 
     /**
      * Update a customer
-     * Replaces mutable fields on a customer record. Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
+     * Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
      * @param id Customer ID (UUID) (required)
      * @param customerUpdateRequest Fields to update (required)
      * @return ResponseEnvelope
@@ -775,6 +801,7 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ResponseEnvelope updateCustomer(String id, CustomerUpdateRequest customerUpdateRequest) throws ApiException {
@@ -784,7 +811,7 @@ public class CustomerApi {
 
     /**
      * Update a customer
-     * Replaces mutable fields on a customer record. Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
+     * Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
      * @param id Customer ID (UUID) (required)
      * @param customerUpdateRequest Fields to update (required)
      * @return ApiResponse&lt;ResponseEnvelope&gt;
@@ -798,6 +825,7 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public ApiResponse<ResponseEnvelope> updateCustomerWithHttpInfo(String id, CustomerUpdateRequest customerUpdateRequest) throws ApiException {
@@ -808,7 +836,7 @@ public class CustomerApi {
 
     /**
      * Update a customer (asynchronously)
-     * Replaces mutable fields on a customer record. Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
+     * Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
      * @param id Customer ID (UUID) (required)
      * @param customerUpdateRequest Fields to update (required)
      * @param _callback The callback to be executed when the API call finishes
@@ -823,6 +851,7 @@ public class CustomerApi {
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
     public okhttp3.Call updateCustomerAsync(String id, CustomerUpdateRequest customerUpdateRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {

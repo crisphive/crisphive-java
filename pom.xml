@@ -5,9 +5,9 @@
     <artifactId>crisphive-java</artifactId>
     <packaging>jar</packaging>
     <name>crisphive-java</name>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <url>https://github.com/crisphive/crisphive-java</url>
-    <description>Official Java SDK for the CrispHive API.</description>
+    <description>Official Java SDK for the Crisphive API.</description>
     <scm>
         <connection>scm:git:git://github.com/crisphive/crisphive-java.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/crisphive/crisphive-java.git</developerConnection>
@@ -24,9 +24,9 @@
 
     <developers>
         <developer>
-            <name>CrispHive</name>
+            <name>Crisphive</name>
             <email>developer@crisphive.com</email>
-            <organization>CrispHive</organization>
+            <organization>Crisphive</organization>
             <organizationUrl>https://crisphive.com</organizationUrl>
         </developer>
     </developers>
