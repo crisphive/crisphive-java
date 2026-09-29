@@ -357,7 +357,7 @@ public class TechnicianUpdateRequest {
   }
 
   /**
-   * At least one of phone/email is required.
+   * Phone number in E.164 international format (&#x60;+16135550188&#x60;); a bare national number is rejected with PHONE_INVALID — see AddTechnicianReq.Phone. At least one of phone/email is required — enforced in the usecase; see the note on AddTechnicianReq.Phone for why no binding rule may decide it.
    * @return phone
    */
   @javax.annotation.Nullable

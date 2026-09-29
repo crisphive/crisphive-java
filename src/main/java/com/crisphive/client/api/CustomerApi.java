@@ -89,8 +89,9 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -169,8 +170,9 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -193,8 +195,9 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -219,8 +222,9 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -245,6 +249,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -317,6 +322,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -338,6 +344,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -361,6 +368,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -384,6 +392,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -456,6 +465,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -477,6 +487,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -500,6 +511,7 @@ public class CustomerApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -513,7 +525,8 @@ public class CustomerApi {
     }
     /**
      * Build call for listCustomers
-     * @param q Search name, UID, phone, email (optional)
+     * @param q Fuzzy search over name, UID, phone, email (optional)
+     * @param phone EXACT caller lookup by phone in E.164 with the leading + (e.g. +16135550188). Separators are stripped, so &#39;+1 (613) 555-0188&#39; works; a bare national number without a country code is refused with PHONE_INVALID. Use this rather than q to identify a caller — q is a substring match and can return the wrong person. (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
      * @param preferredTechnicianId Filter by preferred technician UUID (optional)
@@ -529,12 +542,13 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listCustomersCall(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listCustomersCall(String q, String phone, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -561,6 +575,10 @@ public class CustomerApi {
 
         if (q != null) {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("q", q));
+        }
+
+        if (phone != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("phone", phone));
         }
 
         if (tier != null) {
@@ -611,15 +629,16 @@ public class CustomerApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listCustomersValidateBeforeCall(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback _callback) throws ApiException {
-        return listCustomersCall(q, tier, status, preferredTechnicianId, sort, page, limit, since, _callback);
+    private okhttp3.Call listCustomersValidateBeforeCall(String q, String phone, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback _callback) throws ApiException {
+        return listCustomersCall(q, phone, tier, status, preferredTechnicianId, sort, page, limit, since, _callback);
 
     }
 
     /**
      * List customers
      * Returns a paginated, searchable directory of the business&#39;s customer records — the customer database (CRM) behind every booking and work order. Supports the &#x60;since&#x60;/&#x60;next_since&#x60; cursor for incremental sync into an external CRM, ERP or marketing tool.
-     * @param q Search name, UID, phone, email (optional)
+     * @param q Fuzzy search over name, UID, phone, email (optional)
+     * @param phone EXACT caller lookup by phone in E.164 with the leading + (e.g. +16135550188). Separators are stripped, so &#39;+1 (613) 555-0188&#39; works; a bare national number without a country code is refused with PHONE_INVALID. Use this rather than q to identify a caller — q is a substring match and can return the wrong person. (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
      * @param preferredTechnicianId Filter by preferred technician UUID (optional)
@@ -634,20 +653,22 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ListCustomers200Response listCustomers(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since) throws ApiException {
-        ApiResponse<ListCustomers200Response> localVarResp = listCustomersWithHttpInfo(q, tier, status, preferredTechnicianId, sort, page, limit, since);
+    public ListCustomers200Response listCustomers(String q, String phone, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since) throws ApiException {
+        ApiResponse<ListCustomers200Response> localVarResp = listCustomersWithHttpInfo(q, phone, tier, status, preferredTechnicianId, sort, page, limit, since);
         return localVarResp.getData();
     }
 
     /**
      * List customers
      * Returns a paginated, searchable directory of the business&#39;s customer records — the customer database (CRM) behind every booking and work order. Supports the &#x60;since&#x60;/&#x60;next_since&#x60; cursor for incremental sync into an external CRM, ERP or marketing tool.
-     * @param q Search name, UID, phone, email (optional)
+     * @param q Fuzzy search over name, UID, phone, email (optional)
+     * @param phone EXACT caller lookup by phone in E.164 with the leading + (e.g. +16135550188). Separators are stripped, so &#39;+1 (613) 555-0188&#39; works; a bare national number without a country code is refused with PHONE_INVALID. Use this rather than q to identify a caller — q is a substring match and can return the wrong person. (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
      * @param preferredTechnicianId Filter by preferred technician UUID (optional)
@@ -662,13 +683,14 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ListCustomers200Response> listCustomersWithHttpInfo(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since) throws ApiException {
-        okhttp3.Call localVarCall = listCustomersValidateBeforeCall(q, tier, status, preferredTechnicianId, sort, page, limit, since, null);
+    public ApiResponse<ListCustomers200Response> listCustomersWithHttpInfo(String q, String phone, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since) throws ApiException {
+        okhttp3.Call localVarCall = listCustomersValidateBeforeCall(q, phone, tier, status, preferredTechnicianId, sort, page, limit, since, null);
         Type localVarReturnType = new TypeToken<ListCustomers200Response>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
@@ -676,7 +698,8 @@ public class CustomerApi {
     /**
      * List customers (asynchronously)
      * Returns a paginated, searchable directory of the business&#39;s customer records — the customer database (CRM) behind every booking and work order. Supports the &#x60;since&#x60;/&#x60;next_since&#x60; cursor for incremental sync into an external CRM, ERP or marketing tool.
-     * @param q Search name, UID, phone, email (optional)
+     * @param q Fuzzy search over name, UID, phone, email (optional)
+     * @param phone EXACT caller lookup by phone in E.164 with the leading + (e.g. +16135550188). Separators are stripped, so &#39;+1 (613) 555-0188&#39; works; a bare national number without a country code is refused with PHONE_INVALID. Use this rather than q to identify a caller — q is a substring match and can return the wrong person. (optional)
      * @param tier Filter by tier: regular|vip (repeatable) (optional)
      * @param status Filter by status: active|inactive (optional)
      * @param preferredTechnicianId Filter by preferred technician UUID (optional)
@@ -692,14 +715,15 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> WRONG_QUERY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> WRONG_QUERY | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listCustomersAsync(String q, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback<ListCustomers200Response> _callback) throws ApiException {
+    public okhttp3.Call listCustomersAsync(String q, String phone, List<String> tier, String status, String preferredTechnicianId, String sort, Integer page, Integer limit, String since, final ApiCallback<ListCustomers200Response> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listCustomersValidateBeforeCall(q, tier, status, preferredTechnicianId, sort, page, limit, since, _callback);
+        okhttp3.Call localVarCall = listCustomersValidateBeforeCall(q, phone, tier, status, preferredTechnicianId, sort, page, limit, since, _callback);
         Type localVarReturnType = new TypeToken<ListCustomers200Response>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
@@ -716,10 +740,11 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL | CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_LOCATION_ADDRESS </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -787,7 +812,7 @@ public class CustomerApi {
 
     /**
      * Update a customer
-     * Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
+     * PARTIAL update — send only the fields you are changing; anything you OMIT is left exactly as stored (two-way CRM sync friendly: push one field from your system of record without re-sending the record). To CLEAR a field, send it as an empty string: uid, phone, email, notes, preferred_technician_id, service_area_id. &#x60;tier&#x60; and &#x60;status&#x60; are enums with no empty member, so an empty value there is ignored rather than stored. &#x60;full_name&#x60; cannot be set to empty. The nested &#x60;address&#x60; object is all-or-nothing: omit it to leave the stored address (and its coordinates) untouched; when present it REPLACES the whole block, and missing latitude/longitude are geocoded from the address. A customer must keep at least one contact channel — an update that would clear both phone and email is refused with PHONE_OR_EMAIL_REQUIRED.
      * @param id Customer ID (UUID) (required)
      * @param customerUpdateRequest Fields to update (required)
      * @return ResponseEnvelope
@@ -797,10 +822,11 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL | CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_LOCATION_ADDRESS </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -811,7 +837,7 @@ public class CustomerApi {
 
     /**
      * Update a customer
-     * Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
+     * PARTIAL update — send only the fields you are changing; anything you OMIT is left exactly as stored (two-way CRM sync friendly: push one field from your system of record without re-sending the record). To CLEAR a field, send it as an empty string: uid, phone, email, notes, preferred_technician_id, service_area_id. &#x60;tier&#x60; and &#x60;status&#x60; are enums with no empty member, so an empty value there is ignored rather than stored. &#x60;full_name&#x60; cannot be set to empty. The nested &#x60;address&#x60; object is all-or-nothing: omit it to leave the stored address (and its coordinates) untouched; when present it REPLACES the whole block, and missing latitude/longitude are geocoded from the address. A customer must keep at least one contact channel — an update that would clear both phone and email is refused with PHONE_OR_EMAIL_REQUIRED.
      * @param id Customer ID (UUID) (required)
      * @param customerUpdateRequest Fields to update (required)
      * @return ApiResponse&lt;ResponseEnvelope&gt;
@@ -821,10 +847,11 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL | CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_LOCATION_ADDRESS </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -836,7 +863,7 @@ public class CustomerApi {
 
     /**
      * Update a customer (asynchronously)
-     * Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id&#x3D;\&quot;\&quot; to clear the service area. Address fields (including latitude/longitude) live under the nested &#x60;address&#x60; object.
+     * PARTIAL update — send only the fields you are changing; anything you OMIT is left exactly as stored (two-way CRM sync friendly: push one field from your system of record without re-sending the record). To CLEAR a field, send it as an empty string: uid, phone, email, notes, preferred_technician_id, service_area_id. &#x60;tier&#x60; and &#x60;status&#x60; are enums with no empty member, so an empty value there is ignored rather than stored. &#x60;full_name&#x60; cannot be set to empty. The nested &#x60;address&#x60; object is all-or-nothing: omit it to leave the stored address (and its coordinates) untouched; when present it REPLACES the whole block, and missing latitude/longitude are geocoded from the address. A customer must keep at least one contact channel — an update that would clear both phone and email is refused with PHONE_OR_EMAIL_REQUIRED.
      * @param id Customer ID (UUID) (required)
      * @param customerUpdateRequest Fields to update (required)
      * @param _callback The callback to be executed when the API call finishes
@@ -847,10 +874,11 @@ public class CustomerApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | PHONE_OR_EMAIL_REQUIRED | PHONE_INVALID </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> CUSTOMER_DUPLICATE_PHONE | CUSTOMER_DUPLICATE_EMAIL | CUSTOMER_DUPLICATE_UID | CUSTOMER_DUPLICATE_LOCATION_ADDRESS </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */

@@ -27,7 +27,10 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import com.crisphive.client.model.CreateJobType200Response;
 import com.crisphive.client.model.GetJobType200Response;
+import com.crisphive.client.model.JobTypeCreateRequest;
+import com.crisphive.client.model.JobTypeUpdateRequest;
 import com.crisphive.client.model.ListJobTypes200Response;
 import com.crisphive.client.model.ResponseEnvelope;
 
@@ -75,6 +78,305 @@ public class JobTypesApi {
     }
 
     /**
+     * Build call for createJobType
+     * @param jobTypeCreateRequest Job type (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createJobTypeCall(JobTypeCreateRequest jobTypeCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobTypeCreateRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-types";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call createJobTypeValidateBeforeCall(JobTypeCreateRequest jobTypeCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobTypeCreateRequest' is set
+        if (jobTypeCreateRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobTypeCreateRequest' when calling createJobType(Async)");
+        }
+
+        return createJobTypeCall(jobTypeCreateRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Add a job type to the catalog
+     * Creates a kind of work customers can book, such as \&quot;Annual boiler service\&quot; or \&quot;Drain unblocking\&quot;. Job types classify bookings: createJobRequest takes an optional &#x60;job_type_id&#x60; from this catalog and the job keeps the type&#39;s name as it was at booking time.  &#x60;name&#x60; is the only required field and must be unique in the business (JOB_TYPE_DUPLICATE). &#x60;status&#x60; defaults to active. An inactive type stays in the catalog but cannot be chosen for new job requests; use that rather than deleting a type you may revive.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retried call replays the original response instead of creating a duplicate type.  Optional default_duration_minutes (+ default_mobilization_minutes / default_demobilization_minutes) set how long this kind of work usually takes: quoteJobRequest uses them when it is sent no job_duration_minutes, so an automation or voice agent can schedule the job without knowing the length. A buffer needs a duration (JOB_TYPE_INVALID_DEFAULT_DURATION).  This defines the catalog, not a booking. To book actual work use createJobRequest and reference the job type there.
+     * @param jobTypeCreateRequest Job type (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CreateJobType200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CreateJobType200Response createJobType(JobTypeCreateRequest jobTypeCreateRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CreateJobType200Response> localVarResp = createJobTypeWithHttpInfo(jobTypeCreateRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Add a job type to the catalog
+     * Creates a kind of work customers can book, such as \&quot;Annual boiler service\&quot; or \&quot;Drain unblocking\&quot;. Job types classify bookings: createJobRequest takes an optional &#x60;job_type_id&#x60; from this catalog and the job keeps the type&#39;s name as it was at booking time.  &#x60;name&#x60; is the only required field and must be unique in the business (JOB_TYPE_DUPLICATE). &#x60;status&#x60; defaults to active. An inactive type stays in the catalog but cannot be chosen for new job requests; use that rather than deleting a type you may revive.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retried call replays the original response instead of creating a duplicate type.  Optional default_duration_minutes (+ default_mobilization_minutes / default_demobilization_minutes) set how long this kind of work usually takes: quoteJobRequest uses them when it is sent no job_duration_minutes, so an automation or voice agent can schedule the job without knowing the length. A buffer needs a duration (JOB_TYPE_INVALID_DEFAULT_DURATION).  This defines the catalog, not a booking. To book actual work use createJobRequest and reference the job type there.
+     * @param jobTypeCreateRequest Job type (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CreateJobType200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CreateJobType200Response> createJobTypeWithHttpInfo(JobTypeCreateRequest jobTypeCreateRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = createJobTypeValidateBeforeCall(jobTypeCreateRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CreateJobType200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Add a job type to the catalog (asynchronously)
+     * Creates a kind of work customers can book, such as \&quot;Annual boiler service\&quot; or \&quot;Drain unblocking\&quot;. Job types classify bookings: createJobRequest takes an optional &#x60;job_type_id&#x60; from this catalog and the job keeps the type&#39;s name as it was at booking time.  &#x60;name&#x60; is the only required field and must be unique in the business (JOB_TYPE_DUPLICATE). &#x60;status&#x60; defaults to active. An inactive type stays in the catalog but cannot be chosen for new job requests; use that rather than deleting a type you may revive.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retried call replays the original response instead of creating a duplicate type.  Optional default_duration_minutes (+ default_mobilization_minutes / default_demobilization_minutes) set how long this kind of work usually takes: quoteJobRequest uses them when it is sent no job_duration_minutes, so an automation or voice agent can schedule the job without knowing the length. A buffer needs a duration (JOB_TYPE_INVALID_DEFAULT_DURATION).  This defines the catalog, not a booking. To book actual work use createJobRequest and reference the job type there.
+     * @param jobTypeCreateRequest Job type (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createJobTypeAsync(JobTypeCreateRequest jobTypeCreateRequest, String idempotencyKey, final ApiCallback<CreateJobType200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = createJobTypeValidateBeforeCall(jobTypeCreateRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CreateJobType200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for deleteJobType
+     * @param id Job Type ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteJobTypeCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/job-types/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteJobTypeValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling deleteJobType(Async)");
+        }
+
+        return deleteJobTypeCall(id, _callback);
+
+    }
+
+    /**
+     * Remove a job type from the catalog
+     * Soft-deletes the entry: it disappears from the catalog and can no longer be selected for new bookings. Jobs already booked against it are unaffected and keep showing the name they were booked with.  Prefer updateJobType with &#x60;status&#x3D;inactive&#x60; in almost every case: it has the same effect on the booking form and is trivially reversible. Delete is for a type created in error or one that will never return.  Rows the platform ships with (&#x60;is_system&#x3D;true&#x60;) cannot be deleted and are refused with JOB_TYPE_SYSTEM_READ_ONLY.
+     * @param id Job Type ID (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope deleteJobType(String id) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = deleteJobTypeWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Remove a job type from the catalog
+     * Soft-deletes the entry: it disappears from the catalog and can no longer be selected for new bookings. Jobs already booked against it are unaffected and keep showing the name they were booked with.  Prefer updateJobType with &#x60;status&#x3D;inactive&#x60; in almost every case: it has the same effect on the booking form and is trivially reversible. Delete is for a type created in error or one that will never return.  Rows the platform ships with (&#x60;is_system&#x3D;true&#x60;) cannot be deleted and are refused with JOB_TYPE_SYSTEM_READ_ONLY.
+     * @param id Job Type ID (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> deleteJobTypeWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = deleteJobTypeValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Remove a job type from the catalog (asynchronously)
+     * Soft-deletes the entry: it disappears from the catalog and can no longer be selected for new bookings. Jobs already booked against it are unaffected and keep showing the name they were booked with.  Prefer updateJobType with &#x60;status&#x3D;inactive&#x60; in almost every case: it has the same effect on the booking form and is trivially reversible. Delete is for a type created in error or one that will never return.  Rows the platform ships with (&#x60;is_system&#x3D;true&#x60;) cannot be deleted and are refused with JOB_TYPE_SYSTEM_READ_ONLY.
+     * @param id Job Type ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteJobTypeAsync(String id, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteJobTypeValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getJobType
      * @param id Job Type ID (required)
      * @param _callback Callback for upload/download progress
@@ -86,6 +388,7 @@ public class JobTypesApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -158,6 +461,7 @@ public class JobTypesApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -179,6 +483,7 @@ public class JobTypesApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -202,6 +507,7 @@ public class JobTypesApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -226,6 +532,7 @@ public class JobTypesApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -296,6 +603,7 @@ public class JobTypesApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -317,6 +625,7 @@ public class JobTypesApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -340,6 +649,7 @@ public class JobTypesApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -347,6 +657,167 @@ public class JobTypesApi {
 
         okhttp3.Call localVarCall = listJobTypesValidateBeforeCall(status, _callback);
         Type localVarReturnType = new TypeToken<ListJobTypes200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateJobType
+     * @param id Job Type ID (required)
+     * @param jobTypeUpdateRequest Job type (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateJobTypeCall(String id, JobTypeUpdateRequest jobTypeUpdateRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobTypeUpdateRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-types/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateJobTypeValidateBeforeCall(String id, JobTypeUpdateRequest jobTypeUpdateRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling updateJobType(Async)");
+        }
+
+        // verify the required parameter 'jobTypeUpdateRequest' is set
+        if (jobTypeUpdateRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobTypeUpdateRequest' when calling updateJobType(Async)");
+        }
+
+        return updateJobTypeCall(id, jobTypeUpdateRequest, _callback);
+
+    }
+
+    /**
+     * Rename a job type or change its availability
+     * Edits a catalog entry in place. A rename applies to NEW bookings only: every job stores the job-type name it was booked with, so existing and completed jobs keep their original label.  Partial update: omit a field to keep it. &#x60;name&#x60; rejects \&quot;\&quot; because a type must stay identifiable, and must stay unique (JOB_TYPE_DUPLICATE). Setting &#x60;status&#x60; to inactive is the reversible way to take a type off the booking form; inactive types are refused for new job requests.  Default quote bundle: default_duration_minutes / default_mobilization_minutes / default_demobilization_minutes follow the same partial rule; omit to keep, 0 to clear, a value to set. Clearing the duration while a buffer stays is refused (JOB_TYPE_INVALID_DEFAULT_DURATION).  Rows the platform ships with (&#x60;is_system&#x3D;true&#x60;, e.g. the default \&quot;General\&quot; type) keep their name and status read-only (JOB_TYPE_SYSTEM_READ_ONLY); their default quote bundle IS editable. Create your own type if you need different wording.
+     * @param id Job Type ID (required)
+     * @param jobTypeUpdateRequest Job type (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope updateJobType(String id, JobTypeUpdateRequest jobTypeUpdateRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = updateJobTypeWithHttpInfo(id, jobTypeUpdateRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Rename a job type or change its availability
+     * Edits a catalog entry in place. A rename applies to NEW bookings only: every job stores the job-type name it was booked with, so existing and completed jobs keep their original label.  Partial update: omit a field to keep it. &#x60;name&#x60; rejects \&quot;\&quot; because a type must stay identifiable, and must stay unique (JOB_TYPE_DUPLICATE). Setting &#x60;status&#x60; to inactive is the reversible way to take a type off the booking form; inactive types are refused for new job requests.  Default quote bundle: default_duration_minutes / default_mobilization_minutes / default_demobilization_minutes follow the same partial rule; omit to keep, 0 to clear, a value to set. Clearing the duration while a buffer stays is refused (JOB_TYPE_INVALID_DEFAULT_DURATION).  Rows the platform ships with (&#x60;is_system&#x3D;true&#x60;, e.g. the default \&quot;General\&quot; type) keep their name and status read-only (JOB_TYPE_SYSTEM_READ_ONLY); their default quote bundle IS editable. Create your own type if you need different wording.
+     * @param id Job Type ID (required)
+     * @param jobTypeUpdateRequest Job type (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> updateJobTypeWithHttpInfo(String id, JobTypeUpdateRequest jobTypeUpdateRequest) throws ApiException {
+        okhttp3.Call localVarCall = updateJobTypeValidateBeforeCall(id, jobTypeUpdateRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Rename a job type or change its availability (asynchronously)
+     * Edits a catalog entry in place. A rename applies to NEW bookings only: every job stores the job-type name it was booked with, so existing and completed jobs keep their original label.  Partial update: omit a field to keep it. &#x60;name&#x60; rejects \&quot;\&quot; because a type must stay identifiable, and must stay unique (JOB_TYPE_DUPLICATE). Setting &#x60;status&#x60; to inactive is the reversible way to take a type off the booking form; inactive types are refused for new job requests.  Default quote bundle: default_duration_minutes / default_mobilization_minutes / default_demobilization_minutes follow the same partial rule; omit to keep, 0 to clear, a value to set. Clearing the duration while a buffer stays is refused (JOB_TYPE_INVALID_DEFAULT_DURATION).  Rows the platform ships with (&#x60;is_system&#x3D;true&#x60;, e.g. the default \&quot;General\&quot; type) keep their name and status read-only (JOB_TYPE_SYSTEM_READ_ONLY); their default quote bundle IS editable. Create your own type if you need different wording.
+     * @param id Job Type ID (required)
+     * @param jobTypeUpdateRequest Job type (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_TYPE_INVALID_NAME | JOB_TYPE_INVALID_STATUS | JOB_TYPE_INVALID_DEFAULT_DURATION </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> JOB_TYPE_SYSTEM_READ_ONLY </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> JOB_TYPE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_TYPE_DUPLICATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateJobTypeAsync(String id, JobTypeUpdateRequest jobTypeUpdateRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateJobTypeValidateBeforeCall(id, jobTypeUpdateRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

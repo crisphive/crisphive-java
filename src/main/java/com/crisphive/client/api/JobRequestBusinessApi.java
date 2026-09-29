@@ -28,12 +28,17 @@ import java.io.IOException;
 
 
 import java.math.BigDecimal;
+import com.crisphive.client.model.BookAndConfirmJobRequest200Response;
+import com.crisphive.client.model.CommitAbsenceResolve200Response;
 import com.crisphive.client.model.CommitEmergencyReschedule200Response;
 import com.crisphive.client.model.CommitJobRequestMove200Response;
 import com.crisphive.client.model.CreateJobRequest200Response;
 import com.crisphive.client.model.GetJobRequest200Response;
 import com.crisphive.client.model.GetJobRequestTimeline200Response;
 import com.crisphive.client.model.GetTechnicianSchedule200Response;
+import com.crisphive.client.model.JobRequestAbsenceCommitRequest;
+import com.crisphive.client.model.JobRequestAbsencePreviewRequest;
+import com.crisphive.client.model.JobRequestBookAndConfirmRequest;
 import com.crisphive.client.model.JobRequestConfirmRequest;
 import com.crisphive.client.model.JobRequestCreateRequest;
 import com.crisphive.client.model.JobRequestEmergencyCandidatesRequest;
@@ -96,6 +101,330 @@ public class JobRequestBusinessApi {
     }
 
     /**
+     * Build call for bookAndConfirmJobRequest
+     * @param jobRequestBookAndConfirmRequest Quick booking (required)
+     * @param idempotencyKey Makes retries safe: a repeat send with the same key returns the original result instead of booking again (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT (missing/ambiguous customer, missing address, inactive job type, start in the past, unknown field shape) | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and no default; data.reason &#x3D; job_type_has_no_default_duration, job_has_no_job_type or job_type_unavailable, with job_type_id and hint) | PHONE_INVALID | JOB_REQUEST_ADDRESS_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call bookAndConfirmJobRequestCall(JobRequestBookAndConfirmRequest jobRequestBookAndConfirmRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestBookAndConfirmRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/quick";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call bookAndConfirmJobRequestValidateBeforeCall(JobRequestBookAndConfirmRequest jobRequestBookAndConfirmRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobRequestBookAndConfirmRequest' is set
+        if (jobRequestBookAndConfirmRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestBookAndConfirmRequest' when calling bookAndConfirmJobRequest(Async)");
+        }
+
+        return bookAndConfirmJobRequestCall(jobRequestBookAndConfirmRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Book, schedule and confirm a job in one call
+     * Creates the job, quotes it (job_duration_minutes, or the job type&#39;s default_duration_minutes) and confirms it at scheduled_at on the customer&#39;s behalf — the dashboard&#39;s \&quot;book for a caller\&quot; in a single request, built for voice agents and automation platforms that cannot run create → quote → slots → confirm.  Customer: send &#x60;customer_id&#x60;, or &#x60;customer&#x60; (+ &#x60;address&#x60;) to match-or-create by phone/email — a caller who already exists is matched, never duplicated. Find a caller first with listCustomers?phone&#x3D;.  Every input is validated BEFORE anything is written (time and business timezone, future start, a duration or a job-type default, active job type, phone format); those failures are ordinary 4xx and create nothing.  ⚠️ Once the job is created it is never discarded, and the call answers 200 even if scheduling then fails: &#x60;confirmed: false&#x60; with &#x60;refusal&#x60; (stage + the exact error_code/data the quote or confirm endpoint would have returned, e.g. JOB_REQUEST_NO_TECHNICIAN_AVAILABLE with blockers). The job is then quoted and waiting in the coordinator&#39;s queue — tell the caller the office will confirm a time. Retry with the SAME Idempotency-Key to replay the result; a new key books a second job.
+     * @param jobRequestBookAndConfirmRequest Quick booking (required)
+     * @param idempotencyKey Makes retries safe: a repeat send with the same key returns the original result instead of booking again (optional)
+     * @return BookAndConfirmJobRequest200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT (missing/ambiguous customer, missing address, inactive job type, start in the past, unknown field shape) | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and no default; data.reason &#x3D; job_type_has_no_default_duration, job_has_no_job_type or job_type_unavailable, with job_type_id and hint) | PHONE_INVALID | JOB_REQUEST_ADDRESS_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public BookAndConfirmJobRequest200Response bookAndConfirmJobRequest(JobRequestBookAndConfirmRequest jobRequestBookAndConfirmRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<BookAndConfirmJobRequest200Response> localVarResp = bookAndConfirmJobRequestWithHttpInfo(jobRequestBookAndConfirmRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Book, schedule and confirm a job in one call
+     * Creates the job, quotes it (job_duration_minutes, or the job type&#39;s default_duration_minutes) and confirms it at scheduled_at on the customer&#39;s behalf — the dashboard&#39;s \&quot;book for a caller\&quot; in a single request, built for voice agents and automation platforms that cannot run create → quote → slots → confirm.  Customer: send &#x60;customer_id&#x60;, or &#x60;customer&#x60; (+ &#x60;address&#x60;) to match-or-create by phone/email — a caller who already exists is matched, never duplicated. Find a caller first with listCustomers?phone&#x3D;.  Every input is validated BEFORE anything is written (time and business timezone, future start, a duration or a job-type default, active job type, phone format); those failures are ordinary 4xx and create nothing.  ⚠️ Once the job is created it is never discarded, and the call answers 200 even if scheduling then fails: &#x60;confirmed: false&#x60; with &#x60;refusal&#x60; (stage + the exact error_code/data the quote or confirm endpoint would have returned, e.g. JOB_REQUEST_NO_TECHNICIAN_AVAILABLE with blockers). The job is then quoted and waiting in the coordinator&#39;s queue — tell the caller the office will confirm a time. Retry with the SAME Idempotency-Key to replay the result; a new key books a second job.
+     * @param jobRequestBookAndConfirmRequest Quick booking (required)
+     * @param idempotencyKey Makes retries safe: a repeat send with the same key returns the original result instead of booking again (optional)
+     * @return ApiResponse&lt;BookAndConfirmJobRequest200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT (missing/ambiguous customer, missing address, inactive job type, start in the past, unknown field shape) | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and no default; data.reason &#x3D; job_type_has_no_default_duration, job_has_no_job_type or job_type_unavailable, with job_type_id and hint) | PHONE_INVALID | JOB_REQUEST_ADDRESS_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<BookAndConfirmJobRequest200Response> bookAndConfirmJobRequestWithHttpInfo(JobRequestBookAndConfirmRequest jobRequestBookAndConfirmRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = bookAndConfirmJobRequestValidateBeforeCall(jobRequestBookAndConfirmRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<BookAndConfirmJobRequest200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Book, schedule and confirm a job in one call (asynchronously)
+     * Creates the job, quotes it (job_duration_minutes, or the job type&#39;s default_duration_minutes) and confirms it at scheduled_at on the customer&#39;s behalf — the dashboard&#39;s \&quot;book for a caller\&quot; in a single request, built for voice agents and automation platforms that cannot run create → quote → slots → confirm.  Customer: send &#x60;customer_id&#x60;, or &#x60;customer&#x60; (+ &#x60;address&#x60;) to match-or-create by phone/email — a caller who already exists is matched, never duplicated. Find a caller first with listCustomers?phone&#x3D;.  Every input is validated BEFORE anything is written (time and business timezone, future start, a duration or a job-type default, active job type, phone format); those failures are ordinary 4xx and create nothing.  ⚠️ Once the job is created it is never discarded, and the call answers 200 even if scheduling then fails: &#x60;confirmed: false&#x60; with &#x60;refusal&#x60; (stage + the exact error_code/data the quote or confirm endpoint would have returned, e.g. JOB_REQUEST_NO_TECHNICIAN_AVAILABLE with blockers). The job is then quoted and waiting in the coordinator&#39;s queue — tell the caller the office will confirm a time. Retry with the SAME Idempotency-Key to replay the result; a new key books a second job.
+     * @param jobRequestBookAndConfirmRequest Quick booking (required)
+     * @param idempotencyKey Makes retries safe: a repeat send with the same key returns the original result instead of booking again (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT (missing/ambiguous customer, missing address, inactive job type, start in the past, unknown field shape) | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and no default; data.reason &#x3D; job_type_has_no_default_duration, job_has_no_job_type or job_type_unavailable, with job_type_id and hint) | PHONE_INVALID | JOB_REQUEST_ADDRESS_REQUIRED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
+        <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call bookAndConfirmJobRequestAsync(JobRequestBookAndConfirmRequest jobRequestBookAndConfirmRequest, String idempotencyKey, final ApiCallback<BookAndConfirmJobRequest200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = bookAndConfirmJobRequestValidateBeforeCall(jobRequestBookAndConfirmRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<BookAndConfirmJobRequest200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for commitAbsenceResolve
+     * @param jobRequestAbsenceCommitRequest preview scope + the previewed assignments to apply (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field; for assignments data.reason ∈ not_plannable | absent_technician | duplicate | alternate_overlap | unknown_alternative_kind | window_required | window_not_allowed | window_length | window_unchanged | window_in_past | kind_mismatch | window_out_of_range | outside_working_day, and data.job_ids names the row — a plan the preview could not have produced: re-preview) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage or schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_TIME_OFF_REQUIRED (data.uncovered_dates[], data.uncovered_jobs[], data.pending_wider_time_off_ids[], data.create_via) | ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] + data.time_offs[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS\&quot;| ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call commitAbsenceResolveCall(JobRequestAbsenceCommitRequest jobRequestAbsenceCommitRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestAbsenceCommitRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/absence/commit";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call commitAbsenceResolveValidateBeforeCall(JobRequestAbsenceCommitRequest jobRequestAbsenceCommitRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobRequestAbsenceCommitRequest' is set
+        if (jobRequestAbsenceCommitRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestAbsenceCommitRequest' when calling commitAbsenceResolve(Async)");
+        }
+
+        return commitAbsenceResolveCall(jobRequestAbsenceCommitRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Commit the previewed re-staffing of a technician&#39;s day
+     * Applies the plan returned by /absence/preview, ATOMICALLY: every assignment in one transaction (all or nothing), each job re-staffed onto its alternate at its unchanged window, its \&quot;needs attention\&quot; flag cleared, its status_version bumped. Commit VERIFIES and never re-solves — send &#x60;assignments[]&#x60; copied from &#x60;preview.resolved[]&#x60; (you may drop rows, never add or re-point them) and, to ACCEPT a priced alternative from &#x60;preview.unresolved[].alternatives[]&#x60;, the same row plus its &#x60;alternative_kind&#x60; and (for a reschedule kind) its &#x60;start_at&#x60;/&#x60;end_at&#x60;; the engine re-checks that technician at that window under exactly that relaxation. A reschedule kind rewrites &#x60;scheduled_at&#x60;, notifies the customer of the NEW TIME (&#x60;job_rescheduled&#x60;, never &#x60;tech_reassigned&#x60; on top) and fires &#x60;job_request.rescheduled&#x60;; the response row then carries &#x60;alternative_kind&#x60;, &#x60;cost&#x60;, &#x60;original_start_at&#x60;/&#x60;original_end_at&#x60; and &#x60;window_preserved: false&#x60;. Requires a time-off record covering EVERY day of the range for the technician (pending or approved); a pending one is APPROVED by the commit, because the engine&#39;s feasibility filter reads approved time-off only and without it the absent technician stays bookable everywhere else. The response mirrors the preview plus per-job &#x60;notification&#x60; evidence (dispatched | skipped + reason — what the routing WILL do, never proof of delivery), &#x60;attention_cleared&#x60;, and &#x60;time_off&#x60;. Supports Idempotency-Key. Requires job_manage AND schedule_manage (the approval is a scheduling action). See ABSENCE_RESOLVE_DESIGN.md. 409 NEXT STEPS: ABSENCE_RESOLVE_TIME_OFF_REQUIRED — the absence is not recorded well enough to commit against: &#x60;data.uncovered_dates[]&#x60; (days no eligible record touches) and &#x60;data.uncovered_jobs[]&#x60; (jobs no single eligible record spans); eligible &#x3D; approved records, plus PENDING records whose span lies INSIDE the range — a pending record WIDER than the range (somebody&#39;s leave request) is never approved by this commit and is listed in &#x60;data.pending_wider_time_off_ids[]&#x60; for a human to decide. Record a sick-day time-off via &#x60;data.create_via&#x60; (POST /business/technician-time-off, pending is enough), then commit again. ABSENCE_RESOLVE_PLAN_DRIFTED — the world moved since the preview; &#x60;data.drifted[]&#x60; names the job (job_id/short_code/expected_version) and &#x60;reason&#x60; says how: &#x60;version&#x60; (the row changed or left the technician&#39;s lane), &#x60;infeasible&#x60; (the alternate can no longer take it), &#x60;occupied&#x60; (the alternate&#39;s lane overlapped after the write). No job was written; &#x60;data.time_offs[]&#x60; lists any pending record the commit had already approved — re-preview, show the new plan, commit again. ABSENCE_RESOLVE_NO_ORPHANED_JOBS — the board is empty for the range.
+     * @param jobRequestAbsenceCommitRequest preview scope + the previewed assignments to apply (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CommitAbsenceResolve200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field; for assignments data.reason ∈ not_plannable | absent_technician | duplicate | alternate_overlap | unknown_alternative_kind | window_required | window_not_allowed | window_length | window_unchanged | window_in_past | kind_mismatch | window_out_of_range | outside_working_day, and data.job_ids names the row — a plan the preview could not have produced: re-preview) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage or schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_TIME_OFF_REQUIRED (data.uncovered_dates[], data.uncovered_jobs[], data.pending_wider_time_off_ids[], data.create_via) | ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] + data.time_offs[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS\&quot;| ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CommitAbsenceResolve200Response commitAbsenceResolve(JobRequestAbsenceCommitRequest jobRequestAbsenceCommitRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CommitAbsenceResolve200Response> localVarResp = commitAbsenceResolveWithHttpInfo(jobRequestAbsenceCommitRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Commit the previewed re-staffing of a technician&#39;s day
+     * Applies the plan returned by /absence/preview, ATOMICALLY: every assignment in one transaction (all or nothing), each job re-staffed onto its alternate at its unchanged window, its \&quot;needs attention\&quot; flag cleared, its status_version bumped. Commit VERIFIES and never re-solves — send &#x60;assignments[]&#x60; copied from &#x60;preview.resolved[]&#x60; (you may drop rows, never add or re-point them) and, to ACCEPT a priced alternative from &#x60;preview.unresolved[].alternatives[]&#x60;, the same row plus its &#x60;alternative_kind&#x60; and (for a reschedule kind) its &#x60;start_at&#x60;/&#x60;end_at&#x60;; the engine re-checks that technician at that window under exactly that relaxation. A reschedule kind rewrites &#x60;scheduled_at&#x60;, notifies the customer of the NEW TIME (&#x60;job_rescheduled&#x60;, never &#x60;tech_reassigned&#x60; on top) and fires &#x60;job_request.rescheduled&#x60;; the response row then carries &#x60;alternative_kind&#x60;, &#x60;cost&#x60;, &#x60;original_start_at&#x60;/&#x60;original_end_at&#x60; and &#x60;window_preserved: false&#x60;. Requires a time-off record covering EVERY day of the range for the technician (pending or approved); a pending one is APPROVED by the commit, because the engine&#39;s feasibility filter reads approved time-off only and without it the absent technician stays bookable everywhere else. The response mirrors the preview plus per-job &#x60;notification&#x60; evidence (dispatched | skipped + reason — what the routing WILL do, never proof of delivery), &#x60;attention_cleared&#x60;, and &#x60;time_off&#x60;. Supports Idempotency-Key. Requires job_manage AND schedule_manage (the approval is a scheduling action). See ABSENCE_RESOLVE_DESIGN.md. 409 NEXT STEPS: ABSENCE_RESOLVE_TIME_OFF_REQUIRED — the absence is not recorded well enough to commit against: &#x60;data.uncovered_dates[]&#x60; (days no eligible record touches) and &#x60;data.uncovered_jobs[]&#x60; (jobs no single eligible record spans); eligible &#x3D; approved records, plus PENDING records whose span lies INSIDE the range — a pending record WIDER than the range (somebody&#39;s leave request) is never approved by this commit and is listed in &#x60;data.pending_wider_time_off_ids[]&#x60; for a human to decide. Record a sick-day time-off via &#x60;data.create_via&#x60; (POST /business/technician-time-off, pending is enough), then commit again. ABSENCE_RESOLVE_PLAN_DRIFTED — the world moved since the preview; &#x60;data.drifted[]&#x60; names the job (job_id/short_code/expected_version) and &#x60;reason&#x60; says how: &#x60;version&#x60; (the row changed or left the technician&#39;s lane), &#x60;infeasible&#x60; (the alternate can no longer take it), &#x60;occupied&#x60; (the alternate&#39;s lane overlapped after the write). No job was written; &#x60;data.time_offs[]&#x60; lists any pending record the commit had already approved — re-preview, show the new plan, commit again. ABSENCE_RESOLVE_NO_ORPHANED_JOBS — the board is empty for the range.
+     * @param jobRequestAbsenceCommitRequest preview scope + the previewed assignments to apply (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CommitAbsenceResolve200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field; for assignments data.reason ∈ not_plannable | absent_technician | duplicate | alternate_overlap | unknown_alternative_kind | window_required | window_not_allowed | window_length | window_unchanged | window_in_past | kind_mismatch | window_out_of_range | outside_working_day, and data.job_ids names the row — a plan the preview could not have produced: re-preview) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage or schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_TIME_OFF_REQUIRED (data.uncovered_dates[], data.uncovered_jobs[], data.pending_wider_time_off_ids[], data.create_via) | ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] + data.time_offs[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS\&quot;| ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CommitAbsenceResolve200Response> commitAbsenceResolveWithHttpInfo(JobRequestAbsenceCommitRequest jobRequestAbsenceCommitRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = commitAbsenceResolveValidateBeforeCall(jobRequestAbsenceCommitRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CommitAbsenceResolve200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Commit the previewed re-staffing of a technician&#39;s day (asynchronously)
+     * Applies the plan returned by /absence/preview, ATOMICALLY: every assignment in one transaction (all or nothing), each job re-staffed onto its alternate at its unchanged window, its \&quot;needs attention\&quot; flag cleared, its status_version bumped. Commit VERIFIES and never re-solves — send &#x60;assignments[]&#x60; copied from &#x60;preview.resolved[]&#x60; (you may drop rows, never add or re-point them) and, to ACCEPT a priced alternative from &#x60;preview.unresolved[].alternatives[]&#x60;, the same row plus its &#x60;alternative_kind&#x60; and (for a reschedule kind) its &#x60;start_at&#x60;/&#x60;end_at&#x60;; the engine re-checks that technician at that window under exactly that relaxation. A reschedule kind rewrites &#x60;scheduled_at&#x60;, notifies the customer of the NEW TIME (&#x60;job_rescheduled&#x60;, never &#x60;tech_reassigned&#x60; on top) and fires &#x60;job_request.rescheduled&#x60;; the response row then carries &#x60;alternative_kind&#x60;, &#x60;cost&#x60;, &#x60;original_start_at&#x60;/&#x60;original_end_at&#x60; and &#x60;window_preserved: false&#x60;. Requires a time-off record covering EVERY day of the range for the technician (pending or approved); a pending one is APPROVED by the commit, because the engine&#39;s feasibility filter reads approved time-off only and without it the absent technician stays bookable everywhere else. The response mirrors the preview plus per-job &#x60;notification&#x60; evidence (dispatched | skipped + reason — what the routing WILL do, never proof of delivery), &#x60;attention_cleared&#x60;, and &#x60;time_off&#x60;. Supports Idempotency-Key. Requires job_manage AND schedule_manage (the approval is a scheduling action). See ABSENCE_RESOLVE_DESIGN.md. 409 NEXT STEPS: ABSENCE_RESOLVE_TIME_OFF_REQUIRED — the absence is not recorded well enough to commit against: &#x60;data.uncovered_dates[]&#x60; (days no eligible record touches) and &#x60;data.uncovered_jobs[]&#x60; (jobs no single eligible record spans); eligible &#x3D; approved records, plus PENDING records whose span lies INSIDE the range — a pending record WIDER than the range (somebody&#39;s leave request) is never approved by this commit and is listed in &#x60;data.pending_wider_time_off_ids[]&#x60; for a human to decide. Record a sick-day time-off via &#x60;data.create_via&#x60; (POST /business/technician-time-off, pending is enough), then commit again. ABSENCE_RESOLVE_PLAN_DRIFTED — the world moved since the preview; &#x60;data.drifted[]&#x60; names the job (job_id/short_code/expected_version) and &#x60;reason&#x60; says how: &#x60;version&#x60; (the row changed or left the technician&#39;s lane), &#x60;infeasible&#x60; (the alternate can no longer take it), &#x60;occupied&#x60; (the alternate&#39;s lane overlapped after the write). No job was written; &#x60;data.time_offs[]&#x60; lists any pending record the commit had already approved — re-preview, show the new plan, commit again. ABSENCE_RESOLVE_NO_ORPHANED_JOBS — the board is empty for the range.
+     * @param jobRequestAbsenceCommitRequest preview scope + the previewed assignments to apply (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field; for assignments data.reason ∈ not_plannable | absent_technician | duplicate | alternate_overlap | unknown_alternative_kind | window_required | window_not_allowed | window_length | window_unchanged | window_in_past | kind_mismatch | window_out_of_range | outside_working_day, and data.job_ids names the row — a plan the preview could not have produced: re-preview) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage or schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_TIME_OFF_REQUIRED (data.uncovered_dates[], data.uncovered_jobs[], data.pending_wider_time_off_ids[], data.create_via) | ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] + data.time_offs[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS\&quot;| ABSENCE_RESOLVE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | ABSENCE_RESOLVE_NO_ORPHANED_JOBS </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call commitAbsenceResolveAsync(JobRequestAbsenceCommitRequest jobRequestAbsenceCommitRequest, String idempotencyKey, final ApiCallback<CommitAbsenceResolve200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = commitAbsenceResolveValidateBeforeCall(jobRequestAbsenceCommitRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CommitAbsenceResolve200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for commitEmergencyReschedule
      * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -107,11 +436,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — immovable anchor: another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -178,7 +507,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Commit emergency insert + cascade reschedule
-     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day): another tech or time. Other codes — same remedies as /candidates.
+     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. &#x60;after_hours_override&#x3D;true&#x60; must match the preview it followed — it drops the non-working-day rejection (this endpoint never runs the technician&#39;s working-hours/time-off feasibility check; that only happens on /candidates), and the response carries an AFTER_HOURS warning; the committed job&#39;s activity feed also records who authorized the after-hours placement. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane); &#x60;data.drifted[]&#x60; names the job(s) whose status_version moved when the fence can attribute it (absent, never empty, when only a length mismatch is known): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day); &#x60;data.conflicts[]&#x60; names it: another tech or time. Other codes — same remedies and &#x60;data&#x60; shapes as /candidates. EMERGENCY_RESCHEDULE_NO_WORKING_DAY does NOT fire when after_hours_override&#x3D;true.
      * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @return CommitEmergencyReschedule200Response
@@ -188,11 +517,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — immovable anchor: another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -203,7 +532,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Commit emergency insert + cascade reschedule
-     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day): another tech or time. Other codes — same remedies as /candidates.
+     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. &#x60;after_hours_override&#x3D;true&#x60; must match the preview it followed — it drops the non-working-day rejection (this endpoint never runs the technician&#39;s working-hours/time-off feasibility check; that only happens on /candidates), and the response carries an AFTER_HOURS warning; the committed job&#39;s activity feed also records who authorized the after-hours placement. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane); &#x60;data.drifted[]&#x60; names the job(s) whose status_version moved when the fence can attribute it (absent, never empty, when only a length mismatch is known): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day); &#x60;data.conflicts[]&#x60; names it: another tech or time. Other codes — same remedies and &#x60;data&#x60; shapes as /candidates. EMERGENCY_RESCHEDULE_NO_WORKING_DAY does NOT fire when after_hours_override&#x3D;true.
      * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @return ApiResponse&lt;CommitEmergencyReschedule200Response&gt;
@@ -213,11 +542,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — immovable anchor: another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -229,7 +558,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Commit emergency insert + cascade reschedule (asynchronously)
-     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day): another tech or time. Other codes — same remedies as /candidates.
+     * Applies the cascade previewed by /emergency/preview: assigns the emergency job to the technician and pushes the displaced jobs back (or, with &#x60;displacement_mode&#x3D;reassign&#x60;, re-staffs them onto their previewed alternates first), atomically. Supports Idempotency-Key. The server recomputes the plan under a lock and fences each job on its status_version — if anything changed since the preview it returns 409 EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview). Same body as preview + optional &#x60;emergency_expected_version&#x60;. &#x60;after_hours_override&#x3D;true&#x60; must match the preview it followed — it drops the non-working-day rejection (this endpoint never runs the technician&#39;s working-hours/time-off feasibility check; that only happens on /candidates), and the response carries an AFTER_HOURS warning; the committed job&#39;s activity feed also records who authorized the after-hours placement. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_PLAN_DRIFTED — the schedule changed between your preview and this commit (another booking/move won a lane); &#x60;data.drifted[]&#x60; names the job(s) whose status_version moved when the fence can attribute it (absent, never empty, when only a length mismatch is known): call /preview again, show the fresh plan, then commit. EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — landing window blocked by an immovable anchor (P0/crew/multi-day); &#x60;data.conflicts[]&#x60; names it: another tech or time. Other codes — same remedies and &#x60;data&#x60; shapes as /candidates. EMERGENCY_RESCHEDULE_NO_WORKING_DAY does NOT fire when after_hours_override&#x3D;true.
      * @param jobRequestEmergencyCommitRequest emergency insert spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @param _callback The callback to be executed when the API call finishes
@@ -240,11 +569,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (immovable anchor — another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_PLAN_DRIFTED (data.drifted[] — re-preview, then commit) | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — immovable anchor: another tech/time) | EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -268,11 +597,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED (re-preview, then commit) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -345,7 +674,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Commit a schedule-board job move
-     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids no longer match): re-preview, show the fresh plan, commit again. All other codes — same remedies as /move/preview.
+     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids/expected_member_ids no longer match): re-preview, show the fresh plan, commit again; carries no further &#x60;data&#x60; (the fence cannot attribute the drift to one specific job). All other codes — same remedies AND &#x60;data&#x60; shapes as /move/preview.
      * @param id Job request ID (UUID or short_code) (required)
      * @param jobRequestMoveCommitReq move spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -356,11 +685,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED (re-preview, then commit) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -371,7 +700,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Commit a schedule-board job move
-     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids no longer match): re-preview, show the fresh plan, commit again. All other codes — same remedies as /move/preview.
+     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids/expected_member_ids no longer match): re-preview, show the fresh plan, commit again; carries no further &#x60;data&#x60; (the fence cannot attribute the drift to one specific job). All other codes — same remedies AND &#x60;data&#x60; shapes as /move/preview.
      * @param id Job request ID (UUID or short_code) (required)
      * @param jobRequestMoveCommitReq move spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -382,11 +711,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED (re-preview, then commit) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -398,7 +727,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Commit a schedule-board job move (asynchronously)
-     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids no longer match): re-preview, show the fresh plan, commit again. All other codes — same remedies as /move/preview.
+     * Applies the move previewed by /move/preview: places the job on the technician at the new time and pushes the displaced jobs back, atomically (per-tech advisory lock; the server recomputes the plan and fences each job on its status_version — drift since the preview returns 409 SCHEDULE_MOVE_PLAN_DRIFTED, re-preview). Same body as preview + optional &#x60;expected_version&#x60;. See SCHEDULE_BOARD_DESIGN.md. 409 NEXT STEPS: SCHEDULE_MOVE_PLAN_DRIFTED — the schedule changed since your preview (or expected_move_ids/expected_member_ids no longer match): re-preview, show the fresh plan, commit again; carries no further &#x60;data&#x60; (the fence cannot attribute the drift to one specific job). All other codes — same remedies AND &#x60;data&#x60; shapes as /move/preview.
      * @param id Job request ID (UUID or short_code) (required)
      * @param jobRequestMoveCommitReq move spec (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -410,11 +739,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | SCHEDULE_MOVE_PLAN_DRIFTED (re-preview, then commit) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -438,10 +767,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_AFTER_HOURS_REQUIRES_TECHNICIAN </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME — data.considered/data.blocked_by/data.truncated, best-effort) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.blockers/+data.technician/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED | JOB_REQUEST_AFTER_HOURS_MULTIDAY_UNSUPPORTED </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -514,7 +844,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Confirm a booking on behalf of the customer
-     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why: cannot_arrive_in_time (commute/shift-start — &#x60;data.earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site → offer it) | missing_required_skills | not_available_today | not_lead_tier. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
+     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Best-effort &#x60;data&#x60; breakdown: &#x60;considered&#x60; (roster size checked), &#x60;blocked_by&#x60; (histogram of blockers[0].kind → count, only kinds that actually blocked someone), &#x60;truncated&#x60; (roster larger than the check covered). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why (blockers[0].kind): outside_service_area | missing_required_skills | not_lead_tier | no_working_day | on_time_off | off_shift | visit_too_long | cannot_arrive_in_time (see &#x60;data.earliest_feasible_at&#x60;, RFC3339 UTC — the first same-day time they CAN be on site → offer it) | not_available_today (diagnosis unavailable). &#x60;data.blockers[]&#x60; names EVERY cause, most-structural first (&#x60;data.technician&#x60; carries an id; &#x60;name&#x60; is always empty on this confirm path today — nothing here calls the name lookup move&#39;s TECH_NOT_FEASIBLE payload uses); a UI that reads only &#x60;reason&#x60; still works. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
      * @param id Job request ID (required)
      * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -525,10 +855,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_AFTER_HOURS_REQUIRES_TECHNICIAN </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME — data.considered/data.blocked_by/data.truncated, best-effort) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.blockers/+data.technician/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED | JOB_REQUEST_AFTER_HOURS_MULTIDAY_UNSUPPORTED </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -539,7 +870,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Confirm a booking on behalf of the customer
-     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why: cannot_arrive_in_time (commute/shift-start — &#x60;data.earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site → offer it) | missing_required_skills | not_available_today | not_lead_tier. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
+     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Best-effort &#x60;data&#x60; breakdown: &#x60;considered&#x60; (roster size checked), &#x60;blocked_by&#x60; (histogram of blockers[0].kind → count, only kinds that actually blocked someone), &#x60;truncated&#x60; (roster larger than the check covered). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why (blockers[0].kind): outside_service_area | missing_required_skills | not_lead_tier | no_working_day | on_time_off | off_shift | visit_too_long | cannot_arrive_in_time (see &#x60;data.earliest_feasible_at&#x60;, RFC3339 UTC — the first same-day time they CAN be on site → offer it) | not_available_today (diagnosis unavailable). &#x60;data.blockers[]&#x60; names EVERY cause, most-structural first (&#x60;data.technician&#x60; carries an id; &#x60;name&#x60; is always empty on this confirm path today — nothing here calls the name lookup move&#39;s TECH_NOT_FEASIBLE payload uses); a UI that reads only &#x60;reason&#x60; still works. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
      * @param id Job request ID (required)
      * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -550,10 +881,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_AFTER_HOURS_REQUIRES_TECHNICIAN </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME — data.considered/data.blocked_by/data.truncated, best-effort) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.blockers/+data.technician/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED | JOB_REQUEST_AFTER_HOURS_MULTIDAY_UNSUPPORTED </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -565,7 +897,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Confirm a booking on behalf of the customer (asynchronously)
-     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why: cannot_arrive_in_time (commute/shift-start — &#x60;data.earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site → offer it) | missing_required_skills | not_available_today | not_lead_tier. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
+     * Fires the customer-actor &#x60;confirm_booking&#x60; action from the BUSINESS surface (audited as business_on_behalf). Two uses: (1) LIVE — staff confirm a slot for a customer who booked by phone; (2) SANDBOX — the customer magic-token surface is live-only (a sandbox job&#39;s link can never reach a real customer), so this is the ONLY way to drive a sandbox test job past booking (book → quote → confirm → assign → complete). Body carries the customer-chosen scheduled_at (business-local naive datetime). DECISION TABLE — every 409 this endpoint returns, and the correct NEXT STEP (branch on error_code, never on the HTTP status): • JOB_REQUEST_STAGE_CONFLICT — the job changed since you read it (NOTE: every FAILED confirm attempt also bumps status_version by design). Next: re-GET the job, retry with the fresh status_version. • JOB_REQUEST_ACTION_NOT_PENDING — the job is no longer at the confirm step (usually: already confirmed). Next: re-GET and show current status; do not retry. • JOB_REQUEST_NO_TECHNICIAN_AVAILABLE — the TIME is infeasible for everyone (outside working hours / the customer window, or nobody qualifies). Best-effort &#x60;data&#x60; breakdown: &#x60;considered&#x60; (roster size checked), &#x60;blocked_by&#x60; (histogram of blockers[0].kind → count, only kinds that actually blocked someone), &#x60;truncated&#x60; (roster larger than the check covered). Next: pick another time via booking-windows / time-segments. NOT an emergency case — displacement cannot conjure capacity. • JOB_REQUEST_TECH_INFEASIBLE — the FORCED technician can never take the job then; &#x60;data.reason&#x60; says why (blockers[0].kind): outside_service_area | missing_required_skills | not_lead_tier | no_working_day | on_time_off | off_shift | visit_too_long | cannot_arrive_in_time (see &#x60;data.earliest_feasible_at&#x60;, RFC3339 UTC — the first same-day time they CAN be on site → offer it) | not_available_today (diagnosis unavailable). &#x60;data.blockers[]&#x60; names EVERY cause, most-structural first (&#x60;data.technician&#x60; carries an id; &#x60;name&#x60; is always empty on this confirm path today — nothing here calls the name lookup move&#39;s TECH_NOT_FEASIBLE payload uses); a UI that reads only &#x60;reason&#x60; still works. Next: keep the tech and reschedule to earliest_feasible_at+, OR keep the time and drop technician_id (auto-pick) / choose another tech from time-segments. NOT an emergency case. • JOB_REQUEST_P0_REQUIRES_DISPLACEMENT — the ONLY code that routes to the EMERGENCY flow: the job is P0, the tech qualifies, but the lane is genuinely occupied. Next: POST emergency/candidates → preview → commit (the commit auto-confirms). Caveat: if the occupying jobs are themselves P0 the preview will reject with EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (P0 never displaces P0) — then pick another tech/time.
      * @param id Job request ID (required)
      * @param jobRequestConfirmRequest Chosen slot (scheduled_at) + optional technician_id force-assign (P0–P3 flow: pins the ranked candidate, feasibility still enforced) (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
@@ -577,10 +909,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_AFTER_HOURS_REQUIRES_TECHNICIAN </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET + retry with fresh status_version) | JOB_REQUEST_ACTION_NOT_PENDING (already past confirm) | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE (change the TIME — data.considered/data.blocked_by/data.truncated, best-effort) | JOB_REQUEST_TECH_INFEASIBLE (+data.reason/+data.blockers/+data.technician/+data.earliest_feasible_at — change tech or time) | JOB_REQUEST_P0_REQUIRES_DISPLACEMENT (the ONLY emergency-flow case) | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED | JOB_REQUEST_AFTER_HOURS_MULTIDAY_UNSUPPORTED </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -604,8 +937,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_ADDRESS_REQUIRED | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
         <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
@@ -680,7 +1014,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Create a job request
-     * Books a field-service job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
+     * Books a field-operations job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
      * @param jobRequestCreateRequest Booking payload (required)
      * @param xTimezone Customer IANA timezone (optional)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
@@ -691,8 +1025,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_ADDRESS_REQUIRED | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
         <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
@@ -706,7 +1041,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Create a job request
-     * Books a field-service job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
+     * Books a field-operations job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
      * @param jobRequestCreateRequest Booking payload (required)
      * @param xTimezone Customer IANA timezone (optional)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
@@ -717,8 +1052,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_ADDRESS_REQUIRED | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
         <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
@@ -733,7 +1069,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Create a job request (asynchronously)
-     * Books a field-service job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
+     * Books a field-operations job — the work order that enters the dispatch &amp; scheduling pipeline. Send the customer&#39;s UUID plus requested &#x60;job_dates&#x60; (date + morning/afternoon/evening periods, ideally offered from GET /job-requests/booking-windows), optional &#x60;job_type_id&#x60; (service catalog), &#x60;skill_ids&#x60; (required technician qualifications) and a free-text description. Quoting, technician/crew assignment and completion then advance the work order through the business&#39;s workflow.
      * @param jobRequestCreateRequest Booking payload (required)
      * @param xTimezone Customer IANA timezone (optional)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key returns the original booking instead of creating a duplicate (optional)
@@ -745,8 +1081,9 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | INVALID_TIMEZONE </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_ADDRESS_REQUIRED | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> CUSTOMER_NOT_FOUND | JOB_TYPE_NOT_FOUND | SKILL_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> SKILL_INACTIVE | IDEMPOTENCY_IN_PROGRESS </td><td>  -  </td></tr>
         <tr><td> 422 </td><td> IDEMPOTENCY_KEY_REUSE — same Idempotency-Key sent with a different body </td><td>  -  </td></tr>
@@ -773,6 +1110,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -835,7 +1173,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Get a job request
-     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-service system needs to track one job.
+     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-operations system needs to track one job.
      * @param id Job request ID (UUID or short_code) (required)
      * @return GetJobRequest200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -846,6 +1184,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -857,7 +1196,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Get a job request
-     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-service system needs to track one job.
+     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-operations system needs to track one job.
      * @param id Job request ID (UUID or short_code) (required)
      * @return ApiResponse&lt;GetJobRequest200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -868,6 +1207,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -880,7 +1220,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Get a job request (asynchronously)
-     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-service system needs to track one job.
+     * Returns the full work order: current workflow status, quoted duration, confirmed schedule, customer contact snapshot and the assigned technician / crew — everything a dispatcher or an external field-operations system needs to track one job.
      * @param id Job request ID (UUID or short_code) (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -892,6 +1232,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -916,6 +1257,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -989,6 +1331,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1011,6 +1354,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1035,6 +1379,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID — API key missing, malformed, revoked, or environment mismatch </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1061,6 +1406,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1144,6 +1490,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1168,6 +1515,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1194,6 +1542,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1221,8 +1570,9 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1296,7 +1646,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Matching crew candidates for a job
-     * Technicians who can actually take this job, matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each candidate carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
+     * RE-STAFFING candidates for a CONFIRMED, SCHEDULED job (not yet completed/archived) — any earlier or later stage returns 409 JOB_REQUEST_INVALID_TRANSITION. This is the pool of technicians who could REPLACE the current crew: the currently assigned lead and buddies are deliberately excluded (they are the status quo, not an option), so on a small roster an empty &#x60;leads&#x60; list is a normal answer, not an error. For pre-booking discovery (\&quot;who could take this job before it is confirmed?\&quot;) use listJobRequestBookingWindows / listMatchingSlots / the time-segments grid instead. Candidates are matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
      * @param id Job request ID or short_code (required)
      * @param includeBuddies Also return buddy candidate pools (optional)
      * @param includeVehicle Also return the available-vehicle list (optional)
@@ -1310,8 +1660,9 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1322,7 +1673,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Matching crew candidates for a job
-     * Technicians who can actually take this job, matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each candidate carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
+     * RE-STAFFING candidates for a CONFIRMED, SCHEDULED job (not yet completed/archived) — any earlier or later stage returns 409 JOB_REQUEST_INVALID_TRANSITION. This is the pool of technicians who could REPLACE the current crew: the currently assigned lead and buddies are deliberately excluded (they are the status quo, not an option), so on a small roster an empty &#x60;leads&#x60; list is a normal answer, not an error. For pre-booking discovery (\&quot;who could take this job before it is confirmed?\&quot;) use listJobRequestBookingWindows / listMatchingSlots / the time-segments grid instead. Candidates are matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
      * @param id Job request ID or short_code (required)
      * @param includeBuddies Also return buddy candidate pools (optional)
      * @param includeVehicle Also return the available-vehicle list (optional)
@@ -1336,8 +1687,9 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1349,7 +1701,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Matching crew candidates for a job (asynchronously)
-     * Technicians who can actually take this job, matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each candidate carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
+     * RE-STAFFING candidates for a CONFIRMED, SCHEDULED job (not yet completed/archived) — any earlier or later stage returns 409 JOB_REQUEST_INVALID_TRANSITION. This is the pool of technicians who could REPLACE the current crew: the currently assigned lead and buddies are deliberately excluded (they are the status quo, not an option), so on a small roster an empty &#x60;leads&#x60; list is a normal answer, not an error. For pre-booking discovery (\&quot;who could take this job before it is confirmed?\&quot;) use listJobRequestBookingWindows / listMatchingSlots / the time-segments grid instead. Candidates are matched and ranked by the smart-assignment engine — skills per crew slot, weekly availability, existing schedule, time off and travel are all checked; each carries a score breakdown (distance, travel, matched skills) plus the exact on-site session plan they would work. NOT a raw roster list (use GET /technicians for that). Returns the ranked feasible LEAD pool by default; pass include_buddies&#x3D;true to also return per-slot buddy pools, include_vehicle&#x3D;true to include the available-vehicle list. force_lead_id checks one specific technician: returns only that lead (with their crew combo) if feasible, else 409 JOB_REQUEST_NO_TECHNICIAN_AVAILABLE.
      * @param id Job request ID or short_code (required)
      * @param includeBuddies Also return buddy candidate pools (optional)
      * @param includeVehicle Also return the available-vehicle list (optional)
@@ -1364,8 +1716,9 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_INVALID_TRANSITION | JOB_REQUEST_NO_TECHNICIAN_AVAILABLE </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1387,11 +1740,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size — use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job, or a single visit over the span bound — see data.reason/data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday — pick a working day, or set after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1453,7 +1806,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Rank technicians for a P0 emergency insert
-     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted (not P0, already started/completed/archived, or not quoted): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — a confirmed multi-day job cannot be re-inserted (v1): use the normal reassign flow. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours: pick a working day. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time.
+     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). &#x60;after_hours_override&#x3D;true&#x60; — the coordinator has phoned the technician — drops the non-working-day rejection AND each candidate&#39;s working-hours/time-off feasibility check; an affected candidate carries a per-technician TIME_OFF_OVERLAP warning instead. This is THE phone list for an after-hours insert: it ranks even on a day with no working hours once the flag is set. Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted; &#x60;data.failed_precondition&#x60; names which (not_quoted | archived | completed | not_p0 | smart_assign_unavailable): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1, &#x60;data.crew_size&#x60; &#x3D; lead + buddies): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — either a confirmed multi-day job (&#x60;data.session_count&#x60;/&#x60;data.session_dates&#x60;; use the normal reassign flow) or a single visit longer than the structural span bound, in which case &#x60;data.reason&#x3D;visit_too_long&#x60; + &#x60;data.blockers[0]&#x60; (visit_minutes/max_minutes) name it — no remedy but a shorter visit. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours (&#x60;data.business_timezone&#x60;/&#x60;data.requested_weekday&#x60;): pick a working day, or set after_hours_override&#x3D;true (the coordinator has phoned someone) to rank candidates anyway. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time; &#x60;data&#x60; carries the timezone the naive start_at was read in (&#x60;business_timezone&#x60;) plus the instant it resolved to, so a start that looks future on the caller&#39;s own clock can be diagnosed without guessing.
      * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
      * @return ListEmergencyCandidates200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -1462,11 +1815,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size — use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job, or a single visit over the span bound — see data.reason/data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday — pick a working day, or set after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1477,7 +1830,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Rank technicians for a P0 emergency insert
-     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted (not P0, already started/completed/archived, or not quoted): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — a confirmed multi-day job cannot be re-inserted (v1): use the normal reassign flow. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours: pick a working day. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time.
+     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). &#x60;after_hours_override&#x3D;true&#x60; — the coordinator has phoned the technician — drops the non-working-day rejection AND each candidate&#39;s working-hours/time-off feasibility check; an affected candidate carries a per-technician TIME_OFF_OVERLAP warning instead. This is THE phone list for an after-hours insert: it ranks even on a day with no working hours once the flag is set. Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted; &#x60;data.failed_precondition&#x60; names which (not_quoted | archived | completed | not_p0 | smart_assign_unavailable): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1, &#x60;data.crew_size&#x60; &#x3D; lead + buddies): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — either a confirmed multi-day job (&#x60;data.session_count&#x60;/&#x60;data.session_dates&#x60;; use the normal reassign flow) or a single visit longer than the structural span bound, in which case &#x60;data.reason&#x3D;visit_too_long&#x60; + &#x60;data.blockers[0]&#x60; (visit_minutes/max_minutes) name it — no remedy but a shorter visit. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours (&#x60;data.business_timezone&#x60;/&#x60;data.requested_weekday&#x60;): pick a working day, or set after_hours_override&#x3D;true (the coordinator has phoned someone) to rank candidates anyway. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time; &#x60;data&#x60; carries the timezone the naive start_at was read in (&#x60;business_timezone&#x60;) plus the instant it resolved to, so a start that looks future on the caller&#39;s own clock can be diagnosed without guessing.
      * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
      * @return ApiResponse&lt;ListEmergencyCandidates200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -1486,11 +1839,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size — use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job, or a single visit over the span bound — see data.reason/data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday — pick a working day, or set after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1502,7 +1855,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Rank technicians for a P0 emergency insert (asynchronously)
-     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted (not P0, already started/completed/archived, or not quoted): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — a confirmed multi-day job cannot be re-inserted (v1): use the normal reassign flow. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours: pick a working day. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time.
+     * Returns the technicians who could take the emergency job at the requested start, ranked FASTEST-ARRIVAL first (arrival beats route efficiency for a P0). The response also carries a historical &#x60;crew_recommendation&#x60; (median crew size on comparable completed jobs + mandatory disclaimer — AC-2). Booked technicians are still candidates — each entry carries the displacement preview (which lower-priority jobs would be pushed, per day) that committing to them would cause; total_moves&#x3D;0 means a free slot. P0 jobs are never displaced; P1 only by a P0. ETA is estimated from the technician&#39;s start location (no live GPS). &#x60;after_hours_override&#x3D;true&#x60; — the coordinator has phoned the technician — drops the non-working-day rejection AND each candidate&#39;s working-hours/time-off feasibility check; an affected candidate carries a per-technician TIME_OFF_OVERLAP warning instead. This is THE phone list for an after-hours insert: it ranks even on a day with no working hours once the flag is set. Feed the chosen technician_id into emergency/preview + emergency/commit. 409 NEXT STEPS: EMERGENCY_RESCHEDULE_NOT_ELIGIBLE — the job cannot be emergency-inserted; &#x60;data.failed_precondition&#x60; names which (not_quoted | archived | completed | not_p0 | smart_assign_unavailable): fix the job state or use a normal confirm. EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED — crew jobs cannot use the emergency flow (v1, &#x60;data.crew_size&#x60; &#x3D; lead + buddies): staff via confirm/reassign instead. EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED — either a confirmed multi-day job (&#x60;data.session_count&#x60;/&#x60;data.session_dates&#x60;; use the normal reassign flow) or a single visit longer than the structural span bound, in which case &#x60;data.reason&#x3D;visit_too_long&#x60; + &#x60;data.blockers[0]&#x60; (visit_minutes/max_minutes) name it — no remedy but a shorter visit. EMERGENCY_RESCHEDULE_NO_WORKING_DAY — the chosen date has no working hours (&#x60;data.business_timezone&#x60;/&#x60;data.requested_weekday&#x60;): pick a working day, or set after_hours_override&#x3D;true (the coordinator has phoned someone) to rank candidates anyway. EMERGENCY_RESCHEDULE_IN_PAST — start time already passed: pick a future time; &#x60;data&#x60; carries the timezone the naive start_at was read in (&#x60;business_timezone&#x60;) plus the instant it resolved to, so a start that looks future on the caller&#39;s own clock can be diagnosed without guessing.
      * @param jobRequestEmergencyCandidatesRequest Emergency job + desired start (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -1512,11 +1865,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (job not P0/quoted or already started — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (crew jobs: use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job: use reassign) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (pick a working day) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition — fix state or use normal confirm) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size — use confirm/reassign) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (confirmed multi-day job, or a single visit over the span bound — see data.reason/data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday — pick a working day, or set after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST (pick a future time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1542,6 +1895,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1628,6 +1982,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1651,6 +2006,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1676,6 +2032,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | INVALID_TIMEZONE </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1706,6 +2063,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1793,7 +2151,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Poll for new &amp; changed job requests (sync feed)
-     * Keep an external system (your CRM, ERP or field-service tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
+     * Keep an external system (your CRM, ERP or field-operations tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
      * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
@@ -1811,6 +2169,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1821,7 +2180,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Poll for new &amp; changed job requests (sync feed)
-     * Keep an external system (your CRM, ERP or field-service tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
+     * Keep an external system (your CRM, ERP or field-operations tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
      * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
@@ -1839,6 +2198,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1850,7 +2210,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Poll for new &amp; changed job requests (sync feed) (asynchronously)
-     * Keep an external system (your CRM, ERP or field-service tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
+     * Keep an external system (your CRM, ERP or field-operations tool) in sync with bookings WITHOUT re-listing everything: returns the job requests (work orders) whose state changed (created, status transition, reschedule, soft-delete/archive) at or after the &#x60;since&#x60; cursor, ordered oldest-change-first (updated_at ASC).  How to use it: (1) On your first poll OMIT &#x60;since&#x60; — the server primes the cursor at \&quot;now\&quot;, returns no items and a &#x60;next_since&#x60;. (2) Store &#x60;next_since&#x60; and pass it as &#x60;since&#x60; on the next poll. (3) Apply each returned item to your store by UPSERTING on &#x60;id&#x60; (the server re-scans a ~5s safety window, so the same job may appear again — never blindly append). (4) If &#x60;has_more&#x60; is true the page filled to &#x60;limit&#x60; and more changes are already waiting — poll again immediately; otherwise wait your normal interval (e.g. 5–15s).  This is NOT pagination — it is a time-keyed change feed. Use the paginated GET /job-requests for the initial bulk load, then this endpoint to stay live. Filters (status_keys, customer_id, …) narrow the feed to the slice you care about.
      * @param statusKeys Comma-separated status slugs — only surface changes to jobs in these statuses (optional)
      * @param priority Priority filter (p0|p1|p2|p3) (optional)
      * @param customerId Only changes to this customer&#39;s jobs (UUID) (optional)
@@ -1869,6 +2229,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -1889,6 +2250,8 @@ public class JobRequestBusinessApi {
      * @param serviceAreaId Service-area UUID (board zone filter) (optional)
      * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
      * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
+     * @param completedFrom Filter by completion time from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to). Counts jobs by when they were completed regardless of reschedules. (optional)
+     * @param completedTo Filter by completion time to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
      * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
@@ -1903,10 +2266,11 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listJobRequestsCall(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
+    public okhttp3.Call listJobRequestsCall(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String completedFrom, String completedTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
         String basePath = null;
         // Operation Servers
         String[] localBasePaths = new String[] {  };
@@ -1963,6 +2327,14 @@ public class JobRequestBusinessApi {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("scheduled_to", scheduledTo));
         }
 
+        if (completedFrom != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("completed_from", completedFrom));
+        }
+
+        if (completedTo != null) {
+            localVarQueryParams.addAll(localVarApiClient.parameterToPair("completed_to", completedTo));
+        }
+
         if (q != null) {
             localVarQueryParams.addAll(localVarApiClient.parameterToPair("q", q));
         }
@@ -1999,8 +2371,8 @@ public class JobRequestBusinessApi {
     }
 
     @SuppressWarnings("rawtypes")
-    private okhttp3.Call listJobRequestsValidateBeforeCall(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
-        return listJobRequestsCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit, _callback);
+    private okhttp3.Call listJobRequestsValidateBeforeCall(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String completedFrom, String completedTo, String q, String sort, Integer page, Integer limit, final ApiCallback _callback) throws ApiException {
+        return listJobRequestsCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, completedFrom, completedTo, q, sort, page, limit, _callback);
 
     }
 
@@ -2015,6 +2387,8 @@ public class JobRequestBusinessApi {
      * @param serviceAreaId Service-area UUID (board zone filter) (optional)
      * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
      * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
+     * @param completedFrom Filter by completion time from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to). Counts jobs by when they were completed regardless of reschedules. (optional)
+     * @param completedTo Filter by completion time to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
      * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
@@ -2028,11 +2402,12 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ListJobRequests200Response listJobRequests(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit) throws ApiException {
-        ApiResponse<ListJobRequests200Response> localVarResp = listJobRequestsWithHttpInfo(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit);
+    public ListJobRequests200Response listJobRequests(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String completedFrom, String completedTo, String q, String sort, Integer page, Integer limit) throws ApiException {
+        ApiResponse<ListJobRequests200Response> localVarResp = listJobRequestsWithHttpInfo(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, completedFrom, completedTo, q, sort, page, limit);
         return localVarResp.getData();
     }
 
@@ -2047,6 +2422,8 @@ public class JobRequestBusinessApi {
      * @param serviceAreaId Service-area UUID (board zone filter) (optional)
      * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
      * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
+     * @param completedFrom Filter by completion time from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to). Counts jobs by when they were completed regardless of reschedules. (optional)
+     * @param completedTo Filter by completion time to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
      * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
@@ -2060,11 +2437,12 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public ApiResponse<ListJobRequests200Response> listJobRequestsWithHttpInfo(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit) throws ApiException {
-        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit, null);
+    public ApiResponse<ListJobRequests200Response> listJobRequestsWithHttpInfo(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String completedFrom, String completedTo, String q, String sort, Integer page, Integer limit) throws ApiException {
+        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, completedFrom, completedTo, q, sort, page, limit, null);
         Type localVarReturnType = new TypeToken<ListJobRequests200Response>(){}.getType();
         return localVarApiClient.execute(localVarCall, localVarReturnType);
     }
@@ -2080,6 +2458,8 @@ public class JobRequestBusinessApi {
      * @param serviceAreaId Service-area UUID (board zone filter) (optional)
      * @param scheduledFrom Filter from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to) (optional)
      * @param scheduledTo Filter to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
+     * @param completedFrom Filter by completion time from (YYYY-MM-DD &#x3D; start of that day in the business timezone, or RFC3339); range is [from, to). Counts jobs by when they were completed regardless of reschedules. (optional)
+     * @param completedTo Filter by completion time to (YYYY-MM-DD &#x3D; end of that day in the business timezone, or RFC3339), exclusive (optional)
      * @param q Search short_code or description (case-insensitive, partial match) (optional)
      * @param sort Sort key: created_at:desc (default) | created_at:asc | scheduled_at:asc | scheduled_at:desc | priority:asc (P0 first) | priority:desc (optional)
      * @param page Page number (optional)
@@ -2094,12 +2474,13 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED | API_KEY_INVALID </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
-    public okhttp3.Call listJobRequestsAsync(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String q, String sort, Integer page, Integer limit, final ApiCallback<ListJobRequests200Response> _callback) throws ApiException {
+    public okhttp3.Call listJobRequestsAsync(String statusKeys, String status, String priority, String customerId, String technicianId, String serviceAreaId, String scheduledFrom, String scheduledTo, String completedFrom, String completedTo, String q, String sort, Integer page, Integer limit, final ApiCallback<ListJobRequests200Response> _callback) throws ApiException {
 
-        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, q, sort, page, limit, _callback);
+        okhttp3.Call localVarCall = listJobRequestsValidateBeforeCall(statusKeys, status, priority, customerId, technicianId, serviceAreaId, scheduledFrom, scheduledTo, completedFrom, completedTo, q, sort, page, limit, _callback);
         Type localVarReturnType = new TypeToken<ListJobRequests200Response>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
@@ -2118,6 +2499,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -2196,6 +2578,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -2219,6 +2602,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -2244,6 +2628,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -2273,6 +2658,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
      </table>
      */
@@ -2378,6 +2764,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
      </table>
      */
@@ -2404,6 +2791,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
      </table>
      */
@@ -2432,6 +2820,7 @@ public class JobRequestBusinessApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — this endpoint runs the full feasibility engine per call and is rate-limited at 60 requests/min per key (stricter than the default 240; back off per the Retry-After header) </td><td>  -  </td></tr>
      </table>
      */
@@ -2439,6 +2828,157 @@ public class JobRequestBusinessApi {
 
         okhttp3.Call localVarCall = listNearbyTechniciansValidateBeforeCall(lat, lng, at, durationMinutes, skillIds, limit, _callback);
         Type localVarReturnType = new TypeToken<ListNearbyTechnicians200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for previewAbsenceResolve
+     * @param jobRequestAbsencePreviewRequest absent technician + date range (+ optional job subset) (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field names the bad field: until_date before date, range over data.max_range_days, a board over data.max_orphans jobs — narrow the range, or data.job_ids not on the technician&#39;s board) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_NO_ORPHANED_JOBS (the technician has no scheduled job in the range — hide the action; data.technician_id/date/until_date) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call previewAbsenceResolveCall(JobRequestAbsencePreviewRequest jobRequestAbsencePreviewRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = jobRequestAbsencePreviewRequest;
+
+        // create path and map variables
+        String localVarPath = "/job-requests/absence/preview";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call previewAbsenceResolveValidateBeforeCall(JobRequestAbsencePreviewRequest jobRequestAbsencePreviewRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'jobRequestAbsencePreviewRequest' is set
+        if (jobRequestAbsencePreviewRequest == null) {
+            throw new ApiException("Missing the required parameter 'jobRequestAbsencePreviewRequest' when calling previewAbsenceResolve(Async)");
+        }
+
+        return previewAbsenceResolveCall(jobRequestAbsencePreviewRequest, _callback);
+
+    }
+
+    /**
+     * Preview re-staffing a technician&#39;s whole day (sick call)
+     * Solves (WITHOUT writing) the re-staffing of every job on a technician&#39;s board for a date range: each job is handed to an ALTERNATE lead technician at its UNCHANGED window — the customer&#39;s appointment never moves, two overlapping jobs never land on the same alternate, and the absent technician is never a candidate. &#x60;date&#x60;/&#x60;until_date&#x60; are business-local calendar days (inclusive, ≤ 14 days). Jobs the planner cannot re-staff come back in &#x60;unresolved&#x60; with a &#x60;reason_code&#x60; (no qualified technician free / crew job / multi-day job / already in progress) — a partial plan is a normal 200, not an error. &#x60;solver.duration_ms&#x60; is server-side planner time; &#x60;solver.deterministic&#x60; is true (same input ⇒ same plan). Read-only, safe to repeat; copy &#x60;resolved[]&#x60; into the commit body. No time-off record is required to preview. When the strict pass leaves a job unresolved, its row ALSO carries &#x60;alternatives[]&#x60; — the relaxation ladder&#39;s priced options, cheapest constraint first (ABSENCE_RESOLVE_DESIGN.md §9): &#x60;reassign_out_of_area&#x60; (same window, a lead outside the job&#39;s zone — cost.distance_km/travel_minutes), then &#x60;reschedule_same_day&#x60; / &#x60;reschedule_later_day&#x60; (the earliest free window on a qualified lead, in-area before out-of-area, up to 3 working days past until_date — cost.customer_renotified, cost.day_offset, cost.sla_breached). Each option is a PROPOSAL: nothing is applied until the coordinator copies it into the commit body with its &#x60;alternative_kind&#x60; (+ &#x60;start_at&#x60;/&#x60;end_at&#x60; for a reschedule). &#x60;alternatives&#x60; is an empty array when even the ladder found nothing; &#x60;solver.alternatives_truncated&#x60; is true when the ladder&#39;s time budget cut the search short. Displacing another customer&#39;s job and overtime are deliberately NOT offered. See ABSENCE_RESOLVE_DESIGN.md.
+     * @param jobRequestAbsencePreviewRequest absent technician + date range (+ optional job subset) (required)
+     * @return CommitAbsenceResolve200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field names the bad field: until_date before date, range over data.max_range_days, a board over data.max_orphans jobs — narrow the range, or data.job_ids not on the technician&#39;s board) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_NO_ORPHANED_JOBS (the technician has no scheduled job in the range — hide the action; data.technician_id/date/until_date) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CommitAbsenceResolve200Response previewAbsenceResolve(JobRequestAbsencePreviewRequest jobRequestAbsencePreviewRequest) throws ApiException {
+        ApiResponse<CommitAbsenceResolve200Response> localVarResp = previewAbsenceResolveWithHttpInfo(jobRequestAbsencePreviewRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Preview re-staffing a technician&#39;s whole day (sick call)
+     * Solves (WITHOUT writing) the re-staffing of every job on a technician&#39;s board for a date range: each job is handed to an ALTERNATE lead technician at its UNCHANGED window — the customer&#39;s appointment never moves, two overlapping jobs never land on the same alternate, and the absent technician is never a candidate. &#x60;date&#x60;/&#x60;until_date&#x60; are business-local calendar days (inclusive, ≤ 14 days). Jobs the planner cannot re-staff come back in &#x60;unresolved&#x60; with a &#x60;reason_code&#x60; (no qualified technician free / crew job / multi-day job / already in progress) — a partial plan is a normal 200, not an error. &#x60;solver.duration_ms&#x60; is server-side planner time; &#x60;solver.deterministic&#x60; is true (same input ⇒ same plan). Read-only, safe to repeat; copy &#x60;resolved[]&#x60; into the commit body. No time-off record is required to preview. When the strict pass leaves a job unresolved, its row ALSO carries &#x60;alternatives[]&#x60; — the relaxation ladder&#39;s priced options, cheapest constraint first (ABSENCE_RESOLVE_DESIGN.md §9): &#x60;reassign_out_of_area&#x60; (same window, a lead outside the job&#39;s zone — cost.distance_km/travel_minutes), then &#x60;reschedule_same_day&#x60; / &#x60;reschedule_later_day&#x60; (the earliest free window on a qualified lead, in-area before out-of-area, up to 3 working days past until_date — cost.customer_renotified, cost.day_offset, cost.sla_breached). Each option is a PROPOSAL: nothing is applied until the coordinator copies it into the commit body with its &#x60;alternative_kind&#x60; (+ &#x60;start_at&#x60;/&#x60;end_at&#x60; for a reschedule). &#x60;alternatives&#x60; is an empty array when even the ladder found nothing; &#x60;solver.alternatives_truncated&#x60; is true when the ladder&#39;s time budget cut the search short. Displacing another customer&#39;s job and overtime are deliberately NOT offered. See ABSENCE_RESOLVE_DESIGN.md.
+     * @param jobRequestAbsencePreviewRequest absent technician + date range (+ optional job subset) (required)
+     * @return ApiResponse&lt;CommitAbsenceResolve200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field names the bad field: until_date before date, range over data.max_range_days, a board over data.max_orphans jobs — narrow the range, or data.job_ids not on the technician&#39;s board) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_NO_ORPHANED_JOBS (the technician has no scheduled job in the range — hide the action; data.technician_id/date/until_date) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CommitAbsenceResolve200Response> previewAbsenceResolveWithHttpInfo(JobRequestAbsencePreviewRequest jobRequestAbsencePreviewRequest) throws ApiException {
+        okhttp3.Call localVarCall = previewAbsenceResolveValidateBeforeCall(jobRequestAbsencePreviewRequest, null);
+        Type localVarReturnType = new TypeToken<CommitAbsenceResolve200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Preview re-staffing a technician&#39;s whole day (sick call) (asynchronously)
+     * Solves (WITHOUT writing) the re-staffing of every job on a technician&#39;s board for a date range: each job is handed to an ALTERNATE lead technician at its UNCHANGED window — the customer&#39;s appointment never moves, two overlapping jobs never land on the same alternate, and the absent technician is never a candidate. &#x60;date&#x60;/&#x60;until_date&#x60; are business-local calendar days (inclusive, ≤ 14 days). Jobs the planner cannot re-staff come back in &#x60;unresolved&#x60; with a &#x60;reason_code&#x60; (no qualified technician free / crew job / multi-day job / already in progress) — a partial plan is a normal 200, not an error. &#x60;solver.duration_ms&#x60; is server-side planner time; &#x60;solver.deterministic&#x60; is true (same input ⇒ same plan). Read-only, safe to repeat; copy &#x60;resolved[]&#x60; into the commit body. No time-off record is required to preview. When the strict pass leaves a job unresolved, its row ALSO carries &#x60;alternatives[]&#x60; — the relaxation ladder&#39;s priced options, cheapest constraint first (ABSENCE_RESOLVE_DESIGN.md §9): &#x60;reassign_out_of_area&#x60; (same window, a lead outside the job&#39;s zone — cost.distance_km/travel_minutes), then &#x60;reschedule_same_day&#x60; / &#x60;reschedule_later_day&#x60; (the earliest free window on a qualified lead, in-area before out-of-area, up to 3 working days past until_date — cost.customer_renotified, cost.day_offset, cost.sla_breached). Each option is a PROPOSAL: nothing is applied until the coordinator copies it into the commit body with its &#x60;alternative_kind&#x60; (+ &#x60;start_at&#x60;/&#x60;end_at&#x60; for a reschedule). &#x60;alternatives&#x60; is an empty array when even the ladder found nothing; &#x60;solver.alternatives_truncated&#x60; is true when the ladder&#39;s time budget cut the search short. Displacing another customer&#39;s job and overtime are deliberately NOT offered. See ABSENCE_RESOLVE_DESIGN.md.
+     * @param jobRequestAbsencePreviewRequest absent technician + date range (+ optional job subset) (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | ABSENCE_RESOLVE_INVALID_INPUT (data.field names the bad field: until_date before date, range over data.max_range_days, a board over data.max_orphans jobs — narrow the range, or data.job_ids not on the technician&#39;s board) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> ABSENCE_RESOLVE_NO_ORPHANED_JOBS (the technician has no scheduled job in the range — hide the action; data.technician_id/date/until_date) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call previewAbsenceResolveAsync(JobRequestAbsencePreviewRequest jobRequestAbsencePreviewRequest, final ApiCallback<CommitAbsenceResolve200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = previewAbsenceResolveValidateBeforeCall(jobRequestAbsencePreviewRequest, _callback);
+        Type localVarReturnType = new TypeToken<CommitAbsenceResolve200Response>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }
@@ -2453,11 +2993,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2519,7 +3059,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Preview emergency insert + cascade reschedule
-     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / NO_WORKING_DAY / IN_PAST — same remedies as /candidates.
+     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). &#x60;after_hours_override&#x3D;true&#x60; — the coordinator has phoned the technician — drops the non-working-day rejection; the response then carries an AFTER_HOURS warning naming how far outside the window the insert sits. This endpoint never runs the technician&#39;s working-hours/time-off feasibility check (that only happens on /candidates) — it validates the named technician exists and builds the cascade. Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job); &#x60;data.conflicts[]&#x60; names each blocking job (short_code/start_at/end_at/frozen_because): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / IN_PAST — same remedies and &#x60;data&#x60; shapes as /candidates. EMERGENCY_RESCHEDULE_NO_WORKING_DAY does NOT fire when after_hours_override&#x3D;true.
      * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
      * @return CommitEmergencyReschedule200Response
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -2528,11 +3068,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2543,7 +3083,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Preview emergency insert + cascade reschedule
-     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / NO_WORKING_DAY / IN_PAST — same remedies as /candidates.
+     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). &#x60;after_hours_override&#x3D;true&#x60; — the coordinator has phoned the technician — drops the non-working-day rejection; the response then carries an AFTER_HOURS warning naming how far outside the window the insert sits. This endpoint never runs the technician&#39;s working-hours/time-off feasibility check (that only happens on /candidates) — it validates the named technician exists and builds the cascade. Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job); &#x60;data.conflicts[]&#x60; names each blocking job (short_code/start_at/end_at/frozen_because): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / IN_PAST — same remedies and &#x60;data&#x60; shapes as /candidates. EMERGENCY_RESCHEDULE_NO_WORKING_DAY does NOT fire when after_hours_override&#x3D;true.
      * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
      * @return ApiResponse&lt;CommitEmergencyReschedule200Response&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -2552,11 +3092,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2568,7 +3108,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Preview emergency insert + cascade reschedule (asynchronously)
-     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / NO_WORKING_DAY / IN_PAST — same remedies as /candidates.
+     * Computes (WITHOUT writing) the cascade of inserting an emergency job onto a technician at a chosen time: where the emergency lands + every job pushed back, grouped per business-local day. &#x60;displacement_mode&#x3D;reassign&#x60; instead hands each displaced job to another feasible technician at its ORIGINAL window (same-day promise) — jobs with no alternate capacity fall back to reschedule and stay in &#x60;days&#x60;. &#x60;mode&#x3D;overtime&#x60; keeps everyone same-day (tech works late); &#x60;mode&#x3D;next_day&#x60; rolls overflow to the next working day(s). &#x60;after_hours_override&#x3D;true&#x60; — the coordinator has phoned the technician — drops the non-working-day rejection; the response then carries an AFTER_HOURS warning naming how far outside the window the insert sits. This endpoint never runs the technician&#39;s working-hours/time-off feasibility check (that only happens on /candidates) — it validates the named technician exists and builds the cascade. Read-only — safe to call repeatedly; commit is a separate endpoint. Isolated feature (see EMERGENCY_RESCHEDULE_DESIGN.md). 409 NEXT STEPS: EMERGENCY_RESCHEDULE_SLOT_OCCUPIED — the landing window is blocked by a job the cascade may NOT move (another P0, a crew or multi-day job); &#x60;data.conflicts[]&#x60; names each blocking job (short_code/start_at/end_at/frozen_because): choose another technician (walk the /candidates ranking) or another time; displacement never touches P0/crew/multi-day anchors. EMERGENCY_RESCHEDULE_NOT_ELIGIBLE / CREW_UNSUPPORTED / MULTIDAY_UNSUPPORTED / IN_PAST — same remedies and &#x60;data&#x60; shapes as /candidates. EMERGENCY_RESCHEDULE_NO_WORKING_DAY does NOT fire when after_hours_override&#x3D;true.
      * @param jobRequestEmergencyPreviewRequest emergency insert spec (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -2578,11 +3118,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | EMERGENCY_RESCHEDULE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED | EMERGENCY_RESCHEDULE_NO_WORKING_DAY | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> EMERGENCY_RESCHEDULE_NOT_ELIGIBLE (data.failed_precondition) | EMERGENCY_RESCHEDULE_CREW_UNSUPPORTED (data.crew_size) | EMERGENCY_RESCHEDULE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates, or data.reason&#x3D;visit_too_long + data.blockers) | EMERGENCY_RESCHEDULE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday; not raised when after_hours_override&#x3D;true) | EMERGENCY_RESCHEDULE_IN_PAST | EMERGENCY_RESCHEDULE_SLOT_OCCUPIED (data.conflicts[] — landing window blocked by an immovable P0/crew/multi-day anchor — pick another tech from /candidates or another time) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2605,11 +3145,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2677,7 +3217,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Preview a schedule-board job move
-     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; &#x3D; &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;missing_required_skills&#x60; | &#x60;not_available_today&#x60; (no working hours, approved time off, or outside the service area) | &#x60;not_lead_tier&#x60;. For a P0 move this warning is advisory (coordinator may commit anyway); for p1/p2/p3 the same condition is the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — not movable) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time) · SCHEDULE_MOVE_OUTSIDE_WINDOW (landing time outside the customer-confirmed window — hard block; pick a time inside it) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — see the TECH_NOT_FEASIBLE warning reasons; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1) · SCHEDULE_MOVE_NO_WORKING_DAY (pick a working day) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — free capacity only, unless the owner enables allow_non_p0_displacement) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time).
+     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; (&#x3D; &#x60;blockers[0].kind&#x60;) &#x3D; &#x60;outside_service_area&#x60; | &#x60;missing_required_skills&#x60; | &#x60;not_lead_tier&#x60; | &#x60;no_working_day&#x60; | &#x60;on_time_off&#x60; | &#x60;off_shift&#x60; | &#x60;visit_too_long&#x60; | &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60;, RFC3339 UTC, is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;not_available_today&#x60; (diagnosis unavailable). &#x60;blockers[]&#x60; names EVERY hard filter that failed, most-structural first — a client reading only &#x60;reason&#x60; still works. For a P0 move this warning is advisory (coordinator may commit anyway) and carries the SAME &#x60;blockers[]&#x60; a p1/p2/p3 move would get as the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE below. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — &#x60;data.failed_precondition&#x60; names which) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — &#x60;data.fired_actions[]&#x60; lists the actions already fired; do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time — its &#x60;data&#x60; carries &#x60;business_timezone&#x60;, the naive &#x60;start_at&#x60; and the &#x60;start_at_utc&#x60; it resolved to, which is what tells a caller whose own clock says otherwise where the difference came from) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor; &#x60;data.conflicts[]&#x60; names it — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — its &#x60;data&#x60; carries &#x60;technician&#x60; (id+name), &#x60;reason&#x60; (same catalog as the TECH_NOT_FEASIBLE warning above), &#x60;blockers[]&#x60; (every cause, most-structural first) and, for &#x60;cannot_arrive_in_time&#x60;, &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) to suggest as the drop slot; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1 — &#x60;data.session_count&#x60;/&#x60;data.session_dates&#x60;) · SCHEDULE_MOVE_NO_WORKING_DAY (&#x60;data.business_timezone&#x60;/&#x60;data.requested_weekday&#x60; — pick a working day, or set after_hours_override&#x3D;true for a P0 whose technician has been phoned) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — &#x60;data.would_push[]&#x60; names the jobs that would be pushed, &#x60;data.allow_non_p0_displacement: false&#x60; names the setting that would permit it, unless the crew case sets &#x60;data.crew_never_displaces: true&#x60; instead — free capacity only) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time). A landing outside the customer-confirmed window is NOT an error — it returns 200 with a MOVED_OUTSIDE_WINDOW warning (customer_window attached) that the coordinator overrides.
      * @param id Job request ID (UUID or short_code) (required)
      * @param jobRequestMovePreviewReq move spec (required)
      * @return CommitJobRequestMove200Response
@@ -2687,11 +3227,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2702,7 +3242,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Preview a schedule-board job move
-     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; &#x3D; &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;missing_required_skills&#x60; | &#x60;not_available_today&#x60; (no working hours, approved time off, or outside the service area) | &#x60;not_lead_tier&#x60;. For a P0 move this warning is advisory (coordinator may commit anyway); for p1/p2/p3 the same condition is the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — not movable) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time) · SCHEDULE_MOVE_OUTSIDE_WINDOW (landing time outside the customer-confirmed window — hard block; pick a time inside it) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — see the TECH_NOT_FEASIBLE warning reasons; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1) · SCHEDULE_MOVE_NO_WORKING_DAY (pick a working day) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — free capacity only, unless the owner enables allow_non_p0_displacement) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time).
+     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; (&#x3D; &#x60;blockers[0].kind&#x60;) &#x3D; &#x60;outside_service_area&#x60; | &#x60;missing_required_skills&#x60; | &#x60;not_lead_tier&#x60; | &#x60;no_working_day&#x60; | &#x60;on_time_off&#x60; | &#x60;off_shift&#x60; | &#x60;visit_too_long&#x60; | &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60;, RFC3339 UTC, is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;not_available_today&#x60; (diagnosis unavailable). &#x60;blockers[]&#x60; names EVERY hard filter that failed, most-structural first — a client reading only &#x60;reason&#x60; still works. For a P0 move this warning is advisory (coordinator may commit anyway) and carries the SAME &#x60;blockers[]&#x60; a p1/p2/p3 move would get as the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE below. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — &#x60;data.failed_precondition&#x60; names which) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — &#x60;data.fired_actions[]&#x60; lists the actions already fired; do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time — its &#x60;data&#x60; carries &#x60;business_timezone&#x60;, the naive &#x60;start_at&#x60; and the &#x60;start_at_utc&#x60; it resolved to, which is what tells a caller whose own clock says otherwise where the difference came from) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor; &#x60;data.conflicts[]&#x60; names it — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — its &#x60;data&#x60; carries &#x60;technician&#x60; (id+name), &#x60;reason&#x60; (same catalog as the TECH_NOT_FEASIBLE warning above), &#x60;blockers[]&#x60; (every cause, most-structural first) and, for &#x60;cannot_arrive_in_time&#x60;, &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) to suggest as the drop slot; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1 — &#x60;data.session_count&#x60;/&#x60;data.session_dates&#x60;) · SCHEDULE_MOVE_NO_WORKING_DAY (&#x60;data.business_timezone&#x60;/&#x60;data.requested_weekday&#x60; — pick a working day, or set after_hours_override&#x3D;true for a P0 whose technician has been phoned) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — &#x60;data.would_push[]&#x60; names the jobs that would be pushed, &#x60;data.allow_non_p0_displacement: false&#x60; names the setting that would permit it, unless the crew case sets &#x60;data.crew_never_displaces: true&#x60; instead — free capacity only) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time). A landing outside the customer-confirmed window is NOT an error — it returns 200 with a MOVED_OUTSIDE_WINDOW warning (customer_window attached) that the coordinator overrides.
      * @param id Job request ID (UUID or short_code) (required)
      * @param jobRequestMovePreviewReq move spec (required)
      * @return ApiResponse&lt;CommitJobRequestMove200Response&gt;
@@ -2712,11 +3252,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2728,7 +3268,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Preview a schedule-board job move (asynchronously)
-     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; &#x3D; &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;missing_required_skills&#x60; | &#x60;not_available_today&#x60; (no working hours, approved time off, or outside the service area) | &#x60;not_lead_tier&#x60;. For a P0 move this warning is advisory (coordinator may commit anyway); for p1/p2/p3 the same condition is the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — not movable) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time) · SCHEDULE_MOVE_OUTSIDE_WINDOW (landing time outside the customer-confirmed window — hard block; pick a time inside it) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — see the TECH_NOT_FEASIBLE warning reasons; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1) · SCHEDULE_MOVE_NO_WORKING_DAY (pick a working day) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — free capacity only, unless the owner enables allow_non_p0_displacement) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time).
+     * Computes (WITHOUT writing) the outcome of moving a confirmed job to a new time and/or technician: where it lands, every later job pushed back per &#x60;mode&#x60;, and the warnings the coordinator would accept (displaced jobs leaving their confirmed windows, overtime). Same technician &#x3D; pure time move; different technician &#x3D; manual reassign. Read-only — safe to call repeatedly while dragging; commit is a separate endpoint. See SCHEDULE_BOARD_DESIGN.md. Warning detail: a TECH_NOT_FEASIBLE warning carries &#x60;reason&#x60; (&#x3D; &#x60;blockers[0].kind&#x60;) &#x3D; &#x60;outside_service_area&#x60; | &#x60;missing_required_skills&#x60; | &#x60;not_lead_tier&#x60; | &#x60;no_working_day&#x60; | &#x60;on_time_off&#x60; | &#x60;off_shift&#x60; | &#x60;visit_too_long&#x60; | &#x60;cannot_arrive_in_time&#x60; (commute from the tech day-start location / shift start; &#x60;earliest_feasible_at&#x60;, RFC3339 UTC, is the first same-day time they CAN be on site — suggest it as the drop slot) | &#x60;not_available_today&#x60; (diagnosis unavailable). &#x60;blockers[]&#x60; names EVERY hard filter that failed, most-structural first — a client reading only &#x60;reason&#x60; still works. For a P0 move this warning is advisory (coordinator may commit anyway) and carries the SAME &#x60;blockers[]&#x60; a p1/p2/p3 move would get as the hard 409 SCHEDULE_MOVE_TECH_INFEASIBLE below. 409 NEXT STEPS: SCHEDULE_MOVE_NOT_ELIGIBLE (job unconfirmed/unquoted/archived/completed — &#x60;data.failed_precondition&#x60; names which) · SCHEDULE_MOVE_IN_PROGRESS (tech already executing — &#x60;data.fired_actions[]&#x60; lists the actions already fired; do not move) · SCHEDULE_MOVE_IN_PAST (pick a future time — its &#x60;data&#x60; carries &#x60;business_timezone&#x60;, the naive &#x60;start_at&#x60; and the &#x60;start_at_utc&#x60; it resolved to, which is what tells a caller whose own clock says otherwise where the difference came from) · SCHEDULE_MOVE_SLOT_OCCUPIED (landing window blocked by an immovable anchor; &#x60;data.conflicts[]&#x60; names it — another tech/time) · SCHEDULE_MOVE_TECH_INFEASIBLE (non-P0 hard block: target tech not qualified/available — its &#x60;data&#x60; carries &#x60;technician&#x60; (id+name), &#x60;reason&#x60; (same catalog as the TECH_NOT_FEASIBLE warning above), &#x60;blockers[]&#x60; (every cause, most-structural first) and, for &#x60;cannot_arrive_in_time&#x60;, &#x60;earliest_feasible_at&#x60; (RFC3339 UTC) to suggest as the drop slot; change tech or time) · SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (multi-day jobs not movable v1 — &#x60;data.session_count&#x60;/&#x60;data.session_dates&#x60;) · SCHEDULE_MOVE_NO_WORKING_DAY (&#x60;data.business_timezone&#x60;/&#x60;data.requested_weekday&#x60; — pick a working day, or set after_hours_override&#x3D;true for a P0 whose technician has been phoned) · SCHEDULE_MOVE_REQUIRES_FREE_SLOT (non-P0 moves may not displace — &#x60;data.would_push[]&#x60; names the jobs that would be pushed, &#x60;data.allow_non_p0_displacement: false&#x60; names the setting that would permit it, unless the crew case sets &#x60;data.crew_never_displaces: true&#x60; instead — free capacity only) · SCHEDULE_MOVE_CREW_UNSTAFFABLE (a crew slot has no feasible replacement at the new time — another time). A landing outside the customer-confirmed window is NOT an error — it returns 200 with a MOVED_OUTSIDE_WINDOW warning (customer_window attached) that the coordinator overrides.
      * @param id Job request ID (UUID or short_code) (required)
      * @param jobRequestMovePreviewReq move spec (required)
      * @param _callback The callback to be executed when the API call finishes
@@ -2739,11 +3279,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SCHEDULE_MOVE_INVALID_INPUT (data.field names the first bad field) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
         <tr><td> 403 </td><td> FORBIDDEN (missing job_manage permission/scope) </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE | SCHEDULE_MOVE_IN_PROGRESS | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_OUTSIDE_WINDOW | SCHEDULE_MOVE_SLOT_OCCUPIED | SCHEDULE_MOVE_TECH_INFEASIBLE | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED | SCHEDULE_MOVE_NO_WORKING_DAY | SCHEDULE_MOVE_REQUIRES_FREE_SLOT | SCHEDULE_MOVE_CREW_UNSTAFFABLE </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SCHEDULE_MOVE_NOT_ELIGIBLE (data.failed_precondition) | SCHEDULE_MOVE_IN_PROGRESS (data.fired_actions) | SCHEDULE_MOVE_IN_PAST | SCHEDULE_MOVE_SLOT_OCCUPIED (data.conflicts) | SCHEDULE_MOVE_TECH_INFEASIBLE (data.reason/data.blockers/data.technician/data.earliest_feasible_at) | SCHEDULE_MOVE_MULTIDAY_UNSUPPORTED (data.session_count/data.session_dates) | SCHEDULE_MOVE_NO_WORKING_DAY (data.business_timezone/data.requested_weekday) | SCHEDULE_MOVE_REQUIRES_FREE_SLOT (data.would_push/data.allow_non_p0_displacement) | SCHEDULE_MOVE_CREW_UNSTAFFABLE | JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 (data.current_priority — after_hours_override only lifts the closed-day rejection for a P0: raise the priority or pick a working day) | JOB_REQUEST_AFTER_HOURS_CREW_UNSUPPORTED (data.crew_size — a crew job cannot use the override: technician_id pins only the lead, so the buddies would be staffed without anyone phoning them) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2766,10 +3306,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and the job&#39;s job type has no default_duration_minutes) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_QUOTE_NOT_SCHEDULABLE (no slot in any requested window - see data.reason; resend with force&#x3D;true to override) | JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2837,7 +3378,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Fire quote (FIXED action — business)
-     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;.
+     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;. job_duration_minutes may be omitted when the job&#39;s job type has a default_duration_minutes: the type&#39;s default duration and buffers are used (a buffer you send still wins). This is how an automation or voice agent schedules work it cannot size. Before writing, checks that the customer will see at least one slot: the same engine as the customer slot picker runs over the windows the customer asked for with THIS quote&#39;s duration (working hours, service areas, time-off, existing bookings, crew coverage). If no slot exists the quote is refused with 409 JOB_REQUEST_QUOTE_NOT_SCHEDULABLE; data.reason says why (outside_working_hours, requested_windows_passed, outside_service_area, off_shift, on_time_off, missing_required_skills, no_technician_available, ...) and data.blocked_by counts the roster per blocker. Send force&#x3D;true to schedule it anyway after agreeing a time with the customer.
      * @param id Job request ID (required)
      * @param jobRequestQuoteRequest Quote payload (required)
      * @return ResponseEnvelope
@@ -2847,10 +3388,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and the job&#39;s job type has no default_duration_minutes) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_QUOTE_NOT_SCHEDULABLE (no slot in any requested window - see data.reason; resend with force&#x3D;true to override) | JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2861,7 +3403,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Fire quote (FIXED action — business)
-     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;.
+     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;. job_duration_minutes may be omitted when the job&#39;s job type has a default_duration_minutes: the type&#39;s default duration and buffers are used (a buffer you send still wins). This is how an automation or voice agent schedules work it cannot size. Before writing, checks that the customer will see at least one slot: the same engine as the customer slot picker runs over the windows the customer asked for with THIS quote&#39;s duration (working hours, service areas, time-off, existing bookings, crew coverage). If no slot exists the quote is refused with 409 JOB_REQUEST_QUOTE_NOT_SCHEDULABLE; data.reason says why (outside_working_hours, requested_windows_passed, outside_service_area, off_shift, on_time_off, missing_required_skills, no_technician_available, ...) and data.blocked_by counts the roster per blocker. Send force&#x3D;true to schedule it anyway after agreeing a time with the customer.
      * @param id Job request ID (required)
      * @param jobRequestQuoteRequest Quote payload (required)
      * @return ApiResponse&lt;ResponseEnvelope&gt;
@@ -2871,10 +3413,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and the job&#39;s job type has no default_duration_minutes) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_QUOTE_NOT_SCHEDULABLE (no slot in any requested window - see data.reason; resend with force&#x3D;true to override) | JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -2886,7 +3429,7 @@ public class JobRequestBusinessApi {
 
     /**
      * Fire quote (FIXED action — business) (asynchronously)
-     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;.
+     * Sends the quote: sets quoted_at + duration cols, advances pending_action to confirm_booking. Status stays &#x60;booking&#x60;. job_duration_minutes may be omitted when the job&#39;s job type has a default_duration_minutes: the type&#39;s default duration and buffers are used (a buffer you send still wins). This is how an automation or voice agent schedules work it cannot size. Before writing, checks that the customer will see at least one slot: the same engine as the customer slot picker runs over the windows the customer asked for with THIS quote&#39;s duration (working hours, service areas, time-off, existing bookings, crew coverage). If no slot exists the quote is refused with 409 JOB_REQUEST_QUOTE_NOT_SCHEDULABLE; data.reason says why (outside_working_hours, requested_windows_passed, outside_service_area, off_shift, on_time_off, missing_required_skills, no_technician_available, ...) and data.blocked_by counts the roster per blocker. Send force&#x3D;true to schedule it anyway after agreeing a time with the customer.
      * @param id Job request ID (required)
      * @param jobRequestQuoteRequest Quote payload (required)
      * @param _callback The callback to be executed when the API call finishes
@@ -2897,10 +3440,11 @@ public class JobRequestBusinessApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | JOB_REQUEST_INVALID_INPUT | JOB_REQUEST_QUOTE_INVALID (no job_duration_minutes and the job&#39;s job type has no default_duration_minutes) </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> JOB_REQUEST_NOT_FOUND </td><td>  -  </td></tr>
-        <tr><td> 409 </td><td> JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> JOB_REQUEST_QUOTE_NOT_SCHEDULABLE (no slot in any requested window - see data.reason; resend with force&#x3D;true to override) | JOB_REQUEST_STAGE_CONFLICT (re-GET the job, retry with the fresh status_version) | JOB_REQUEST_INVALID_TRANSITION (job is past the quote step — re-GET and show current status) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */

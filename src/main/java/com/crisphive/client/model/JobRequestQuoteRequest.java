@@ -63,9 +63,14 @@ public class JobRequestQuoteRequest {
   @javax.annotation.Nullable
   private Integer demobilizationMinutes;
 
+  public static final String SERIALIZED_NAME_FORCE = "force";
+  @SerializedName(SERIALIZED_NAME_FORCE)
+  @javax.annotation.Nullable
+  private Boolean force;
+
   public static final String SERIALIZED_NAME_JOB_DURATION_MINUTES = "job_duration_minutes";
   @SerializedName(SERIALIZED_NAME_JOB_DURATION_MINUTES)
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   private Integer jobDurationMinutes;
 
   public static final String SERIALIZED_NAME_MOBILIZATION_MINUTES = "mobilization_minutes";
@@ -128,22 +133,41 @@ public class JobRequestQuoteRequest {
   }
 
 
-  public JobRequestQuoteRequest jobDurationMinutes(@javax.annotation.Nonnull Integer jobDurationMinutes) {
+  public JobRequestQuoteRequest force(@javax.annotation.Nullable Boolean force) {
+    this.force = force;
+    return this;
+  }
+
+  /**
+   * Schedule the job even when no technician can take it in ANY window the customer asked for (outside working hours, outside every service area, nobody free). Without it that case answers 409 JOB_REQUEST_QUOTE_NOT_SCHEDULABLE with the reason, so the coordinator can agree a different time with the customer first. Send true only after that conversation; the override is recorded in the activity feed.
+   * @return force
+   */
+  @javax.annotation.Nullable
+  public Boolean getForce() {
+    return force;
+  }
+
+  public void setForce(@javax.annotation.Nullable Boolean force) {
+    this.force = force;
+  }
+
+
+  public JobRequestQuoteRequest jobDurationMinutes(@javax.annotation.Nullable Integer jobDurationMinutes) {
     this.jobDurationMinutes = jobDurationMinutes;
     return this;
   }
 
   /**
-   * Hands-on work duration in minutes (man-minutes for a crew job). Required, min 1.
+   * Hands-on work duration in minutes (man-minutes for a crew job), min 1. On POST /quote it may be OMITTED when the job&#39;s job type carries a default_duration_minutes: the quote then uses the type&#39;s default duration and its default buffers (a buffer you send still wins). No duration and no default answers 400 JOB_REQUEST_QUOTE_INVALID. PATCH /quote always requires it.
    * minimum: 1
    * @return jobDurationMinutes
    */
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   public Integer getJobDurationMinutes() {
     return jobDurationMinutes;
   }
 
-  public void setJobDurationMinutes(@javax.annotation.Nonnull Integer jobDurationMinutes) {
+  public void setJobDurationMinutes(@javax.annotation.Nullable Integer jobDurationMinutes) {
     this.jobDurationMinutes = jobDurationMinutes;
   }
 
@@ -199,6 +223,7 @@ public class JobRequestQuoteRequest {
     JobRequestQuoteRequest jobRequestQuoteRequest = (JobRequestQuoteRequest) o;
     return Objects.equals(this.crew, jobRequestQuoteRequest.crew) &&
         Objects.equals(this.demobilizationMinutes, jobRequestQuoteRequest.demobilizationMinutes) &&
+        Objects.equals(this.force, jobRequestQuoteRequest.force) &&
         Objects.equals(this.jobDurationMinutes, jobRequestQuoteRequest.jobDurationMinutes) &&
         Objects.equals(this.mobilizationMinutes, jobRequestQuoteRequest.mobilizationMinutes) &&
         Objects.equals(this.statusVersion, jobRequestQuoteRequest.statusVersion);
@@ -206,7 +231,7 @@ public class JobRequestQuoteRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(crew, demobilizationMinutes, jobDurationMinutes, mobilizationMinutes, statusVersion);
+    return Objects.hash(crew, demobilizationMinutes, force, jobDurationMinutes, mobilizationMinutes, statusVersion);
   }
 
   @Override
@@ -215,6 +240,7 @@ public class JobRequestQuoteRequest {
     sb.append("class JobRequestQuoteRequest {\n");
     sb.append("    crew: ").append(toIndentedString(crew)).append("\n");
     sb.append("    demobilizationMinutes: ").append(toIndentedString(demobilizationMinutes)).append("\n");
+    sb.append("    force: ").append(toIndentedString(force)).append("\n");
     sb.append("    jobDurationMinutes: ").append(toIndentedString(jobDurationMinutes)).append("\n");
     sb.append("    mobilizationMinutes: ").append(toIndentedString(mobilizationMinutes)).append("\n");
     sb.append("    statusVersion: ").append(toIndentedString(statusVersion)).append("\n");
@@ -242,13 +268,13 @@ public class JobRequestQuoteRequest {
     openapiFields = new HashSet<String>();
     openapiFields.add("crew");
     openapiFields.add("demobilization_minutes");
+    openapiFields.add("force");
     openapiFields.add("job_duration_minutes");
     openapiFields.add("mobilization_minutes");
     openapiFields.add("status_version");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("job_duration_minutes");
   }
 
   /**
@@ -269,13 +295,6 @@ public class JobRequestQuoteRequest {
       for (Map.Entry<String, JsonElement> entry : entries) {
         if (!JobRequestQuoteRequest.openapiFields.contains(entry.getKey())) {
           throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `JobRequestQuoteRequest` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
-        }
-      }
-
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : JobRequestQuoteRequest.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();

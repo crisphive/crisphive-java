@@ -202,7 +202,7 @@ public class JobRequestActionSummary {
   }
 
   /**
-   * Action label, resolved to the request locale.
+   * Action label as authored on the workflow (canonical; NOT resolved to the request locale).
    * @return label
    */
   @javax.annotation.Nullable

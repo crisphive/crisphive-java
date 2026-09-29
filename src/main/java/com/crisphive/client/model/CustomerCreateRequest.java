@@ -82,6 +82,11 @@ public class CustomerCreateRequest {
   @javax.annotation.Nullable
   private UUID serviceAreaId;
 
+  public static final String SERIALIZED_NAME_SMS_OPT_IN = "sms_opt_in";
+  @SerializedName(SERIALIZED_NAME_SMS_OPT_IN)
+  @javax.annotation.Nullable
+  private Boolean smsOptIn;
+
   /**
    * Loyalty tier. Defaults to \&quot;regular\&quot; if omitted.
    */
@@ -210,7 +215,7 @@ public class CustomerCreateRequest {
   }
 
   /**
-   * Phone number. Optional, but at least one of phone/email is required; 10–20 chars.
+   * Phone number in E.164 international format: a leading &#x60;+&#x60; and the country code, e.g. &#x60;+16135550188&#x60;. A bare national number (&#x60;6135550188&#x60;) is REJECTED with PHONE_INVALID — there is no default region to guess the country from. Separators (spaces, dashes, parentheses) are stripped before validation. Optional, but at least one of phone/email is required; 10–20 chars.
    * @return phone
    */
   @javax.annotation.Nullable
@@ -258,6 +263,25 @@ public class CustomerCreateRequest {
 
   public void setServiceAreaId(@javax.annotation.Nullable UUID serviceAreaId) {
     this.serviceAreaId = serviceAreaId;
+  }
+
+
+  public CustomerCreateRequest smsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+    return this;
+  }
+
+  /**
+   * SMS consent: set true ONLY when the customer explicitly agreed to receive SMS (e.g. ticked a non-pre-checked consent box, or gave verbal/written consent you keep a record of). SMS notifications are suppressed while false.
+   * @return smsOptIn
+   */
+  @javax.annotation.Nullable
+  public Boolean getSmsOptIn() {
+    return smsOptIn;
+  }
+
+  public void setSmsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
   }
 
 
@@ -315,13 +339,14 @@ public class CustomerCreateRequest {
         Objects.equals(this.phone, customerCreateRequest.phone) &&
         Objects.equals(this.preferredTechnicianId, customerCreateRequest.preferredTechnicianId) &&
         Objects.equals(this.serviceAreaId, customerCreateRequest.serviceAreaId) &&
+        Objects.equals(this.smsOptIn, customerCreateRequest.smsOptIn) &&
         Objects.equals(this.tier, customerCreateRequest.tier) &&
         Objects.equals(this.uid, customerCreateRequest.uid);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, email, fullName, phone, preferredTechnicianId, serviceAreaId, tier, uid);
+    return Objects.hash(address, email, fullName, phone, preferredTechnicianId, serviceAreaId, smsOptIn, tier, uid);
   }
 
   @Override
@@ -334,6 +359,7 @@ public class CustomerCreateRequest {
     sb.append("    phone: ").append(toIndentedString(phone)).append("\n");
     sb.append("    preferredTechnicianId: ").append(toIndentedString(preferredTechnicianId)).append("\n");
     sb.append("    serviceAreaId: ").append(toIndentedString(serviceAreaId)).append("\n");
+    sb.append("    smsOptIn: ").append(toIndentedString(smsOptIn)).append("\n");
     sb.append("    tier: ").append(toIndentedString(tier)).append("\n");
     sb.append("    uid: ").append(toIndentedString(uid)).append("\n");
     sb.append("}");
@@ -364,6 +390,7 @@ public class CustomerCreateRequest {
     openapiFields.add("phone");
     openapiFields.add("preferred_technician_id");
     openapiFields.add("service_area_id");
+    openapiFields.add("sms_opt_in");
     openapiFields.add("tier");
     openapiFields.add("uid");
 

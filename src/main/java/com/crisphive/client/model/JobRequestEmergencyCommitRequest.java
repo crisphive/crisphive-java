@@ -53,6 +53,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestEmergencyCommitRequest {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE = "after_hours_override";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverride;
+
   /**
    * Fate of displaced jobs: reschedule (default) or reassign — must match the preview.
    */
@@ -194,6 +199,25 @@ public class JobRequestEmergencyCommitRequest {
 
   public JobRequestEmergencyCommitRequest() {
   }
+
+  public JobRequestEmergencyCommitRequest afterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+    return this;
+  }
+
+  /**
+   * Place this P0 outside working hours / approved time-off — you have phoned the technician and they agreed. Drops the non-working-day rejection; the response then carries an AFTER_HOURS warning. Double-booking, service area, required skills and the lead-tier rule still reject.
+   * @return afterHoursOverride
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverride() {
+    return afterHoursOverride;
+  }
+
+  public void setAfterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+  }
+
 
   public JobRequestEmergencyCommitRequest displacementMode(@javax.annotation.Nullable DisplacementModeEnum displacementMode) {
     this.displacementMode = displacementMode;
@@ -346,7 +370,8 @@ public class JobRequestEmergencyCommitRequest {
       return false;
     }
     JobRequestEmergencyCommitRequest jobRequestEmergencyCommitRequest = (JobRequestEmergencyCommitRequest) o;
-    return Objects.equals(this.displacementMode, jobRequestEmergencyCommitRequest.displacementMode) &&
+    return Objects.equals(this.afterHoursOverride, jobRequestEmergencyCommitRequest.afterHoursOverride) &&
+        Objects.equals(this.displacementMode, jobRequestEmergencyCommitRequest.displacementMode) &&
         Objects.equals(this.emergencyExpectedVersion, jobRequestEmergencyCommitRequest.emergencyExpectedVersion) &&
         Objects.equals(this.emergencyJobId, jobRequestEmergencyCommitRequest.emergencyJobId) &&
         Objects.equals(this.expectedMoveIds, jobRequestEmergencyCommitRequest.expectedMoveIds) &&
@@ -357,13 +382,14 @@ public class JobRequestEmergencyCommitRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(displacementMode, emergencyExpectedVersion, emergencyJobId, expectedMoveIds, mode, startAt, technicianId);
+    return Objects.hash(afterHoursOverride, displacementMode, emergencyExpectedVersion, emergencyJobId, expectedMoveIds, mode, startAt, technicianId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestEmergencyCommitRequest {\n");
+    sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    displacementMode: ").append(toIndentedString(displacementMode)).append("\n");
     sb.append("    emergencyExpectedVersion: ").append(toIndentedString(emergencyExpectedVersion)).append("\n");
     sb.append("    emergencyJobId: ").append(toIndentedString(emergencyJobId)).append("\n");
@@ -393,6 +419,7 @@ public class JobRequestEmergencyCommitRequest {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override");
     openapiFields.add("displacement_mode");
     openapiFields.add("emergency_expected_version");
     openapiFields.add("emergency_job_id");

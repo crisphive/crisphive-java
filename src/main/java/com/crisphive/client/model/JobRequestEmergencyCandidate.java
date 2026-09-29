@@ -14,6 +14,7 @@
 package com.crisphive.client.model;
 
 import java.util.Objects;
+import com.crisphive.client.model.JobRequestMoveWarning;
 import com.crisphive.client.model.JobRequestRescheduleDay;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
@@ -99,6 +100,11 @@ public class JobRequestEmergencyCandidate {
   @SerializedName(SERIALIZED_NAME_TRAVEL_MINUTES)
   @javax.annotation.Nullable
   private BigDecimal travelMinutes;
+
+  public static final String SERIALIZED_NAME_WARNINGS = "warnings";
+  @SerializedName(SERIALIZED_NAME_WARNINGS)
+  @javax.annotation.Nullable
+  private List<JobRequestMoveWarning> warnings = new ArrayList<>();
 
   public JobRequestEmergencyCandidate() {
   }
@@ -282,6 +288,33 @@ public class JobRequestEmergencyCandidate {
   }
 
 
+  public JobRequestEmergencyCandidate warnings(@javax.annotation.Nullable List<JobRequestMoveWarning> warnings) {
+    this.warnings = warnings;
+    return this;
+  }
+
+  public JobRequestEmergencyCandidate addWarningsItem(JobRequestMoveWarning warningsItem) {
+    if (this.warnings == null) {
+      this.warnings = new ArrayList<>();
+    }
+    this.warnings.add(warningsItem);
+    return this;
+  }
+
+  /**
+   * Per-technician warnings, e.g. TIME_OFF_OVERLAP when this technician is on approved leave at the requested time (only reachable with after_hours_override, which stops leave from rejecting).
+   * @return warnings
+   */
+  @javax.annotation.Nullable
+  public List<JobRequestMoveWarning> getWarnings() {
+    return warnings;
+  }
+
+  public void setWarnings(@javax.annotation.Nullable List<JobRequestMoveWarning> warnings) {
+    this.warnings = warnings;
+  }
+
+
 
   @Override
   public boolean equals(Object o) {
@@ -300,12 +333,13 @@ public class JobRequestEmergencyCandidate {
         Objects.equals(this.technicianId, jobRequestEmergencyCandidate.technicianId) &&
         Objects.equals(this.totalMoves, jobRequestEmergencyCandidate.totalMoves) &&
         Objects.equals(this.totalScore, jobRequestEmergencyCandidate.totalScore) &&
-        Objects.equals(this.travelMinutes, jobRequestEmergencyCandidate.travelMinutes);
+        Objects.equals(this.travelMinutes, jobRequestEmergencyCandidate.travelMinutes) &&
+        Objects.equals(this.warnings, jobRequestEmergencyCandidate.warnings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(bookedMinutes, days, distanceKm, fullName, matchedSkills, technicianId, totalMoves, totalScore, travelMinutes);
+    return Objects.hash(bookedMinutes, days, distanceKm, fullName, matchedSkills, technicianId, totalMoves, totalScore, travelMinutes, warnings);
   }
 
   @Override
@@ -321,6 +355,7 @@ public class JobRequestEmergencyCandidate {
     sb.append("    totalMoves: ").append(toIndentedString(totalMoves)).append("\n");
     sb.append("    totalScore: ").append(toIndentedString(totalScore)).append("\n");
     sb.append("    travelMinutes: ").append(toIndentedString(travelMinutes)).append("\n");
+    sb.append("    warnings: ").append(toIndentedString(warnings)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -352,6 +387,7 @@ public class JobRequestEmergencyCandidate {
     openapiFields.add("total_moves");
     openapiFields.add("total_score");
     openapiFields.add("travel_minutes");
+    openapiFields.add("warnings");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -397,6 +433,20 @@ public class JobRequestEmergencyCandidate {
       }
       if ((jsonObj.get("technician_id") != null && !jsonObj.get("technician_id").isJsonNull()) && !jsonObj.get("technician_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `technician_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("technician_id").toString()));
+      }
+      if (jsonObj.get("warnings") != null && !jsonObj.get("warnings").isJsonNull()) {
+        JsonArray jsonArraywarnings = jsonObj.getAsJsonArray("warnings");
+        if (jsonArraywarnings != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("warnings").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `warnings` to be an array in the JSON string but got `%s`", jsonObj.get("warnings").toString()));
+          }
+
+          // validate the optional field `warnings` (array)
+          for (int i = 0; i < jsonArraywarnings.size(); i++) {
+            JobRequestMoveWarning.validateJsonElement(jsonArraywarnings.get(i));
+          };
+        }
       }
   }
 

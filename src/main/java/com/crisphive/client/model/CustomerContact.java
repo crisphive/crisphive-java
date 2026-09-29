@@ -15,14 +15,15 @@ package com.crisphive.client.model;
 
 import java.util.Objects;
 import com.crisphive.client.model.CustomerAddress;
-import com.crisphive.client.model.ServiceArea;
-import com.crisphive.client.model.Technician;
+import com.crisphive.client.model.CustomerServiceAreaRef;
+import com.crisphive.client.model.CustomerTechnicianRef;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 
 import com.google.gson.Gson;
@@ -71,12 +72,22 @@ public class CustomerContact {
   public static final String SERIALIZED_NAME_PREFERRED_TECHNICIAN = "preferred_technician";
   @SerializedName(SERIALIZED_NAME_PREFERRED_TECHNICIAN)
   @javax.annotation.Nullable
-  private Technician preferredTechnician;
+  private CustomerTechnicianRef preferredTechnician;
 
   public static final String SERIALIZED_NAME_SERVICE_AREA = "service_area";
   @SerializedName(SERIALIZED_NAME_SERVICE_AREA)
   @javax.annotation.Nullable
-  private ServiceArea serviceArea;
+  private CustomerServiceAreaRef serviceArea;
+
+  public static final String SERIALIZED_NAME_SMS_OPT_IN = "sms_opt_in";
+  @SerializedName(SERIALIZED_NAME_SMS_OPT_IN)
+  @javax.annotation.Nullable
+  private Boolean smsOptIn;
+
+  public static final String SERIALIZED_NAME_SMS_OPT_IN_AT = "sms_opt_in_at";
+  @SerializedName(SERIALIZED_NAME_SMS_OPT_IN_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime smsOptInAt;
 
   public CustomerContact() {
   }
@@ -138,7 +149,7 @@ public class CustomerContact {
   }
 
 
-  public CustomerContact preferredTechnician(@javax.annotation.Nullable Technician preferredTechnician) {
+  public CustomerContact preferredTechnician(@javax.annotation.Nullable CustomerTechnicianRef preferredTechnician) {
     this.preferredTechnician = preferredTechnician;
     return this;
   }
@@ -148,16 +159,16 @@ public class CustomerContact {
    * @return preferredTechnician
    */
   @javax.annotation.Nullable
-  public Technician getPreferredTechnician() {
+  public CustomerTechnicianRef getPreferredTechnician() {
     return preferredTechnician;
   }
 
-  public void setPreferredTechnician(@javax.annotation.Nullable Technician preferredTechnician) {
+  public void setPreferredTechnician(@javax.annotation.Nullable CustomerTechnicianRef preferredTechnician) {
     this.preferredTechnician = preferredTechnician;
   }
 
 
-  public CustomerContact serviceArea(@javax.annotation.Nullable ServiceArea serviceArea) {
+  public CustomerContact serviceArea(@javax.annotation.Nullable CustomerServiceAreaRef serviceArea) {
     this.serviceArea = serviceArea;
     return this;
   }
@@ -167,12 +178,50 @@ public class CustomerContact {
    * @return serviceArea
    */
   @javax.annotation.Nullable
-  public ServiceArea getServiceArea() {
+  public CustomerServiceAreaRef getServiceArea() {
     return serviceArea;
   }
 
-  public void setServiceArea(@javax.annotation.Nullable ServiceArea serviceArea) {
+  public void setServiceArea(@javax.annotation.Nullable CustomerServiceAreaRef serviceArea) {
     this.serviceArea = serviceArea;
+  }
+
+
+  public CustomerContact smsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+    return this;
+  }
+
+  /**
+   * True when the customer has explicitly consented to receive SMS. SMS notifications to this customer are suppressed while false.
+   * @return smsOptIn
+   */
+  @javax.annotation.Nullable
+  public Boolean getSmsOptIn() {
+    return smsOptIn;
+  }
+
+  public void setSmsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+  }
+
+
+  public CustomerContact smsOptInAt(@javax.annotation.Nullable OffsetDateTime smsOptInAt) {
+    this.smsOptInAt = smsOptInAt;
+    return this;
+  }
+
+  /**
+   * When SMS consent was granted (RFC3339); null when sms_opt_in is false.
+   * @return smsOptInAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getSmsOptInAt() {
+    return smsOptInAt;
+  }
+
+  public void setSmsOptInAt(@javax.annotation.Nullable OffsetDateTime smsOptInAt) {
+    this.smsOptInAt = smsOptInAt;
   }
 
 
@@ -190,12 +239,14 @@ public class CustomerContact {
         Objects.equals(this.email, customerContact.email) &&
         Objects.equals(this.phone, customerContact.phone) &&
         Objects.equals(this.preferredTechnician, customerContact.preferredTechnician) &&
-        Objects.equals(this.serviceArea, customerContact.serviceArea);
+        Objects.equals(this.serviceArea, customerContact.serviceArea) &&
+        Objects.equals(this.smsOptIn, customerContact.smsOptIn) &&
+        Objects.equals(this.smsOptInAt, customerContact.smsOptInAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, email, phone, preferredTechnician, serviceArea);
+    return Objects.hash(address, email, phone, preferredTechnician, serviceArea, smsOptIn, smsOptInAt);
   }
 
   @Override
@@ -207,6 +258,8 @@ public class CustomerContact {
     sb.append("    phone: ").append(toIndentedString(phone)).append("\n");
     sb.append("    preferredTechnician: ").append(toIndentedString(preferredTechnician)).append("\n");
     sb.append("    serviceArea: ").append(toIndentedString(serviceArea)).append("\n");
+    sb.append("    smsOptIn: ").append(toIndentedString(smsOptIn)).append("\n");
+    sb.append("    smsOptInAt: ").append(toIndentedString(smsOptInAt)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -234,6 +287,8 @@ public class CustomerContact {
     openapiFields.add("phone");
     openapiFields.add("preferred_technician");
     openapiFields.add("service_area");
+    openapiFields.add("sms_opt_in");
+    openapiFields.add("sms_opt_in_at");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
@@ -272,11 +327,11 @@ public class CustomerContact {
       }
       // validate the optional field `preferred_technician`
       if (jsonObj.get("preferred_technician") != null && !jsonObj.get("preferred_technician").isJsonNull()) {
-        Technician.validateJsonElement(jsonObj.get("preferred_technician"));
+        CustomerTechnicianRef.validateJsonElement(jsonObj.get("preferred_technician"));
       }
       // validate the optional field `service_area`
       if (jsonObj.get("service_area") != null && !jsonObj.get("service_area").isJsonNull()) {
-        ServiceArea.validateJsonElement(jsonObj.get("service_area"));
+        CustomerServiceAreaRef.validateJsonElement(jsonObj.get("service_area"));
       }
   }
 

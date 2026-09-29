@@ -15,6 +15,7 @@ package com.crisphive.client.model;
 
 import java.util.Objects;
 import com.crisphive.client.model.JobRequestMoveWarning;
+import com.crisphive.client.model.JobRequestReassignFallback;
 import com.crisphive.client.model.JobRequestRescheduleDay;
 import com.crisphive.client.model.JobRequestRescheduleReassignment;
 import com.google.gson.TypeAdapter;
@@ -138,6 +139,11 @@ public class JobRequestEmergencyPlan {
   @SerializedName(SERIALIZED_NAME_MODE)
   @javax.annotation.Nullable
   private ModeEnum mode;
+
+  public static final String SERIALIZED_NAME_REASSIGN_FALLBACKS = "reassign_fallbacks";
+  @SerializedName(SERIALIZED_NAME_REASSIGN_FALLBACKS)
+  @javax.annotation.Nullable
+  private List<JobRequestReassignFallback> reassignFallbacks = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_REASSIGNMENTS = "reassignments";
   @SerializedName(SERIALIZED_NAME_REASSIGNMENTS)
@@ -284,6 +290,33 @@ public class JobRequestEmergencyPlan {
   }
 
 
+  public JobRequestEmergencyPlan reassignFallbacks(@javax.annotation.Nullable List<JobRequestReassignFallback> reassignFallbacks) {
+    this.reassignFallbacks = reassignFallbacks;
+    return this;
+  }
+
+  public JobRequestEmergencyPlan addReassignFallbacksItem(JobRequestReassignFallback reassignFallbacksItem) {
+    if (this.reassignFallbacks == null) {
+      this.reassignFallbacks = new ArrayList<>();
+    }
+    this.reassignFallbacks.add(reassignFallbacksItem);
+    return this;
+  }
+
+  /**
+   * ReassignFallbacks: one entry per displaced job that reassign mode could NOT re-staff, and therefore left in days[].moves[] to be rescheduled. Empty in reschedule mode. Read this INSTEAD of inferring \&quot;nobody was free\&quot; from an empty reassignments[] — the two are different states (no fallbacks + empty reassignments means nothing was displaced at all).
+   * @return reassignFallbacks
+   */
+  @javax.annotation.Nullable
+  public List<JobRequestReassignFallback> getReassignFallbacks() {
+    return reassignFallbacks;
+  }
+
+  public void setReassignFallbacks(@javax.annotation.Nullable List<JobRequestReassignFallback> reassignFallbacks) {
+    this.reassignFallbacks = reassignFallbacks;
+  }
+
+
   public JobRequestEmergencyPlan reassignments(@javax.annotation.Nullable List<JobRequestRescheduleReassignment> reassignments) {
     this.reassignments = reassignments;
     return this;
@@ -363,7 +396,7 @@ public class JobRequestEmergencyPlan {
   }
 
   /**
-   * Non-blocking consequences the coordinator accepts by committing (TIME_OFF_OVERLAP per displaced job landing in the tech&#39;s approved leave).
+   * Non-blocking consequences the coordinator accepts by committing (TIME_OFF_OVERLAP per displaced job landing in the tech&#39;s approved leave, CALENDAR_OVERLAP per displaced job landing on a personal calendar event).
    * @return warnings
    */
   @javax.annotation.Nullable
@@ -392,6 +425,7 @@ public class JobRequestEmergencyPlan {
         Objects.equals(this.emergencyJobId, jobRequestEmergencyPlan.emergencyJobId) &&
         Objects.equals(this.emergencyStart, jobRequestEmergencyPlan.emergencyStart) &&
         Objects.equals(this.mode, jobRequestEmergencyPlan.mode) &&
+        Objects.equals(this.reassignFallbacks, jobRequestEmergencyPlan.reassignFallbacks) &&
         Objects.equals(this.reassignments, jobRequestEmergencyPlan.reassignments) &&
         Objects.equals(this.technicianId, jobRequestEmergencyPlan.technicianId) &&
         Objects.equals(this.totalMoves, jobRequestEmergencyPlan.totalMoves) &&
@@ -400,7 +434,7 @@ public class JobRequestEmergencyPlan {
 
   @Override
   public int hashCode() {
-    return Objects.hash(businessTimezone, days, emergencyEnd, emergencyJobId, emergencyStart, mode, reassignments, technicianId, totalMoves, warnings);
+    return Objects.hash(businessTimezone, days, emergencyEnd, emergencyJobId, emergencyStart, mode, reassignFallbacks, reassignments, technicianId, totalMoves, warnings);
   }
 
   @Override
@@ -413,6 +447,7 @@ public class JobRequestEmergencyPlan {
     sb.append("    emergencyJobId: ").append(toIndentedString(emergencyJobId)).append("\n");
     sb.append("    emergencyStart: ").append(toIndentedString(emergencyStart)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
+    sb.append("    reassignFallbacks: ").append(toIndentedString(reassignFallbacks)).append("\n");
     sb.append("    reassignments: ").append(toIndentedString(reassignments)).append("\n");
     sb.append("    technicianId: ").append(toIndentedString(technicianId)).append("\n");
     sb.append("    totalMoves: ").append(toIndentedString(totalMoves)).append("\n");
@@ -445,6 +480,7 @@ public class JobRequestEmergencyPlan {
     openapiFields.add("emergency_job_id");
     openapiFields.add("emergency_start");
     openapiFields.add("mode");
+    openapiFields.add("reassign_fallbacks");
     openapiFields.add("reassignments");
     openapiFields.add("technician_id");
     openapiFields.add("total_moves");
@@ -501,6 +537,20 @@ public class JobRequestEmergencyPlan {
       // validate the optional field `mode`
       if (jsonObj.get("mode") != null && !jsonObj.get("mode").isJsonNull()) {
         ModeEnum.validateJsonElement(jsonObj.get("mode"));
+      }
+      if (jsonObj.get("reassign_fallbacks") != null && !jsonObj.get("reassign_fallbacks").isJsonNull()) {
+        JsonArray jsonArrayreassignFallbacks = jsonObj.getAsJsonArray("reassign_fallbacks");
+        if (jsonArrayreassignFallbacks != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("reassign_fallbacks").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `reassign_fallbacks` to be an array in the JSON string but got `%s`", jsonObj.get("reassign_fallbacks").toString()));
+          }
+
+          // validate the optional field `reassign_fallbacks` (array)
+          for (int i = 0; i < jsonArrayreassignFallbacks.size(); i++) {
+            JobRequestReassignFallback.validateJsonElement(jsonArrayreassignFallbacks.get(i));
+          };
+        }
       }
       if (jsonObj.get("reassignments") != null && !jsonObj.get("reassignments").isJsonNull()) {
         JsonArray jsonArrayreassignments = jsonObj.getAsJsonArray("reassignments");

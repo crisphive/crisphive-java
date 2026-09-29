@@ -64,7 +64,7 @@ public class CustomerUpdateRequest {
 
   public static final String SERIALIZED_NAME_FULL_NAME = "full_name";
   @SerializedName(SERIALIZED_NAME_FULL_NAME)
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   private String fullName;
 
   public static final String SERIALIZED_NAME_NOTES = "notes";
@@ -87,8 +87,13 @@ public class CustomerUpdateRequest {
   @javax.annotation.Nullable
   private UUID serviceAreaId;
 
+  public static final String SERIALIZED_NAME_SMS_OPT_IN = "sms_opt_in";
+  @SerializedName(SERIALIZED_NAME_SMS_OPT_IN)
+  @javax.annotation.Nullable
+  private Boolean smsOptIn;
+
   /**
-   * Lifecycle status.
+   * Lifecycle status. Omit to leave unchanged; \&quot;\&quot; is ignored.
    */
   @JsonAdapter(StatusEnum.Adapter.class)
   public enum StatusEnum {
@@ -145,7 +150,7 @@ public class CustomerUpdateRequest {
   private StatusEnum status;
 
   /**
-   * Loyalty tier.
+   * Loyalty tier. Omit to leave unchanged; \&quot;\&quot; is ignored (an enum has no empty member).
    */
   @JsonAdapter(TierEnum.Adapter.class)
   public enum TierEnum {
@@ -215,7 +220,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * Postal address and coordinates.
+   * Postal address and coordinates. Omit the whole object to leave the stored address untouched; when present it REPLACES the address block.
    * @return address
    */
   @javax.annotation.Nullable
@@ -234,7 +239,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * Email address.
+   * Email address. Omit to leave unchanged, \&quot;\&quot; to clear.
    * @return email
    */
   @javax.annotation.Nullable
@@ -247,21 +252,21 @@ public class CustomerUpdateRequest {
   }
 
 
-  public CustomerUpdateRequest fullName(@javax.annotation.Nonnull String fullName) {
+  public CustomerUpdateRequest fullName(@javax.annotation.Nullable String fullName) {
     this.fullName = fullName;
     return this;
   }
 
   /**
-   * Customer&#39;s full name. Required; max 255 chars.
+   * Customer&#39;s full name. Omit to leave unchanged; an empty or blank value is ignored (a customer cannot be left nameless). Max 255 chars.
    * @return fullName
    */
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   public String getFullName() {
     return fullName;
   }
 
-  public void setFullName(@javax.annotation.Nonnull String fullName) {
+  public void setFullName(@javax.annotation.Nullable String fullName) {
     this.fullName = fullName;
   }
 
@@ -272,7 +277,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * Free-form internal notes about the customer; max 4000 chars.
+   * Free-form internal notes about the customer. Omit to leave unchanged, \&quot;\&quot; to clear; max 4000 chars.
    * @return notes
    */
   @javax.annotation.Nullable
@@ -291,7 +296,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * Phone number. 10–20 chars.
+   * Phone number in E.164 international format (&#x60;+16135550188&#x60;); a bare national number is rejected with PHONE_INVALID — see createCustomerReq.Phone. Omit to leave unchanged, \&quot;\&quot; to clear. 10–20 chars.
    * @return phone
    */
   @javax.annotation.Nullable
@@ -310,7 +315,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * UUID of the technician this customer prefers. Must belong to this business.
+   * UUID of the technician this customer prefers. Omit to leave unchanged, \&quot;\&quot; to clear. Must belong to this business.
    * @return preferredTechnicianId
    */
   @javax.annotation.Nullable
@@ -329,7 +334,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * UUID of the service area for this customer. Must belong to this business.
+   * UUID of the service area for this customer. Omit to leave unchanged, \&quot;\&quot; to clear. Must belong to this business.
    * @return serviceAreaId
    */
   @javax.annotation.Nullable
@@ -342,13 +347,32 @@ public class CustomerUpdateRequest {
   }
 
 
+  public CustomerUpdateRequest smsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+    return this;
+  }
+
+  /**
+   * SMS consent, tri-state: omit/null &#x3D; leave unchanged; true &#x3D; grant (only when the customer explicitly consented — the original consent timestamp is preserved); false &#x3D; revoke (opt-out, stops SMS immediately).
+   * @return smsOptIn
+   */
+  @javax.annotation.Nullable
+  public Boolean getSmsOptIn() {
+    return smsOptIn;
+  }
+
+  public void setSmsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+  }
+
+
   public CustomerUpdateRequest status(@javax.annotation.Nullable StatusEnum status) {
     this.status = status;
     return this;
   }
 
   /**
-   * Lifecycle status.
+   * Lifecycle status. Omit to leave unchanged; \&quot;\&quot; is ignored.
    * @return status
    */
   @javax.annotation.Nullable
@@ -367,7 +391,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * Loyalty tier.
+   * Loyalty tier. Omit to leave unchanged; \&quot;\&quot; is ignored (an enum has no empty member).
    * @return tier
    */
   @javax.annotation.Nullable
@@ -386,7 +410,7 @@ public class CustomerUpdateRequest {
   }
 
   /**
-   * Your external reference for this customer. Optional; max 32 chars.
+   * Your external reference for this customer. Omit to leave unchanged, \&quot;\&quot; to clear. Max 32 chars.
    * @return uid
    */
   @javax.annotation.Nullable
@@ -416,6 +440,7 @@ public class CustomerUpdateRequest {
         Objects.equals(this.phone, customerUpdateRequest.phone) &&
         Objects.equals(this.preferredTechnicianId, customerUpdateRequest.preferredTechnicianId) &&
         Objects.equals(this.serviceAreaId, customerUpdateRequest.serviceAreaId) &&
+        Objects.equals(this.smsOptIn, customerUpdateRequest.smsOptIn) &&
         Objects.equals(this.status, customerUpdateRequest.status) &&
         Objects.equals(this.tier, customerUpdateRequest.tier) &&
         Objects.equals(this.uid, customerUpdateRequest.uid);
@@ -423,7 +448,7 @@ public class CustomerUpdateRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, email, fullName, notes, phone, preferredTechnicianId, serviceAreaId, status, tier, uid);
+    return Objects.hash(address, email, fullName, notes, phone, preferredTechnicianId, serviceAreaId, smsOptIn, status, tier, uid);
   }
 
   @Override
@@ -437,6 +462,7 @@ public class CustomerUpdateRequest {
     sb.append("    phone: ").append(toIndentedString(phone)).append("\n");
     sb.append("    preferredTechnicianId: ").append(toIndentedString(preferredTechnicianId)).append("\n");
     sb.append("    serviceAreaId: ").append(toIndentedString(serviceAreaId)).append("\n");
+    sb.append("    smsOptIn: ").append(toIndentedString(smsOptIn)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    tier: ").append(toIndentedString(tier)).append("\n");
     sb.append("    uid: ").append(toIndentedString(uid)).append("\n");
@@ -469,13 +495,13 @@ public class CustomerUpdateRequest {
     openapiFields.add("phone");
     openapiFields.add("preferred_technician_id");
     openapiFields.add("service_area_id");
+    openapiFields.add("sms_opt_in");
     openapiFields.add("status");
     openapiFields.add("tier");
     openapiFields.add("uid");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("full_name");
   }
 
   /**
@@ -498,13 +524,6 @@ public class CustomerUpdateRequest {
           throw new IllegalArgumentException(String.format("The field `%s` in the JSON string is not defined in the `CustomerUpdateRequest` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
         }
       }
-
-      // check to make sure all required properties/fields are present in the JSON string
-      for (String requiredField : CustomerUpdateRequest.openapiRequiredFields) {
-        if (jsonElement.getAsJsonObject().get(requiredField) == null) {
-          throw new IllegalArgumentException(String.format("The required field `%s` is not found in the JSON string: %s", requiredField, jsonElement.toString()));
-        }
-      }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       // validate the optional field `address`
       if (jsonObj.get("address") != null && !jsonObj.get("address").isJsonNull()) {
@@ -513,7 +532,7 @@ public class CustomerUpdateRequest {
       if ((jsonObj.get("email") != null && !jsonObj.get("email").isJsonNull()) && !jsonObj.get("email").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `email` to be a primitive type in the JSON string but got `%s`", jsonObj.get("email").toString()));
       }
-      if (!jsonObj.get("full_name").isJsonPrimitive()) {
+      if ((jsonObj.get("full_name") != null && !jsonObj.get("full_name").isJsonNull()) && !jsonObj.get("full_name").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `full_name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("full_name").toString()));
       }
       if ((jsonObj.get("notes") != null && !jsonObj.get("notes").isJsonNull()) && !jsonObj.get("notes").isJsonPrimitive()) {

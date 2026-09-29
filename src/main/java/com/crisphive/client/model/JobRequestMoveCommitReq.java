@@ -53,6 +53,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestMoveCommitReq {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE = "after_hours_override";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverride;
+
   public static final String SERIALIZED_NAME_EXPECTED_MEMBER_IDS = "expected_member_ids";
   @SerializedName(SERIALIZED_NAME_EXPECTED_MEMBER_IDS)
   @javax.annotation.Nullable
@@ -137,6 +142,25 @@ public class JobRequestMoveCommitReq {
 
   public JobRequestMoveCommitReq() {
   }
+
+  public JobRequestMoveCommitReq afterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+    return this;
+  }
+
+  /**
+   * AfterHoursOverride — drop the non-working-day rejection for a P0 whose technician the coordinator has already phoned. P0 only (JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 otherwise), and the preview then carries an AFTER_HOURS warning. Commit must repeat what the preview was run with.
+   * @return afterHoursOverride
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverride() {
+    return afterHoursOverride;
+  }
+
+  public void setAfterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+  }
+
 
   public JobRequestMoveCommitReq expectedMemberIds(@javax.annotation.Nullable List<UUID> expectedMemberIds) {
     this.expectedMemberIds = expectedMemberIds;
@@ -279,7 +303,8 @@ public class JobRequestMoveCommitReq {
       return false;
     }
     JobRequestMoveCommitReq jobRequestMoveCommitReq = (JobRequestMoveCommitReq) o;
-    return Objects.equals(this.expectedMemberIds, jobRequestMoveCommitReq.expectedMemberIds) &&
+    return Objects.equals(this.afterHoursOverride, jobRequestMoveCommitReq.afterHoursOverride) &&
+        Objects.equals(this.expectedMemberIds, jobRequestMoveCommitReq.expectedMemberIds) &&
         Objects.equals(this.expectedMoveIds, jobRequestMoveCommitReq.expectedMoveIds) &&
         Objects.equals(this.expectedVersion, jobRequestMoveCommitReq.expectedVersion) &&
         Objects.equals(this.mode, jobRequestMoveCommitReq.mode) &&
@@ -289,13 +314,14 @@ public class JobRequestMoveCommitReq {
 
   @Override
   public int hashCode() {
-    return Objects.hash(expectedMemberIds, expectedMoveIds, expectedVersion, mode, startAt, technicianId);
+    return Objects.hash(afterHoursOverride, expectedMemberIds, expectedMoveIds, expectedVersion, mode, startAt, technicianId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestMoveCommitReq {\n");
+    sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    expectedMemberIds: ").append(toIndentedString(expectedMemberIds)).append("\n");
     sb.append("    expectedMoveIds: ").append(toIndentedString(expectedMoveIds)).append("\n");
     sb.append("    expectedVersion: ").append(toIndentedString(expectedVersion)).append("\n");
@@ -324,6 +350,7 @@ public class JobRequestMoveCommitReq {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override");
     openapiFields.add("expected_member_ids");
     openapiFields.add("expected_move_ids");
     openapiFields.add("expected_version");

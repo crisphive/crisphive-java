@@ -34,6 +34,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,6 +150,11 @@ public class JobRequest {
   @SerializedName(SERIALIZED_NAME_DESCRIPTION)
   @javax.annotation.Nullable
   private String description;
+
+  public static final String SERIALIZED_NAME_DISTANCE_KM = "distance_km";
+  @SerializedName(SERIALIZED_NAME_DISTANCE_KM)
+  @javax.annotation.Nullable
+  private BigDecimal distanceKm;
 
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
@@ -614,6 +620,25 @@ public class JobRequest {
   }
 
 
+  public JobRequest distanceKm(@javax.annotation.Nullable BigDecimal distanceKm) {
+    this.distanceKm = distanceKm;
+    return this;
+  }
+
+  /**
+   * Driving distance from the technician&#39;s start location to the job site, in kilometres. Detail reads only — omitted when unknown. Named _km to match distance_km on the nearby-technician and emergency-candidate DTOs.
+   * @return distanceKm
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getDistanceKm() {
+    return distanceKm;
+  }
+
+  public void setDistanceKm(@javax.annotation.Nullable BigDecimal distanceKm) {
+    this.distanceKm = distanceKm;
+  }
+
+
   public JobRequest id(@javax.annotation.Nullable UUID id) {
     this.id = id;
     return this;
@@ -979,6 +1004,7 @@ public class JobRequest {
         Objects.equals(this.customerUrl, jobRequest.customerUrl) &&
         Objects.equals(this.deletedAt, jobRequest.deletedAt) &&
         Objects.equals(this.description, jobRequest.description) &&
+        Objects.equals(this.distanceKm, jobRequest.distanceKm) &&
         Objects.equals(this.id, jobRequest.id) &&
         Objects.equals(this.jobTypeId, jobRequest.jobTypeId) &&
         Objects.equals(this.jobTypeName, jobRequest.jobTypeName) &&
@@ -1000,7 +1026,7 @@ public class JobRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(actionAudit, address, archive, assignedVehicle, assignment, attention, businessId, completedAt, completedByUserId, createdAt, crew, currentStatus, customer, customerUrl, deletedAt, description, id, jobTypeId, jobTypeName, nextActions, priority, quote, rating, schedule, shortCode, skills, slaDeadline, slaEscalatedAt, slaWarnedAt, statusVersion, updatedAt, workflowId, workflowName);
+    return Objects.hash(actionAudit, address, archive, assignedVehicle, assignment, attention, businessId, completedAt, completedByUserId, createdAt, crew, currentStatus, customer, customerUrl, deletedAt, description, distanceKm, id, jobTypeId, jobTypeName, nextActions, priority, quote, rating, schedule, shortCode, skills, slaDeadline, slaEscalatedAt, slaWarnedAt, statusVersion, updatedAt, workflowId, workflowName);
   }
 
   @Override
@@ -1023,6 +1049,7 @@ public class JobRequest {
     sb.append("    customerUrl: ").append(toIndentedString(customerUrl)).append("\n");
     sb.append("    deletedAt: ").append(toIndentedString(deletedAt)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    distanceKm: ").append(toIndentedString(distanceKm)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    jobTypeId: ").append(toIndentedString(jobTypeId)).append("\n");
     sb.append("    jobTypeName: ").append(toIndentedString(jobTypeName)).append("\n");
@@ -1078,6 +1105,7 @@ public class JobRequest {
     openapiFields.add("customer_url");
     openapiFields.add("deleted_at");
     openapiFields.add("description");
+    openapiFields.add("distance_km");
     openapiFields.add("id");
     openapiFields.add("job_type_id");
     openapiFields.add("job_type_name");

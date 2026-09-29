@@ -161,7 +161,7 @@ public class JobRequestSkillSummary {
   }
 
   /**
-   * Skill display name (resolved to the request locale).
+   * Skill display name (canonical; skill names carry no locale translations, so this is NOT resolved to the request locale).
    * @return name
    */
   @javax.annotation.Nullable

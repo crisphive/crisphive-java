@@ -184,6 +184,11 @@ public class Technician {
   @javax.annotation.Nullable
   private List<TechnicianLeadRef> leads = new ArrayList<>();
 
+  public static final String SERIALIZED_NAME_LEFT_AT = "left_at";
+  @SerializedName(SERIALIZED_NAME_LEFT_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime leftAt;
+
   public static final String SERIALIZED_NAME_PHONE = "phone";
   @SerializedName(SERIALIZED_NAME_PHONE)
   @javax.annotation.Nullable
@@ -193,6 +198,69 @@ public class Technician {
   @SerializedName(SERIALIZED_NAME_ROLE)
   @javax.annotation.Nullable
   private String role;
+
+  /**
+   * Stable machine key of the role for SYSTEM groups; empty for custom (business-authored) groups. Compare role-specific client behavior against THIS, never against the localized role name.
+   */
+  @JsonAdapter(RoleKeyEnum.Adapter.class)
+  public enum RoleKeyEnum {
+    OWNER("owner"),
+    
+    ADMINISTRATOR("administrator"),
+    
+    BOOKING_COORDINATOR("booking_coordinator"),
+    
+    SUPERVISOR("supervisor"),
+    
+    TECHNICIAN("technician");
+
+    private String value;
+
+    RoleKeyEnum(String value) {
+      this.value = value;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    public static RoleKeyEnum fromValue(String value) {
+      for (RoleKeyEnum b : RoleKeyEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+
+    public static class Adapter extends TypeAdapter<RoleKeyEnum> {
+      @Override
+      public void write(final JsonWriter jsonWriter, final RoleKeyEnum enumeration) throws IOException {
+        jsonWriter.value(enumeration.getValue());
+      }
+
+      @Override
+      public RoleKeyEnum read(final JsonReader jsonReader) throws IOException {
+        String value =  jsonReader.nextString();
+        return RoleKeyEnum.fromValue(value);
+      }
+    }
+
+    public static void validateJsonElement(JsonElement jsonElement) throws IOException {
+      String value = jsonElement.getAsString();
+      RoleKeyEnum.fromValue(value);
+    }
+  }
+
+  public static final String SERIALIZED_NAME_ROLE_KEY = "role_key";
+  @SerializedName(SERIALIZED_NAME_ROLE_KEY)
+  @javax.annotation.Nullable
+  private RoleKeyEnum roleKey;
 
   public static final String SERIALIZED_NAME_SERVICE_AREAS = "service_areas";
   @SerializedName(SERIALIZED_NAME_SERVICE_AREAS)
@@ -571,6 +639,25 @@ public class Technician {
   }
 
 
+  public Technician leftAt(@javax.annotation.Nullable OffsetDateTime leftAt) {
+    this.leftAt = leftAt;
+    return this;
+  }
+
+  /**
+   * Set (RFC3339) only when the member RESIGNED themselves; null otherwise.  It is what separates the two meanings of &#x60;status: \&quot;deactive\&quot;&#x60;: with &#x60;left_at&#x60; set the member chose to leave (\&quot;Đã nghỉ việc\&quot;), with it null the business suspended them (\&quot;Tạm khoá\&quot;). Render them differently — the roster otherwise shows somebody who resigned exactly like somebody who was disciplined. Cleared when they are reactivated.
+   * @return leftAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getLeftAt() {
+    return leftAt;
+  }
+
+  public void setLeftAt(@javax.annotation.Nullable OffsetDateTime leftAt) {
+    this.leftAt = leftAt;
+  }
+
+
   public Technician phone(@javax.annotation.Nullable String phone) {
     this.phone = phone;
     return this;
@@ -596,7 +683,7 @@ public class Technician {
   }
 
   /**
-   * Resolved role/group name (e.g. \&quot;Technician\&quot;, \&quot;Owner\&quot;).
+   * Resolved role/group name, localized to the request locale (e.g. \&quot;Technician\&quot;, \&quot;기술자\&quot;).
    * @return role
    */
   @javax.annotation.Nullable
@@ -606,6 +693,25 @@ public class Technician {
 
   public void setRole(@javax.annotation.Nullable String role) {
     this.role = role;
+  }
+
+
+  public Technician roleKey(@javax.annotation.Nullable RoleKeyEnum roleKey) {
+    this.roleKey = roleKey;
+    return this;
+  }
+
+  /**
+   * Stable machine key of the role for SYSTEM groups; empty for custom (business-authored) groups. Compare role-specific client behavior against THIS, never against the localized role name.
+   * @return roleKey
+   */
+  @javax.annotation.Nullable
+  public RoleKeyEnum getRoleKey() {
+    return roleKey;
+  }
+
+  public void setRoleKey(@javax.annotation.Nullable RoleKeyEnum roleKey) {
+    this.roleKey = roleKey;
   }
 
 
@@ -801,8 +907,10 @@ public class Technician {
         Objects.equals(this.joinDate, technician.joinDate) &&
         Objects.equals(this.lastLoginAt, technician.lastLoginAt) &&
         Objects.equals(this.leads, technician.leads) &&
+        Objects.equals(this.leftAt, technician.leftAt) &&
         Objects.equals(this.phone, technician.phone) &&
         Objects.equals(this.role, technician.role) &&
+        Objects.equals(this.roleKey, technician.roleKey) &&
         Objects.equals(this.serviceAreas, technician.serviceAreas) &&
         Objects.equals(this.startLocationLat, technician.startLocationLat) &&
         Objects.equals(this.startLocationLong, technician.startLocationLong) &&
@@ -815,7 +923,7 @@ public class Technician {
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, assignmentTier, buddyIds, businessGroupId, businessId, createdAt, deletedAt, email, fullName, id, jobTitle, joinDate, lastLoginAt, leads, phone, role, serviceAreas, startLocationLat, startLocationLong, startLocationType, status, updatedAt, userId, vehicleIds);
+    return Objects.hash(address, assignmentTier, buddyIds, businessGroupId, businessId, createdAt, deletedAt, email, fullName, id, jobTitle, joinDate, lastLoginAt, leads, leftAt, phone, role, roleKey, serviceAreas, startLocationLat, startLocationLong, startLocationType, status, updatedAt, userId, vehicleIds);
   }
 
   @Override
@@ -836,8 +944,10 @@ public class Technician {
     sb.append("    joinDate: ").append(toIndentedString(joinDate)).append("\n");
     sb.append("    lastLoginAt: ").append(toIndentedString(lastLoginAt)).append("\n");
     sb.append("    leads: ").append(toIndentedString(leads)).append("\n");
+    sb.append("    leftAt: ").append(toIndentedString(leftAt)).append("\n");
     sb.append("    phone: ").append(toIndentedString(phone)).append("\n");
     sb.append("    role: ").append(toIndentedString(role)).append("\n");
+    sb.append("    roleKey: ").append(toIndentedString(roleKey)).append("\n");
     sb.append("    serviceAreas: ").append(toIndentedString(serviceAreas)).append("\n");
     sb.append("    startLocationLat: ").append(toIndentedString(startLocationLat)).append("\n");
     sb.append("    startLocationLong: ").append(toIndentedString(startLocationLong)).append("\n");
@@ -882,8 +992,10 @@ public class Technician {
     openapiFields.add("join_date");
     openapiFields.add("last_login_at");
     openapiFields.add("leads");
+    openapiFields.add("left_at");
     openapiFields.add("phone");
     openapiFields.add("role");
+    openapiFields.add("role_key");
     openapiFields.add("service_areas");
     openapiFields.add("start_location_lat");
     openapiFields.add("start_location_long");
@@ -970,6 +1082,13 @@ public class Technician {
       }
       if ((jsonObj.get("role") != null && !jsonObj.get("role").isJsonNull()) && !jsonObj.get("role").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `role` to be a primitive type in the JSON string but got `%s`", jsonObj.get("role").toString()));
+      }
+      if ((jsonObj.get("role_key") != null && !jsonObj.get("role_key").isJsonNull()) && !jsonObj.get("role_key").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `role_key` to be a primitive type in the JSON string but got `%s`", jsonObj.get("role_key").toString()));
+      }
+      // validate the optional field `role_key`
+      if (jsonObj.get("role_key") != null && !jsonObj.get("role_key").isJsonNull()) {
+        RoleKeyEnum.validateJsonElement(jsonObj.get("role_key"));
       }
       if (jsonObj.get("service_areas") != null && !jsonObj.get("service_areas").isJsonNull()) {
         JsonArray jsonArrayserviceAreas = jsonObj.getAsJsonArray("service_areas");

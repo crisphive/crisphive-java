@@ -77,6 +77,11 @@ public class CustomerListItem {
   @javax.annotation.Nullable
   private Integer requestCount;
 
+  public static final String SERIALIZED_NAME_SMS_OPT_IN = "sms_opt_in";
+  @SerializedName(SERIALIZED_NAME_SMS_OPT_IN)
+  @javax.annotation.Nullable
+  private Boolean smsOptIn;
+
   /**
    * Lifecycle status.
    */
@@ -299,6 +304,25 @@ public class CustomerListItem {
   }
 
 
+  public CustomerListItem smsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+    return this;
+  }
+
+  /**
+   * True when the customer has explicitly consented to receive SMS.
+   * @return smsOptIn
+   */
+  @javax.annotation.Nullable
+  public Boolean getSmsOptIn() {
+    return smsOptIn;
+  }
+
+  public void setSmsOptIn(@javax.annotation.Nullable Boolean smsOptIn) {
+    this.smsOptIn = smsOptIn;
+  }
+
+
   public CustomerListItem status(@javax.annotation.Nullable StatusEnum status) {
     this.status = status;
     return this;
@@ -390,6 +414,7 @@ public class CustomerListItem {
         Objects.equals(this.id, customerListItem.id) &&
         Objects.equals(this.lastRequestAt, customerListItem.lastRequestAt) &&
         Objects.equals(this.requestCount, customerListItem.requestCount) &&
+        Objects.equals(this.smsOptIn, customerListItem.smsOptIn) &&
         Objects.equals(this.status, customerListItem.status) &&
         Objects.equals(this.tier, customerListItem.tier) &&
         Objects.equals(this.uid, customerListItem.uid) &&
@@ -398,7 +423,7 @@ public class CustomerListItem {
 
   @Override
   public int hashCode() {
-    return Objects.hash(deletedAt, fullName, id, lastRequestAt, requestCount, status, tier, uid, updatedAt);
+    return Objects.hash(deletedAt, fullName, id, lastRequestAt, requestCount, smsOptIn, status, tier, uid, updatedAt);
   }
 
   @Override
@@ -410,6 +435,7 @@ public class CustomerListItem {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    lastRequestAt: ").append(toIndentedString(lastRequestAt)).append("\n");
     sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
+    sb.append("    smsOptIn: ").append(toIndentedString(smsOptIn)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    tier: ").append(toIndentedString(tier)).append("\n");
     sb.append("    uid: ").append(toIndentedString(uid)).append("\n");
@@ -441,6 +467,7 @@ public class CustomerListItem {
     openapiFields.add("id");
     openapiFields.add("last_request_at");
     openapiFields.add("request_count");
+    openapiFields.add("sms_opt_in");
     openapiFields.add("status");
     openapiFields.add("tier");
     openapiFields.add("uid");

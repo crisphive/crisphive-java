@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -51,6 +52,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestConfirmRequest {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE = "after_hours_override";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverride;
+
   public static final String SERIALIZED_NAME_ARRIVAL_WINDOW_MINUTES = "arrival_window_minutes";
   @SerializedName(SERIALIZED_NAME_ARRIVAL_WINDOW_MINUTES)
   @javax.annotation.Nullable
@@ -59,7 +65,7 @@ public class JobRequestConfirmRequest {
   public static final String SERIALIZED_NAME_SCHEDULED_AT = "scheduled_at";
   @SerializedName(SERIALIZED_NAME_SCHEDULED_AT)
   @javax.annotation.Nullable
-  private String scheduledAt;
+  private OffsetDateTime scheduledAt;
 
   public static final String SERIALIZED_NAME_STATUS_VERSION = "status_version";
   @SerializedName(SERIALIZED_NAME_STATUS_VERSION)
@@ -73,6 +79,25 @@ public class JobRequestConfirmRequest {
 
   public JobRequestConfirmRequest() {
   }
+
+  public JobRequestConfirmRequest afterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+    return this;
+  }
+
+  /**
+   * AfterHoursOverride (BUSINESS confirm only): schedule this P0 outside the technician&#39;s working hours or approved time-off — you have phoned them and they agreed. Requires priority p0, a single-person job, and technician_id. Double-booking, service area, required skills and the lead-tier rule still reject. Deliberately NOT a binding-tag rule: gin evaluates tags before the handler, which would make the three AFTER_HOURS codes unreachable.
+   * @return afterHoursOverride
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverride() {
+    return afterHoursOverride;
+  }
+
+  public void setAfterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+  }
+
 
   public JobRequestConfirmRequest arrivalWindowMinutes(@javax.annotation.Nullable Integer arrivalWindowMinutes) {
     this.arrivalWindowMinutes = arrivalWindowMinutes;
@@ -93,21 +118,21 @@ public class JobRequestConfirmRequest {
   }
 
 
-  public JobRequestConfirmRequest scheduledAt(@javax.annotation.Nullable String scheduledAt) {
+  public JobRequestConfirmRequest scheduledAt(@javax.annotation.Nullable OffsetDateTime scheduledAt) {
     this.scheduledAt = scheduledAt;
     return this;
   }
 
   /**
-   * Chosen start time — business-local naive datetime, no offset (the business_time.datetime value from the time-segments picker). The server converts to UTC using the job&#39;s business timezone.
+   * Chosen start time — business-local wall clock (the business_time.datetime value from the time-segments picker), converted to UTC against the job&#39;s business timezone. Seconds may be omitted and a space may replace the T. An offset is accepted only when it agrees with the business timezone; a disagreeing one is refused with JOB_REQUEST_INVALID_INPUT naming what it means locally.
    * @return scheduledAt
    */
   @javax.annotation.Nullable
-  public String getScheduledAt() {
+  public OffsetDateTime getScheduledAt() {
     return scheduledAt;
   }
 
-  public void setScheduledAt(@javax.annotation.Nullable String scheduledAt) {
+  public void setScheduledAt(@javax.annotation.Nullable OffsetDateTime scheduledAt) {
     this.scheduledAt = scheduledAt;
   }
 
@@ -160,7 +185,8 @@ public class JobRequestConfirmRequest {
       return false;
     }
     JobRequestConfirmRequest jobRequestConfirmRequest = (JobRequestConfirmRequest) o;
-    return Objects.equals(this.arrivalWindowMinutes, jobRequestConfirmRequest.arrivalWindowMinutes) &&
+    return Objects.equals(this.afterHoursOverride, jobRequestConfirmRequest.afterHoursOverride) &&
+        Objects.equals(this.arrivalWindowMinutes, jobRequestConfirmRequest.arrivalWindowMinutes) &&
         Objects.equals(this.scheduledAt, jobRequestConfirmRequest.scheduledAt) &&
         Objects.equals(this.statusVersion, jobRequestConfirmRequest.statusVersion) &&
         Objects.equals(this.technicianId, jobRequestConfirmRequest.technicianId);
@@ -168,13 +194,14 @@ public class JobRequestConfirmRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(arrivalWindowMinutes, scheduledAt, statusVersion, technicianId);
+    return Objects.hash(afterHoursOverride, arrivalWindowMinutes, scheduledAt, statusVersion, technicianId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestConfirmRequest {\n");
+    sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    arrivalWindowMinutes: ").append(toIndentedString(arrivalWindowMinutes)).append("\n");
     sb.append("    scheduledAt: ").append(toIndentedString(scheduledAt)).append("\n");
     sb.append("    statusVersion: ").append(toIndentedString(statusVersion)).append("\n");
@@ -201,6 +228,7 @@ public class JobRequestConfirmRequest {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override");
     openapiFields.add("arrival_window_minutes");
     openapiFields.add("scheduled_at");
     openapiFields.add("status_version");
@@ -231,9 +259,6 @@ public class JobRequestConfirmRequest {
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
-      if ((jsonObj.get("scheduled_at") != null && !jsonObj.get("scheduled_at").isJsonNull()) && !jsonObj.get("scheduled_at").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `scheduled_at` to be a primitive type in the JSON string but got `%s`", jsonObj.get("scheduled_at").toString()));
-      }
       if ((jsonObj.get("technician_id") != null && !jsonObj.get("technician_id").isJsonNull()) && !jsonObj.get("technician_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `technician_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("technician_id").toString()));
       }

@@ -94,9 +94,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -165,7 +165,7 @@ public class TechnicianApi {
 
     /**
      * Add a technician
-     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created (no invite email — login is passwordless later). Either way the membership starts active. If the technician was previously removed (deactive) they are reactivated instead. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created. Either way the membership starts active. The new member is notified (live mode only, best-effort): an email when &#x60;email&#x60; is supplied, an SMS when &#x60;phone&#x60; is supplied, both when both — informational only, no activation step (login stays passwordless: magic link / OTP). Re-adding someone: if the person is currently SUSPENDED on this business (a dashboard action — not reachable via this API), the create REACTIVATES that existing membership (same technician id, their existing group; also notified). A technician REMOVED with deleteTechnician is a closed membership: re-adding the same email/phone links the SAME underlying person (no duplicate identity) but creates a FRESH membership with a NEW id — history stays under the old one. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
      * @param technicianCreateRequest Technician details (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @return CreateTechnician200Response
@@ -175,9 +175,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -190,7 +190,7 @@ public class TechnicianApi {
 
     /**
      * Add a technician
-     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created (no invite email — login is passwordless later). Either way the membership starts active. If the technician was previously removed (deactive) they are reactivated instead. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created. Either way the membership starts active. The new member is notified (live mode only, best-effort): an email when &#x60;email&#x60; is supplied, an SMS when &#x60;phone&#x60; is supplied, both when both — informational only, no activation step (login stays passwordless: magic link / OTP). Re-adding someone: if the person is currently SUSPENDED on this business (a dashboard action — not reachable via this API), the create REACTIVATES that existing membership (same technician id, their existing group; also notified). A technician REMOVED with deleteTechnician is a closed membership: re-adding the same email/phone links the SAME underlying person (no duplicate identity) but creates a FRESH membership with a NEW id — history stays under the old one. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
      * @param technicianCreateRequest Technician details (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @return ApiResponse&lt;CreateTechnician200Response&gt;
@@ -200,9 +200,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -216,7 +216,7 @@ public class TechnicianApi {
 
     /**
      * Add a technician (asynchronously)
-     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created (no invite email — login is passwordless later). Either way the membership starts active. If the technician was previously removed (deactive) they are reactivated instead. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
+     * Creates a technician membership under the current business. If the phone/email matches an existing user, their account is linked. Otherwise a new user identity is created. Either way the membership starts active. The new member is notified (live mode only, best-effort): an email when &#x60;email&#x60; is supplied, an SMS when &#x60;phone&#x60; is supplied, both when both — informational only, no activation step (login stays passwordless: magic link / OTP). Re-adding someone: if the person is currently SUSPENDED on this business (a dashboard action — not reachable via this API), the create REACTIVATES that existing membership (same technician id, their existing group; also notified). A technician REMOVED with deleteTechnician is a closed membership: re-adding the same email/phone links the SAME underlying person (no duplicate identity) but creates a FRESH membership with a NEW id — history stays under the old one. Owner/Administrator groups cannot be assigned via API key, and not at all in sandbox mode.  Optional relations (all validated; any missing id → 404 TECHNICIAN_NOT_FOUND with &#x60;missing_ids&#x60;): &#x60;buddy_ids&#x60; sets this technician&#39;s buddy list (use when creating a lead); &#x60;lead_ids&#x60; adds this technician as a buddy of each named lead (use when creating a buddy — the buddy-side way to attach the same lead↔buddy relation); &#x60;service_area_ids&#x60; assigns the technician to those service areas.  &#x60;start_location_type&#x3D;office&#x60; snapshots the business address + coordinates into the technician at create time; &#x60;address&#x60;, &#x60;start_location_lat&#x60;, &#x60;start_location_long&#x60; in the body are ignored. Requires the business to have coordinates set (else 400 BUSINESS_LOCATION_MISSING). &#x60;start_location_type&#x3D;home&#x60; (or empty) uses the address + coordinates from the body.
      * @param technicianCreateRequest Technician details (required)
      * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
      * @param _callback The callback to be executed when the API call finishes
@@ -227,9 +227,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> BUSINESS_GROUP_NOT_FOUND | TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_ALREADY_MEMBER | TECHNICIAN_IDENTITY_CONFLICT | TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -254,6 +254,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -316,8 +317,8 @@ public class TechnicianApi {
     }
 
     /**
-     * Remove a technician
-     * Soft-removes a technician from the business by setting status to deactive
+     * Remove a technician from the business
+     * Closes the technician&#39;s membership: the profile is set to deactive and soft-deleted, and their access to this business ends on their next request. In the same operation they are removed from every other technician&#39;s buddy list, vehicles they own are released, and any personal-calendar connection they made for this business is revoked. Fires the technician.deleted webhook. Their underlying user identity is untouched, and so are memberships at other businesses.  Removal does NOT move their work: jobs still assigned to them keep the assignment and must be re-staffed. Do that BEFORE removing: use listCrewCandidates on each upcoming job, or re-plan the whole day with previewAbsenceResolve / commitAbsenceResolve (which needs a time-off record covering those days; create one with createTechnicianTimeOff).  This is a closed membership, not a pause. Re-adding the same email or phone later with createTechnician links the SAME person but opens a FRESH membership with a NEW technician id and none of the old buddy, vehicle or area links. If you expect the person back, suspend them from the dashboard instead; a suspended member is reactivated in place by createTechnician, keeping their id and group.  The last active Owner cannot be removed (TECHNICIAN_LAST_OWNER). API keys the person created are NOT revoked (an HR action must not take an integration down); if any are still active, the business Owners and Administrators are emailed a list of them.
      * @param id Technician ID (required)
      * @return ResponseEnvelope
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -327,6 +328,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -338,8 +340,8 @@ public class TechnicianApi {
     }
 
     /**
-     * Remove a technician
-     * Soft-removes a technician from the business by setting status to deactive
+     * Remove a technician from the business
+     * Closes the technician&#39;s membership: the profile is set to deactive and soft-deleted, and their access to this business ends on their next request. In the same operation they are removed from every other technician&#39;s buddy list, vehicles they own are released, and any personal-calendar connection they made for this business is revoked. Fires the technician.deleted webhook. Their underlying user identity is untouched, and so are memberships at other businesses.  Removal does NOT move their work: jobs still assigned to them keep the assignment and must be re-staffed. Do that BEFORE removing: use listCrewCandidates on each upcoming job, or re-plan the whole day with previewAbsenceResolve / commitAbsenceResolve (which needs a time-off record covering those days; create one with createTechnicianTimeOff).  This is a closed membership, not a pause. Re-adding the same email or phone later with createTechnician links the SAME person but opens a FRESH membership with a NEW technician id and none of the old buddy, vehicle or area links. If you expect the person back, suspend them from the dashboard instead; a suspended member is reactivated in place by createTechnician, keeping their id and group.  The last active Owner cannot be removed (TECHNICIAN_LAST_OWNER). API keys the person created are NOT revoked (an HR action must not take an integration down); if any are still active, the business Owners and Administrators are emailed a list of them.
      * @param id Technician ID (required)
      * @return ApiResponse&lt;ResponseEnvelope&gt;
      * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
@@ -349,6 +351,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -361,8 +364,8 @@ public class TechnicianApi {
     }
 
     /**
-     * Remove a technician (asynchronously)
-     * Soft-removes a technician from the business by setting status to deactive
+     * Remove a technician from the business (asynchronously)
+     * Closes the technician&#39;s membership: the profile is set to deactive and soft-deleted, and their access to this business ends on their next request. In the same operation they are removed from every other technician&#39;s buddy list, vehicles they own are released, and any personal-calendar connection they made for this business is revoked. Fires the technician.deleted webhook. Their underlying user identity is untouched, and so are memberships at other businesses.  Removal does NOT move their work: jobs still assigned to them keep the assignment and must be re-staffed. Do that BEFORE removing: use listCrewCandidates on each upcoming job, or re-plan the whole day with previewAbsenceResolve / commitAbsenceResolve (which needs a time-off record covering those days; create one with createTechnicianTimeOff).  This is a closed membership, not a pause. Re-adding the same email or phone later with createTechnician links the SAME person but opens a FRESH membership with a NEW technician id and none of the old buddy, vehicle or area links. If you expect the person back, suspend them from the dashboard instead; a suspended member is reactivated in place by createTechnician, keeping their id and group.  The last active Owner cannot be removed (TECHNICIAN_LAST_OWNER). API keys the person created are NOT revoked (an HR action must not take an integration down); if any are still active, the business Owners and Administrators are emailed a list of them.
      * @param id Technician ID (required)
      * @param _callback The callback to be executed when the API call finishes
      * @return The request call
@@ -373,6 +376,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_LAST_OWNER </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -397,6 +401,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -469,6 +474,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -490,6 +496,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -513,6 +520,7 @@ public class TechnicianApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -543,6 +551,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -643,6 +652,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -670,6 +680,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -699,6 +710,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -723,6 +735,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -803,6 +816,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -826,6 +840,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -851,6 +866,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -876,6 +892,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -956,6 +973,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -979,6 +997,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1004,6 +1023,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_BUDDY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1029,6 +1049,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1109,6 +1130,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1132,6 +1154,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1157,6 +1180,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | SERVICE_AREA_NOT_FOUND (+missing_ids) </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1182,6 +1206,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1262,6 +1287,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1285,6 +1311,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1310,6 +1337,7 @@ public class TechnicianApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -1333,9 +1361,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -1415,9 +1443,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -1440,9 +1468,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
@@ -1467,9 +1495,9 @@ public class TechnicianApi {
        <caption>Response Details</caption>
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
-        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | TECHNICIAN_CONTACT_REQUIRED | PHONE_INVALID | TECHNICIAN_INVALID_TIER | BUSINESS_LOCATION_MISSING </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
-        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> SANDBOX_MANAGEMENT_ROLE_FORBIDDEN | TECHNICIAN_ROLE_API_KEY_FORBIDDEN | TECHNICIAN_GROUP_NOT_ASSIGNABLE | TECHNICIAN_TARGET_NOT_MANAGEABLE </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> TECHNICIAN_NOT_FOUND | BUSINESS_GROUP_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 409 </td><td> TECHNICIAN_DUPLICATE_PHONE | TECHNICIAN_DUPLICATE_EMAIL </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>

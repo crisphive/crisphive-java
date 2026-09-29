@@ -155,6 +155,11 @@ public class TechnicianCreateRequest {
   @javax.annotation.Nullable
   private List<UUID> leadIds = new ArrayList<>();
 
+  public static final String SERIALIZED_NAME_NOTIFY = "notify";
+  @SerializedName(SERIALIZED_NAME_NOTIFY)
+  @javax.annotation.Nullable
+  private Boolean notify;
+
   public static final String SERIALIZED_NAME_PHONE = "phone";
   @SerializedName(SERIALIZED_NAME_PHONE)
   @javax.annotation.Nullable
@@ -422,13 +427,32 @@ public class TechnicianCreateRequest {
   }
 
 
+  public TechnicianCreateRequest notify(@javax.annotation.Nullable Boolean notify) {
+    this.notify = notify;
+    return this;
+  }
+
+  /**
+   * Whether to send the new member the \&quot;you have been added to {business}\&quot; message (email when an email was supplied, SMS when a phone was, both when both). Omitted or true sends it; false stays silent. Set false for bulk imports so seeding a roster does not text everybody at once.
+   * @return notify
+   */
+  @javax.annotation.Nullable
+  public Boolean getNotify() {
+    return notify;
+  }
+
+  public void setNotify(@javax.annotation.Nullable Boolean notify) {
+    this.notify = notify;
+  }
+
+
   public TechnicianCreateRequest phone(@javax.annotation.Nullable String phone) {
     this.phone = phone;
     return this;
   }
 
   /**
-   * At least one of phone/email is required (identity resolution key).
+   * Phone number in E.164 international format: a leading &#x60;+&#x60; and the country code, e.g. &#x60;+16135550188&#x60;. A bare national number (&#x60;6135550188&#x60;) is REJECTED with PHONE_INVALID — there is no default region to guess the country from. At least one of phone/email is required (identity resolution key).
    * @return phone
    */
   @javax.annotation.Nullable
@@ -548,6 +572,7 @@ public class TechnicianCreateRequest {
         Objects.equals(this.jobTitle, technicianCreateRequest.jobTitle) &&
         Objects.equals(this.joinDate, technicianCreateRequest.joinDate) &&
         Objects.equals(this.leadIds, technicianCreateRequest.leadIds) &&
+        Objects.equals(this.notify, technicianCreateRequest.notify) &&
         Objects.equals(this.phone, technicianCreateRequest.phone) &&
         Objects.equals(this.serviceAreaIds, technicianCreateRequest.serviceAreaIds) &&
         Objects.equals(this.startLocationLat, technicianCreateRequest.startLocationLat) &&
@@ -557,7 +582,7 @@ public class TechnicianCreateRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, assignmentTier, buddyIds, businessGroupId, email, fullName, jobTitle, joinDate, leadIds, phone, serviceAreaIds, startLocationLat, startLocationLong, startLocationType);
+    return Objects.hash(address, assignmentTier, buddyIds, businessGroupId, email, fullName, jobTitle, joinDate, leadIds, notify, phone, serviceAreaIds, startLocationLat, startLocationLong, startLocationType);
   }
 
   @Override
@@ -573,6 +598,7 @@ public class TechnicianCreateRequest {
     sb.append("    jobTitle: ").append(toIndentedString(jobTitle)).append("\n");
     sb.append("    joinDate: ").append(toIndentedString(joinDate)).append("\n");
     sb.append("    leadIds: ").append(toIndentedString(leadIds)).append("\n");
+    sb.append("    notify: ").append(toIndentedString(notify)).append("\n");
     sb.append("    phone: ").append(toIndentedString(phone)).append("\n");
     sb.append("    serviceAreaIds: ").append(toIndentedString(serviceAreaIds)).append("\n");
     sb.append("    startLocationLat: ").append(toIndentedString(startLocationLat)).append("\n");
@@ -609,6 +635,7 @@ public class TechnicianCreateRequest {
     openapiFields.add("job_title");
     openapiFields.add("join_date");
     openapiFields.add("lead_ids");
+    openapiFields.add("notify");
     openapiFields.add("phone");
     openapiFields.add("service_area_ids");
     openapiFields.add("start_location_lat");

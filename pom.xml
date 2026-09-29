@@ -5,7 +5,7 @@
     <artifactId>crisphive-java</artifactId>
     <packaging>jar</packaging>
     <name>crisphive-java</name>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <url>https://github.com/crisphive/crisphive-java</url>
     <description>Official Java SDK for the Crisphive API.</description>
     <scm>

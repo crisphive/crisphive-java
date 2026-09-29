@@ -219,7 +219,7 @@ public class JobRequestCreateRequest {
   }
 
   /**
-   * UUID of the job type to classify this job. Optional; null leaves the job unclassified.
+   * UUID of the job type to classify this job. Optional: omitted, the business&#39;s DEFAULT job type (&#x60;is_default&#x60;, the seeded \&quot;General\&quot;) is used, so every new job has a type and can be quoted from its default duration.
    * @return jobTypeId
    */
   @javax.annotation.Nullable

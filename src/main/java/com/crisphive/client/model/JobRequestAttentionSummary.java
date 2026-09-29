@@ -61,7 +61,9 @@ public class JobRequestAttentionSummary {
    */
   @JsonAdapter(ReasonEnum.Adapter.class)
   public enum ReasonEnum {
-    ASSIGNMENT_BROKEN("assignment_broken");
+    ASSIGNMENT_BROKEN("assignment_broken"),
+    
+    CALENDAR_CONFLICT("calendar_conflict");
 
     private String value;
 

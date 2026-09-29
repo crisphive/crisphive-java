@@ -14,6 +14,8 @@
 package com.crisphive.client.model;
 
 import java.util.Objects;
+import com.crisphive.client.model.JobDateBusinessRange;
+import com.crisphive.client.model.JobRequestBlocker;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
@@ -21,7 +23,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gson.Gson;
@@ -52,11 +56,18 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestMoveWarning {
+  public static final String SERIALIZED_NAME_BLOCKERS = "blockers";
+  @SerializedName(SERIALIZED_NAME_BLOCKERS)
+  @javax.annotation.Nullable
+  private List<JobRequestBlocker> blockers = new ArrayList<>();
+
   /**
-   * Warning kind: TECH_NOT_FEASIBLE | PUSHED_OUTSIDE_WINDOW | OVERTIME | TIME_OFF_OVERLAP | VEHICLE_CONFLICT.
+   * Warning kind: MOVED_OUTSIDE_WINDOW | TECH_NOT_FEASIBLE | PUSHED_OUTSIDE_WINDOW | OVERTIME | TIME_OFF_OVERLAP | CALENDAR_OVERLAP | VEHICLE_CONFLICT | AFTER_HOURS.  CALENDAR_OVERLAP is a SEPARATE value from TIME_OFF_OVERLAP on purpose: approved time off is a record the coordinator can open, a personal calendar event is one we cannot see at all.
    */
   @JsonAdapter(CodeEnum.Adapter.class)
   public enum CodeEnum {
+    MOVED_OUTSIDE_WINDOW("MOVED_OUTSIDE_WINDOW"),
+    
     TECH_NOT_FEASIBLE("TECH_NOT_FEASIBLE"),
     
     PUSHED_OUTSIDE_WINDOW("PUSHED_OUTSIDE_WINDOW"),
@@ -65,7 +76,11 @@ public class JobRequestMoveWarning {
     
     TIME_OFF_OVERLAP("TIME_OFF_OVERLAP"),
     
-    VEHICLE_CONFLICT("VEHICLE_CONFLICT");
+    CALENDAR_OVERLAP("CALENDAR_OVERLAP"),
+    
+    VEHICLE_CONFLICT("VEHICLE_CONFLICT"),
+    
+    AFTER_HOURS("AFTER_HOURS");
 
     private String value;
 
@@ -115,6 +130,11 @@ public class JobRequestMoveWarning {
   @javax.annotation.Nullable
   private CodeEnum code;
 
+  public static final String SERIALIZED_NAME_CUSTOMER_WINDOW = "customer_window";
+  @SerializedName(SERIALIZED_NAME_CUSTOMER_WINDOW)
+  @javax.annotation.Nullable
+  private List<JobDateBusinessRange> customerWindow = new ArrayList<>();
+
   public static final String SERIALIZED_NAME_EARLIEST_FEASIBLE_AT = "earliest_feasible_at";
   @SerializedName(SERIALIZED_NAME_EARLIEST_FEASIBLE_AT)
   @javax.annotation.Nullable
@@ -136,17 +156,31 @@ public class JobRequestMoveWarning {
   private Integer minutes;
 
   /**
-   * Machine cause, TECH_NOT_FEASIBLE only: cannot_arrive_in_time (see earliest_feasible_at) | missing_required_skills | not_available_today | not_lead_tier.
+   * Machine cause, TECH_NOT_FEASIBLE only. Blockers[0].kind, or not_available_today when the diagnosis was unavailable. EXTEND-ONLY: a client switching on this MUST carry a default branch.  calendar_conflict is the one value NOT in smartassign.BlockerKind: it is raised by the crew-assign path, never by ExplainInfeasibility, so it never appears in Blockers. A busy window on the technician&#39;s own PERSONAL calendar covers the visit. It is kept separate from on_time_off because approved leave is a record the coordinator can open and weigh, while this one is the obstacle we deliberately cannot see, so the action is a phone call. It may arrive alongside earliest_feasible_at.
    */
   @JsonAdapter(ReasonEnum.Adapter.class)
   public enum ReasonEnum {
-    CANNOT_ARRIVE_IN_TIME("cannot_arrive_in_time"),
+    OUTSIDE_SERVICE_AREA("outside_service_area"),
     
     MISSING_REQUIRED_SKILLS("missing_required_skills"),
     
-    NOT_AVAILABLE_TODAY("not_available_today"),
+    NOT_LEAD_TIER("not_lead_tier"),
     
-    NOT_LEAD_TIER("not_lead_tier");
+    NO_WORKING_DAY("no_working_day"),
+    
+    ON_TIME_OFF("on_time_off"),
+    
+    OFF_SHIFT("off_shift"),
+    
+    OCCUPIED("occupied"),
+    
+    VISIT_TOO_LONG("visit_too_long"),
+    
+    CANNOT_ARRIVE_IN_TIME("cannot_arrive_in_time"),
+    
+    CALENDAR_CONFLICT("calendar_conflict"),
+    
+    NOT_AVAILABLE_TODAY("not_available_today");
 
     private String value;
 
@@ -199,13 +233,40 @@ public class JobRequestMoveWarning {
   public JobRequestMoveWarning() {
   }
 
+  public JobRequestMoveWarning blockers(@javax.annotation.Nullable List<JobRequestBlocker> blockers) {
+    this.blockers = blockers;
+    return this;
+  }
+
+  public JobRequestMoveWarning addBlockersItem(JobRequestBlocker blockersItem) {
+    if (this.blockers == null) {
+      this.blockers = new ArrayList<>();
+    }
+    this.blockers.add(blockersItem);
+    return this;
+  }
+
+  /**
+   * Every hard filter that refused the technician, most-structural first (TECH_NOT_FEASIBLE only). blockers[0] is the row Reason is derived from.
+   * @return blockers
+   */
+  @javax.annotation.Nullable
+  public List<JobRequestBlocker> getBlockers() {
+    return blockers;
+  }
+
+  public void setBlockers(@javax.annotation.Nullable List<JobRequestBlocker> blockers) {
+    this.blockers = blockers;
+  }
+
+
   public JobRequestMoveWarning code(@javax.annotation.Nullable CodeEnum code) {
     this.code = code;
     return this;
   }
 
   /**
-   * Warning kind: TECH_NOT_FEASIBLE | PUSHED_OUTSIDE_WINDOW | OVERTIME | TIME_OFF_OVERLAP | VEHICLE_CONFLICT.
+   * Warning kind: MOVED_OUTSIDE_WINDOW | TECH_NOT_FEASIBLE | PUSHED_OUTSIDE_WINDOW | OVERTIME | TIME_OFF_OVERLAP | CALENDAR_OVERLAP | VEHICLE_CONFLICT | AFTER_HOURS.  CALENDAR_OVERLAP is a SEPARATE value from TIME_OFF_OVERLAP on purpose: approved time off is a record the coordinator can open, a personal calendar event is one we cannot see at all.
    * @return code
    */
   @javax.annotation.Nullable
@@ -215,6 +276,33 @@ public class JobRequestMoveWarning {
 
   public void setCode(@javax.annotation.Nullable CodeEnum code) {
     this.code = code;
+  }
+
+
+  public JobRequestMoveWarning customerWindow(@javax.annotation.Nullable List<JobDateBusinessRange> customerWindow) {
+    this.customerWindow = customerWindow;
+    return this;
+  }
+
+  public JobRequestMoveWarning addCustomerWindowItem(JobDateBusinessRange customerWindowItem) {
+    if (this.customerWindow == null) {
+      this.customerWindow = new ArrayList<>();
+    }
+    this.customerWindow.add(customerWindowItem);
+    return this;
+  }
+
+  /**
+   * MOVED_OUTSIDE_WINDOW only: the customer-confirmed business-local ranges the job was booked into, so the board can show what the customer requested next to the override warning.
+   * @return customerWindow
+   */
+  @javax.annotation.Nullable
+  public List<JobDateBusinessRange> getCustomerWindow() {
+    return customerWindow;
+  }
+
+  public void setCustomerWindow(@javax.annotation.Nullable List<JobDateBusinessRange> customerWindow) {
+    this.customerWindow = customerWindow;
   }
 
 
@@ -243,7 +331,7 @@ public class JobRequestMoveWarning {
   }
 
   /**
-   * The displaced job this warning is about (per-job warnings only).
+   * The job this warning is about (per-job warnings only).
    * @return jobId
    */
   @javax.annotation.Nullable
@@ -300,7 +388,7 @@ public class JobRequestMoveWarning {
   }
 
   /**
-   * Machine cause, TECH_NOT_FEASIBLE only: cannot_arrive_in_time (see earliest_feasible_at) | missing_required_skills | not_available_today | not_lead_tier.
+   * Machine cause, TECH_NOT_FEASIBLE only. Blockers[0].kind, or not_available_today when the diagnosis was unavailable. EXTEND-ONLY: a client switching on this MUST carry a default branch.  calendar_conflict is the one value NOT in smartassign.BlockerKind: it is raised by the crew-assign path, never by ExplainInfeasibility, so it never appears in Blockers. A busy window on the technician&#39;s own PERSONAL calendar covers the visit. It is kept separate from on_time_off because approved leave is a record the coordinator can open and weigh, while this one is the obstacle we deliberately cannot see, so the action is a phone call. It may arrive alongside earliest_feasible_at.
    * @return reason
    */
   @javax.annotation.Nullable
@@ -323,7 +411,9 @@ public class JobRequestMoveWarning {
       return false;
     }
     JobRequestMoveWarning jobRequestMoveWarning = (JobRequestMoveWarning) o;
-    return Objects.equals(this.code, jobRequestMoveWarning.code) &&
+    return Objects.equals(this.blockers, jobRequestMoveWarning.blockers) &&
+        Objects.equals(this.code, jobRequestMoveWarning.code) &&
+        Objects.equals(this.customerWindow, jobRequestMoveWarning.customerWindow) &&
         Objects.equals(this.earliestFeasibleAt, jobRequestMoveWarning.earliestFeasibleAt) &&
         Objects.equals(this.jobId, jobRequestMoveWarning.jobId) &&
         Objects.equals(this.message, jobRequestMoveWarning.message) &&
@@ -333,14 +423,16 @@ public class JobRequestMoveWarning {
 
   @Override
   public int hashCode() {
-    return Objects.hash(code, earliestFeasibleAt, jobId, message, minutes, reason);
+    return Objects.hash(blockers, code, customerWindow, earliestFeasibleAt, jobId, message, minutes, reason);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestMoveWarning {\n");
+    sb.append("    blockers: ").append(toIndentedString(blockers)).append("\n");
     sb.append("    code: ").append(toIndentedString(code)).append("\n");
+    sb.append("    customerWindow: ").append(toIndentedString(customerWindow)).append("\n");
     sb.append("    earliestFeasibleAt: ").append(toIndentedString(earliestFeasibleAt)).append("\n");
     sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
@@ -368,7 +460,9 @@ public class JobRequestMoveWarning {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("blockers");
     openapiFields.add("code");
+    openapiFields.add("customer_window");
     openapiFields.add("earliest_feasible_at");
     openapiFields.add("job_id");
     openapiFields.add("message");
@@ -400,12 +494,40 @@ public class JobRequestMoveWarning {
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
+      if (jsonObj.get("blockers") != null && !jsonObj.get("blockers").isJsonNull()) {
+        JsonArray jsonArrayblockers = jsonObj.getAsJsonArray("blockers");
+        if (jsonArrayblockers != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("blockers").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `blockers` to be an array in the JSON string but got `%s`", jsonObj.get("blockers").toString()));
+          }
+
+          // validate the optional field `blockers` (array)
+          for (int i = 0; i < jsonArrayblockers.size(); i++) {
+            JobRequestBlocker.validateJsonElement(jsonArrayblockers.get(i));
+          };
+        }
+      }
       if ((jsonObj.get("code") != null && !jsonObj.get("code").isJsonNull()) && !jsonObj.get("code").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `code` to be a primitive type in the JSON string but got `%s`", jsonObj.get("code").toString()));
       }
       // validate the optional field `code`
       if (jsonObj.get("code") != null && !jsonObj.get("code").isJsonNull()) {
         CodeEnum.validateJsonElement(jsonObj.get("code"));
+      }
+      if (jsonObj.get("customer_window") != null && !jsonObj.get("customer_window").isJsonNull()) {
+        JsonArray jsonArraycustomerWindow = jsonObj.getAsJsonArray("customer_window");
+        if (jsonArraycustomerWindow != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("customer_window").isJsonArray()) {
+            throw new IllegalArgumentException(String.format("Expected the field `customer_window` to be an array in the JSON string but got `%s`", jsonObj.get("customer_window").toString()));
+          }
+
+          // validate the optional field `customer_window` (array)
+          for (int i = 0; i < jsonArraycustomerWindow.size(); i++) {
+            JobDateBusinessRange.validateJsonElement(jsonArraycustomerWindow.get(i));
+          };
+        }
       }
       if ((jsonObj.get("job_id") != null && !jsonObj.get("job_id").isJsonNull()) && !jsonObj.get("job_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `job_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("job_id").toString()));

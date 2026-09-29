@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -51,6 +52,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestEmergencyCandidatesRequest {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE = "after_hours_override";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverride;
+
   public static final String SERIALIZED_NAME_EMERGENCY_JOB_ID = "emergency_job_id";
   @SerializedName(SERIALIZED_NAME_EMERGENCY_JOB_ID)
   @javax.annotation.Nonnull
@@ -121,10 +127,29 @@ public class JobRequestEmergencyCandidatesRequest {
   public static final String SERIALIZED_NAME_START_AT = "start_at";
   @SerializedName(SERIALIZED_NAME_START_AT)
   @javax.annotation.Nonnull
-  private String startAt;
+  private OffsetDateTime startAt;
 
   public JobRequestEmergencyCandidatesRequest() {
   }
+
+  public JobRequestEmergencyCandidatesRequest afterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+    return this;
+  }
+
+  /**
+   * Place this P0 outside working hours / approved time-off — you have phoned the technician and they agreed. Drops the non-working-day rejection; the response then carries an AFTER_HOURS warning. Double-booking, service area, required skills and the lead-tier rule still reject.
+   * @return afterHoursOverride
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverride() {
+    return afterHoursOverride;
+  }
+
+  public void setAfterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+  }
+
 
   public JobRequestEmergencyCandidatesRequest emergencyJobId(@javax.annotation.Nonnull UUID emergencyJobId) {
     this.emergencyJobId = emergencyJobId;
@@ -185,21 +210,21 @@ public class JobRequestEmergencyCandidatesRequest {
   }
 
 
-  public JobRequestEmergencyCandidatesRequest startAt(@javax.annotation.Nonnull String startAt) {
+  public JobRequestEmergencyCandidatesRequest startAt(@javax.annotation.Nonnull OffsetDateTime startAt) {
     this.startAt = startAt;
     return this;
   }
 
   /**
-   * Desired start — business-local naive datetime, no offset. Must be in the future.
+   * Desired start — business-local wall clock. Seconds may be omitted and a space may replace the T; an offset is accepted only when it agrees with the business timezone (a disagreeing one is refused with JOB_REQUEST_INVALID_INPUT rather than guessed). Must be in the future.
    * @return startAt
    */
   @javax.annotation.Nonnull
-  public String getStartAt() {
+  public OffsetDateTime getStartAt() {
     return startAt;
   }
 
-  public void setStartAt(@javax.annotation.Nonnull String startAt) {
+  public void setStartAt(@javax.annotation.Nonnull OffsetDateTime startAt) {
     this.startAt = startAt;
   }
 
@@ -214,7 +239,8 @@ public class JobRequestEmergencyCandidatesRequest {
       return false;
     }
     JobRequestEmergencyCandidatesRequest jobRequestEmergencyCandidatesRequest = (JobRequestEmergencyCandidatesRequest) o;
-    return Objects.equals(this.emergencyJobId, jobRequestEmergencyCandidatesRequest.emergencyJobId) &&
+    return Objects.equals(this.afterHoursOverride, jobRequestEmergencyCandidatesRequest.afterHoursOverride) &&
+        Objects.equals(this.emergencyJobId, jobRequestEmergencyCandidatesRequest.emergencyJobId) &&
         Objects.equals(this.limit, jobRequestEmergencyCandidatesRequest.limit) &&
         Objects.equals(this.mode, jobRequestEmergencyCandidatesRequest.mode) &&
         Objects.equals(this.startAt, jobRequestEmergencyCandidatesRequest.startAt);
@@ -222,13 +248,14 @@ public class JobRequestEmergencyCandidatesRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(emergencyJobId, limit, mode, startAt);
+    return Objects.hash(afterHoursOverride, emergencyJobId, limit, mode, startAt);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestEmergencyCandidatesRequest {\n");
+    sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    emergencyJobId: ").append(toIndentedString(emergencyJobId)).append("\n");
     sb.append("    limit: ").append(toIndentedString(limit)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
@@ -255,6 +282,7 @@ public class JobRequestEmergencyCandidatesRequest {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override");
     openapiFields.add("emergency_job_id");
     openapiFields.add("limit");
     openapiFields.add("mode");
@@ -303,9 +331,6 @@ public class JobRequestEmergencyCandidatesRequest {
       }
       // validate the required field `mode`
       ModeEnum.validateJsonElement(jsonObj.get("mode"));
-      if (!jsonObj.get("start_at").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `start_at` to be a primitive type in the JSON string but got `%s`", jsonObj.get("start_at").toString()));
-      }
   }
 
   public static class CustomTypeAdapterFactory implements TypeAdapterFactory {

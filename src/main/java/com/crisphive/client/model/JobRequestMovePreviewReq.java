@@ -51,6 +51,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestMovePreviewReq {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE = "after_hours_override";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverride;
+
   /**
    * Cascade mode for displaced jobs: overtime &#x3D; stay same-day (tech works late); next_day &#x3D; overflow rolls to the next working day.
    */
@@ -121,6 +126,25 @@ public class JobRequestMovePreviewReq {
   public JobRequestMovePreviewReq() {
   }
 
+  public JobRequestMovePreviewReq afterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+    return this;
+  }
+
+  /**
+   * AfterHoursOverride — drop the non-working-day rejection for a P0 whose technician the coordinator has already phoned. P0 only (JOB_REQUEST_AFTER_HOURS_REQUIRES_P0 otherwise), and the preview then carries an AFTER_HOURS warning. Commit must repeat what the preview was run with.
+   * @return afterHoursOverride
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverride() {
+    return afterHoursOverride;
+  }
+
+  public void setAfterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+  }
+
+
   public JobRequestMovePreviewReq mode(@javax.annotation.Nonnull ModeEnum mode) {
     this.mode = mode;
     return this;
@@ -188,20 +212,22 @@ public class JobRequestMovePreviewReq {
       return false;
     }
     JobRequestMovePreviewReq jobRequestMovePreviewReq = (JobRequestMovePreviewReq) o;
-    return Objects.equals(this.mode, jobRequestMovePreviewReq.mode) &&
+    return Objects.equals(this.afterHoursOverride, jobRequestMovePreviewReq.afterHoursOverride) &&
+        Objects.equals(this.mode, jobRequestMovePreviewReq.mode) &&
         Objects.equals(this.startAt, jobRequestMovePreviewReq.startAt) &&
         Objects.equals(this.technicianId, jobRequestMovePreviewReq.technicianId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(mode, startAt, technicianId);
+    return Objects.hash(afterHoursOverride, mode, startAt, technicianId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestMovePreviewReq {\n");
+    sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
     sb.append("    startAt: ").append(toIndentedString(startAt)).append("\n");
     sb.append("    technicianId: ").append(toIndentedString(technicianId)).append("\n");
@@ -227,6 +253,7 @@ public class JobRequestMovePreviewReq {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override");
     openapiFields.add("mode");
     openapiFields.add("start_at");
     openapiFields.add("technician_id");

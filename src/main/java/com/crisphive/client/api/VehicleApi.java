@@ -27,9 +27,12 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import com.crisphive.client.model.CreateVehicle200Response;
 import com.crisphive.client.model.GetVehicle200Response;
 import com.crisphive.client.model.ListVehicles200Response;
 import com.crisphive.client.model.ResponseEnvelope;
+import com.crisphive.client.model.VehicleCreateRequest;
+import com.crisphive.client.model.VehicleUpdateRequest;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -75,6 +78,305 @@ public class VehicleApi {
     }
 
     /**
+     * Build call for createVehicle
+     * @param vehicleCreateRequest Vehicle details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createVehicleCall(VehicleCreateRequest vehicleCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = vehicleCreateRequest;
+
+        // create path and map variables
+        String localVarPath = "/vehicles";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call createVehicleValidateBeforeCall(VehicleCreateRequest vehicleCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'vehicleCreateRequest' is set
+        if (vehicleCreateRequest == null) {
+            throw new ApiException("Missing the required parameter 'vehicleCreateRequest' when calling createVehicle(Async)");
+        }
+
+        return createVehicleCall(vehicleCreateRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Add a vehicle to the fleet
+     * Registers a van, truck or car in the business&#39;s own fleet. Vehicles are what a confirmed job&#39;s crew travels in: at confirm, Crisphive auto-selects one vehicle for the whole crew from the lead technician&#39;s vehicles, then from unowned fleet vehicles, and blocks a vehicle already booked for an overlapping job.  &#x60;name&#x60; is the only required field, so a bulk fleet import needs nothing else; brand, model, year, plate_number, current_mileage and vehicle_type (van, truck or car) can be filled in later with updateVehicle. Names and plate numbers must be unique in the business (VEHICLE_DUPLICATE_NAME / VEHICLE_DUPLICATE_PLATE).  &#x60;owner_id&#x60; records who has CLAIMED the vehicle as their primary one. The owner must be a lead technician or a management role; a buddy- or float-tier profile is refused with VEHICLE_OWNER_TIER_NOT_ALLOWED, an unknown profile with VEHICLE_INVALID_OWNER. Deciding which vehicles a technician may USE is a separate relation: use replaceTechnicianVehicles for that, not this tool.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retried call replays the original response instead of creating a duplicate vehicle.
+     * @param vehicleCreateRequest Vehicle details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CreateVehicle200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CreateVehicle200Response createVehicle(VehicleCreateRequest vehicleCreateRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CreateVehicle200Response> localVarResp = createVehicleWithHttpInfo(vehicleCreateRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Add a vehicle to the fleet
+     * Registers a van, truck or car in the business&#39;s own fleet. Vehicles are what a confirmed job&#39;s crew travels in: at confirm, Crisphive auto-selects one vehicle for the whole crew from the lead technician&#39;s vehicles, then from unowned fleet vehicles, and blocks a vehicle already booked for an overlapping job.  &#x60;name&#x60; is the only required field, so a bulk fleet import needs nothing else; brand, model, year, plate_number, current_mileage and vehicle_type (van, truck or car) can be filled in later with updateVehicle. Names and plate numbers must be unique in the business (VEHICLE_DUPLICATE_NAME / VEHICLE_DUPLICATE_PLATE).  &#x60;owner_id&#x60; records who has CLAIMED the vehicle as their primary one. The owner must be a lead technician or a management role; a buddy- or float-tier profile is refused with VEHICLE_OWNER_TIER_NOT_ALLOWED, an unknown profile with VEHICLE_INVALID_OWNER. Deciding which vehicles a technician may USE is a separate relation: use replaceTechnicianVehicles for that, not this tool.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retried call replays the original response instead of creating a duplicate vehicle.
+     * @param vehicleCreateRequest Vehicle details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CreateVehicle200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CreateVehicle200Response> createVehicleWithHttpInfo(VehicleCreateRequest vehicleCreateRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = createVehicleValidateBeforeCall(vehicleCreateRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CreateVehicle200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Add a vehicle to the fleet (asynchronously)
+     * Registers a van, truck or car in the business&#39;s own fleet. Vehicles are what a confirmed job&#39;s crew travels in: at confirm, Crisphive auto-selects one vehicle for the whole crew from the lead technician&#39;s vehicles, then from unowned fleet vehicles, and blocks a vehicle already booked for an overlapping job.  &#x60;name&#x60; is the only required field, so a bulk fleet import needs nothing else; brand, model, year, plate_number, current_mileage and vehicle_type (van, truck or car) can be filled in later with updateVehicle. Names and plate numbers must be unique in the business (VEHICLE_DUPLICATE_NAME / VEHICLE_DUPLICATE_PLATE).  &#x60;owner_id&#x60; records who has CLAIMED the vehicle as their primary one. The owner must be a lead technician or a management role; a buddy- or float-tier profile is refused with VEHICLE_OWNER_TIER_NOT_ALLOWED, an unknown profile with VEHICLE_INVALID_OWNER. Deciding which vehicles a technician may USE is a separate relation: use replaceTechnicianVehicles for that, not this tool.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retried call replays the original response instead of creating a duplicate vehicle.
+     * @param vehicleCreateRequest Vehicle details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createVehicleAsync(VehicleCreateRequest vehicleCreateRequest, String idempotencyKey, final ApiCallback<CreateVehicle200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = createVehicleValidateBeforeCall(vehicleCreateRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CreateVehicle200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for deleteVehicle
+     * @param id Vehicle ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteVehicleCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/vehicles/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteVehicleValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling deleteVehicle(Async)");
+        }
+
+        return deleteVehicleCall(id, _callback);
+
+    }
+
+    /**
+     * Retire a vehicle from the fleet
+     * Soft-deletes the vehicle and, in the same transaction, removes it from every technician&#39;s vehicle list. It no longer appears in listVehicles or getVehicle and can no longer be auto-selected for a crew.  Jobs that referenced it keep the stored reference but no longer display an assigned vehicle, and upcoming jobs are NOT given a replacement automatically. Reach for this only when a vehicle leaves the fleet for good (sold, written off, off-lease). For a van that is merely in the workshop, set its &#x60;status&#x60; to maintenance with updateVehicle instead, so the record stays in the fleet and can be brought straight back.
+     * @param id Vehicle ID (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope deleteVehicle(String id) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = deleteVehicleWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Retire a vehicle from the fleet
+     * Soft-deletes the vehicle and, in the same transaction, removes it from every technician&#39;s vehicle list. It no longer appears in listVehicles or getVehicle and can no longer be auto-selected for a crew.  Jobs that referenced it keep the stored reference but no longer display an assigned vehicle, and upcoming jobs are NOT given a replacement automatically. Reach for this only when a vehicle leaves the fleet for good (sold, written off, off-lease). For a van that is merely in the workshop, set its &#x60;status&#x60; to maintenance with updateVehicle instead, so the record stays in the fleet and can be brought straight back.
+     * @param id Vehicle ID (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> deleteVehicleWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = deleteVehicleValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Retire a vehicle from the fleet (asynchronously)
+     * Soft-deletes the vehicle and, in the same transaction, removes it from every technician&#39;s vehicle list. It no longer appears in listVehicles or getVehicle and can no longer be auto-selected for a crew.  Jobs that referenced it keep the stored reference but no longer display an assigned vehicle, and upcoming jobs are NOT given a replacement automatically. Reach for this only when a vehicle leaves the fleet for good (sold, written off, off-lease). For a van that is merely in the workshop, set its &#x60;status&#x60; to maintenance with updateVehicle instead, so the record stays in the fleet and can be brought straight back.
+     * @param id Vehicle ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteVehicleAsync(String id, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteVehicleValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getVehicle
      * @param id Vehicle ID (required)
      * @param _callback Callback for upload/download progress
@@ -86,6 +388,7 @@ public class VehicleApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -158,6 +461,7 @@ public class VehicleApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -179,6 +483,7 @@ public class VehicleApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -202,6 +507,7 @@ public class VehicleApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -230,6 +536,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -320,6 +627,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -345,6 +653,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -372,6 +681,7 @@ public class VehicleApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -379,6 +689,167 @@ public class VehicleApi {
 
         okhttp3.Call localVarCall = listVehiclesValidateBeforeCall(page, limit, status, keyword, since, _callback);
         Type localVarReturnType = new TypeToken<ListVehicles200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateVehicle
+     * @param id Vehicle ID (required)
+     * @param vehicleUpdateRequest Vehicle details (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateVehicleCall(String id, VehicleUpdateRequest vehicleUpdateRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = vehicleUpdateRequest;
+
+        // create path and map variables
+        String localVarPath = "/vehicles/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateVehicleValidateBeforeCall(String id, VehicleUpdateRequest vehicleUpdateRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling updateVehicle(Async)");
+        }
+
+        // verify the required parameter 'vehicleUpdateRequest' is set
+        if (vehicleUpdateRequest == null) {
+            throw new ApiException("Missing the required parameter 'vehicleUpdateRequest' when calling updateVehicle(Async)");
+        }
+
+        return updateVehicleCall(id, vehicleUpdateRequest, _callback);
+
+    }
+
+    /**
+     * Change a vehicle&#39;s details
+     * Edits an existing fleet record in place; the vehicle id and the technicians who use it are untouched.  Partial update: omit a field to KEEP its current value, send \&quot;\&quot; to CLEAR an optional text field (brand, model, plate_number). Exceptions: &#x60;name&#x60; rejects \&quot;\&quot; because a vehicle must stay identifiable, and &#x60;vehicle_type&#x60; (van, truck, car) and &#x60;status&#x60; (inactive, idle, on_job, maintenance) must be valid enum values when present; an empty string there is a 400. &#x60;owner_id&#x60;: omit to keep the current owner, \&quot;\&quot; to unclaim, or a UUID to reassign; the new owner must be a lead or management profile (VEHICLE_OWNER_TIER_NOT_ALLOWED otherwise).  Use this for corrections and odometer updates, and set &#x60;status&#x60; to maintenance or inactive when a vehicle is temporarily out of service so it stays in the fleet. To change which technicians may use it, call replaceTechnicianVehicles; to take it out of the fleet for good, call deleteVehicle.
+     * @param id Vehicle ID (required)
+     * @param vehicleUpdateRequest Vehicle details (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope updateVehicle(String id, VehicleUpdateRequest vehicleUpdateRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = updateVehicleWithHttpInfo(id, vehicleUpdateRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Change a vehicle&#39;s details
+     * Edits an existing fleet record in place; the vehicle id and the technicians who use it are untouched.  Partial update: omit a field to KEEP its current value, send \&quot;\&quot; to CLEAR an optional text field (brand, model, plate_number). Exceptions: &#x60;name&#x60; rejects \&quot;\&quot; because a vehicle must stay identifiable, and &#x60;vehicle_type&#x60; (van, truck, car) and &#x60;status&#x60; (inactive, idle, on_job, maintenance) must be valid enum values when present; an empty string there is a 400. &#x60;owner_id&#x60;: omit to keep the current owner, \&quot;\&quot; to unclaim, or a UUID to reassign; the new owner must be a lead or management profile (VEHICLE_OWNER_TIER_NOT_ALLOWED otherwise).  Use this for corrections and odometer updates, and set &#x60;status&#x60; to maintenance or inactive when a vehicle is temporarily out of service so it stays in the fleet. To change which technicians may use it, call replaceTechnicianVehicles; to take it out of the fleet for good, call deleteVehicle.
+     * @param id Vehicle ID (required)
+     * @param vehicleUpdateRequest Vehicle details (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> updateVehicleWithHttpInfo(String id, VehicleUpdateRequest vehicleUpdateRequest) throws ApiException {
+        okhttp3.Call localVarCall = updateVehicleValidateBeforeCall(id, vehicleUpdateRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Change a vehicle&#39;s details (asynchronously)
+     * Edits an existing fleet record in place; the vehicle id and the technicians who use it are untouched.  Partial update: omit a field to KEEP its current value, send \&quot;\&quot; to CLEAR an optional text field (brand, model, plate_number). Exceptions: &#x60;name&#x60; rejects \&quot;\&quot; because a vehicle must stay identifiable, and &#x60;vehicle_type&#x60; (van, truck, car) and &#x60;status&#x60; (inactive, idle, on_job, maintenance) must be valid enum values when present; an empty string there is a 400. &#x60;owner_id&#x60;: omit to keep the current owner, \&quot;\&quot; to unclaim, or a UUID to reassign; the new owner must be a lead or management profile (VEHICLE_OWNER_TIER_NOT_ALLOWED otherwise).  Use this for corrections and odometer updates, and set &#x60;status&#x60; to maintenance or inactive when a vehicle is temporarily out of service so it stays in the fleet. To change which technicians may use it, call replaceTechnicianVehicles; to take it out of the fleet for good, call deleteVehicle.
+     * @param id Vehicle ID (required)
+     * @param vehicleUpdateRequest Vehicle details (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | VEHICLE_INVALID_OWNER | VEHICLE_OWNER_TIER_NOT_ALLOWED </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> VEHICLE_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> VEHICLE_DUPLICATE_NAME | VEHICLE_DUPLICATE_PLATE </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateVehicleAsync(String id, VehicleUpdateRequest vehicleUpdateRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateVehicleValidateBeforeCall(id, vehicleUpdateRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

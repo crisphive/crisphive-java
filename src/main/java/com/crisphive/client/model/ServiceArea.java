@@ -67,6 +67,11 @@ public class ServiceArea {
   @javax.annotation.Nullable
   private String city;
 
+  public static final String SERIALIZED_NAME_COUNTRY = "country";
+  @SerializedName(SERIALIZED_NAME_COUNTRY)
+  @javax.annotation.Nullable
+  private String country;
+
   public static final String SERIALIZED_NAME_COUNTY = "county";
   @SerializedName(SERIALIZED_NAME_COUNTY)
   @javax.annotation.Nullable
@@ -101,6 +106,11 @@ public class ServiceArea {
   @SerializedName(SERIALIZED_NAME_POSTAL_CODE)
   @javax.annotation.Nullable
   private String postalCode;
+
+  public static final String SERIALIZED_NAME_STATE_PROVINCE = "state_province";
+  @SerializedName(SERIALIZED_NAME_STATE_PROVINCE)
+  @javax.annotation.Nullable
+  private String stateProvince;
 
   public static final String SERIALIZED_NAME_UPDATED_AT = "updated_at";
   @SerializedName(SERIALIZED_NAME_UPDATED_AT)
@@ -164,6 +174,25 @@ public class ServiceArea {
 
   public void setCity(@javax.annotation.Nullable String city) {
     this.city = city;
+  }
+
+
+  public ServiceArea country(@javax.annotation.Nullable String country) {
+    this.country = country;
+    return this;
+  }
+
+  /**
+   * Country for the area. Empty if unused.
+   * @return country
+   */
+  @javax.annotation.Nullable
+  public String getCountry() {
+    return country;
+  }
+
+  public void setCountry(@javax.annotation.Nullable String country) {
+    this.country = country;
   }
 
 
@@ -300,6 +329,25 @@ public class ServiceArea {
   }
 
 
+  public ServiceArea stateProvince(@javax.annotation.Nullable String stateProvince) {
+    this.stateProvince = stateProvince;
+    return this;
+  }
+
+  /**
+   * State / province for the area. Empty if unused.
+   * @return stateProvince
+   */
+  @javax.annotation.Nullable
+  public String getStateProvince() {
+    return stateProvince;
+  }
+
+  public void setStateProvince(@javax.annotation.Nullable String stateProvince) {
+    this.stateProvince = stateProvince;
+  }
+
+
   public ServiceArea updatedAt(@javax.annotation.Nullable OffsetDateTime updatedAt) {
     this.updatedAt = updatedAt;
     return this;
@@ -332,6 +380,7 @@ public class ServiceArea {
     return Objects.equals(this.boundary, serviceArea.boundary) &&
         Objects.equals(this.businessId, serviceArea.businessId) &&
         Objects.equals(this.city, serviceArea.city) &&
+        Objects.equals(this.country, serviceArea.country) &&
         Objects.equals(this.county, serviceArea.county) &&
         Objects.equals(this.createdAt, serviceArea.createdAt) &&
         Objects.equals(this.description, serviceArea.description) &&
@@ -339,12 +388,13 @@ public class ServiceArea {
         Objects.equals(this.id, serviceArea.id) &&
         Objects.equals(this.name, serviceArea.name) &&
         Objects.equals(this.postalCode, serviceArea.postalCode) &&
+        Objects.equals(this.stateProvince, serviceArea.stateProvince) &&
         Objects.equals(this.updatedAt, serviceArea.updatedAt);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(boundary, businessId, city, county, createdAt, description, district, id, name, postalCode, updatedAt);
+    return Objects.hash(boundary, businessId, city, country, county, createdAt, description, district, id, name, postalCode, stateProvince, updatedAt);
   }
 
   @Override
@@ -354,6 +404,7 @@ public class ServiceArea {
     sb.append("    boundary: ").append(toIndentedString(boundary)).append("\n");
     sb.append("    businessId: ").append(toIndentedString(businessId)).append("\n");
     sb.append("    city: ").append(toIndentedString(city)).append("\n");
+    sb.append("    country: ").append(toIndentedString(country)).append("\n");
     sb.append("    county: ").append(toIndentedString(county)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
@@ -361,6 +412,7 @@ public class ServiceArea {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    postalCode: ").append(toIndentedString(postalCode)).append("\n");
+    sb.append("    stateProvince: ").append(toIndentedString(stateProvince)).append("\n");
     sb.append("    updatedAt: ").append(toIndentedString(updatedAt)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -387,6 +439,7 @@ public class ServiceArea {
     openapiFields.add("boundary");
     openapiFields.add("business_id");
     openapiFields.add("city");
+    openapiFields.add("country");
     openapiFields.add("county");
     openapiFields.add("created_at");
     openapiFields.add("description");
@@ -394,6 +447,7 @@ public class ServiceArea {
     openapiFields.add("id");
     openapiFields.add("name");
     openapiFields.add("postal_code");
+    openapiFields.add("state_province");
     openapiFields.add("updated_at");
 
     // a set of required properties/fields (JSON key names)
@@ -427,6 +481,9 @@ public class ServiceArea {
       if ((jsonObj.get("city") != null && !jsonObj.get("city").isJsonNull()) && !jsonObj.get("city").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `city` to be a primitive type in the JSON string but got `%s`", jsonObj.get("city").toString()));
       }
+      if ((jsonObj.get("country") != null && !jsonObj.get("country").isJsonNull()) && !jsonObj.get("country").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `country` to be a primitive type in the JSON string but got `%s`", jsonObj.get("country").toString()));
+      }
       if ((jsonObj.get("county") != null && !jsonObj.get("county").isJsonNull()) && !jsonObj.get("county").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `county` to be a primitive type in the JSON string but got `%s`", jsonObj.get("county").toString()));
       }
@@ -444,6 +501,9 @@ public class ServiceArea {
       }
       if ((jsonObj.get("postal_code") != null && !jsonObj.get("postal_code").isJsonNull()) && !jsonObj.get("postal_code").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `postal_code` to be a primitive type in the JSON string but got `%s`", jsonObj.get("postal_code").toString()));
+      }
+      if ((jsonObj.get("state_province") != null && !jsonObj.get("state_province").isJsonNull()) && !jsonObj.get("state_province").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `state_province` to be a primitive type in the JSON string but got `%s`", jsonObj.get("state_province").toString()));
       }
   }
 

@@ -62,10 +62,30 @@ public class JobType {
   @javax.annotation.Nullable
   private OffsetDateTime createdAt;
 
+  public static final String SERIALIZED_NAME_DEFAULT_DEMOBILIZATION_MINUTES = "default_demobilization_minutes";
+  @SerializedName(SERIALIZED_NAME_DEFAULT_DEMOBILIZATION_MINUTES)
+  @javax.annotation.Nullable
+  private Integer defaultDemobilizationMinutes;
+
+  public static final String SERIALIZED_NAME_DEFAULT_DURATION_MINUTES = "default_duration_minutes";
+  @SerializedName(SERIALIZED_NAME_DEFAULT_DURATION_MINUTES)
+  @javax.annotation.Nullable
+  private Integer defaultDurationMinutes;
+
+  public static final String SERIALIZED_NAME_DEFAULT_MOBILIZATION_MINUTES = "default_mobilization_minutes";
+  @SerializedName(SERIALIZED_NAME_DEFAULT_MOBILIZATION_MINUTES)
+  @javax.annotation.Nullable
+  private Integer defaultMobilizationMinutes;
+
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
   @javax.annotation.Nullable
   private UUID id;
+
+  public static final String SERIALIZED_NAME_IS_DEFAULT = "is_default";
+  @SerializedName(SERIALIZED_NAME_IS_DEFAULT)
+  @javax.annotation.Nullable
+  private Boolean isDefault;
 
   public static final String SERIALIZED_NAME_IS_SYSTEM = "is_system";
   @SerializedName(SERIALIZED_NAME_IS_SYSTEM)
@@ -180,6 +200,63 @@ public class JobType {
   }
 
 
+  public JobType defaultDemobilizationMinutes(@javax.annotation.Nullable Integer defaultDemobilizationMinutes) {
+    this.defaultDemobilizationMinutes = defaultDemobilizationMinutes;
+    return this;
+  }
+
+  /**
+   * Default demobilization minutes applied with the default duration. Absent &#x3D; none.
+   * @return defaultDemobilizationMinutes
+   */
+  @javax.annotation.Nullable
+  public Integer getDefaultDemobilizationMinutes() {
+    return defaultDemobilizationMinutes;
+  }
+
+  public void setDefaultDemobilizationMinutes(@javax.annotation.Nullable Integer defaultDemobilizationMinutes) {
+    this.defaultDemobilizationMinutes = defaultDemobilizationMinutes;
+  }
+
+
+  public JobType defaultDurationMinutes(@javax.annotation.Nullable Integer defaultDurationMinutes) {
+    this.defaultDurationMinutes = defaultDurationMinutes;
+    return this;
+  }
+
+  /**
+   * Default work duration in minutes used when a quote omits job_duration_minutes. Absent &#x3D; no default: a quote for this type must send a duration.
+   * @return defaultDurationMinutes
+   */
+  @javax.annotation.Nullable
+  public Integer getDefaultDurationMinutes() {
+    return defaultDurationMinutes;
+  }
+
+  public void setDefaultDurationMinutes(@javax.annotation.Nullable Integer defaultDurationMinutes) {
+    this.defaultDurationMinutes = defaultDurationMinutes;
+  }
+
+
+  public JobType defaultMobilizationMinutes(@javax.annotation.Nullable Integer defaultMobilizationMinutes) {
+    this.defaultMobilizationMinutes = defaultMobilizationMinutes;
+    return this;
+  }
+
+  /**
+   * Default mobilization minutes applied with the default duration. Absent &#x3D; none.
+   * @return defaultMobilizationMinutes
+   */
+  @javax.annotation.Nullable
+  public Integer getDefaultMobilizationMinutes() {
+    return defaultMobilizationMinutes;
+  }
+
+  public void setDefaultMobilizationMinutes(@javax.annotation.Nullable Integer defaultMobilizationMinutes) {
+    this.defaultMobilizationMinutes = defaultMobilizationMinutes;
+  }
+
+
   public JobType id(@javax.annotation.Nullable UUID id) {
     this.id = id;
     return this;
@@ -199,13 +276,32 @@ public class JobType {
   }
 
 
+  public JobType isDefault(@javax.annotation.Nullable Boolean isDefault) {
+    this.isDefault = isDefault;
+    return this;
+  }
+
+  /**
+   * True for the business&#39;s DEFAULT job type (the seeded \&quot;General\&quot;): a job booked without a job_type_id gets it, and a job with no job type is quoted from its default bundle. It cannot be deleted or deactivated and its default duration cannot be cleared (it can be changed). Exactly one per business per environment (live and sandbox each have their own).
+   * @return isDefault
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsDefault() {
+    return isDefault;
+  }
+
+  public void setIsDefault(@javax.annotation.Nullable Boolean isDefault) {
+    this.isDefault = isDefault;
+  }
+
+
   public JobType isSystem(@javax.annotation.Nullable Boolean isSystem) {
     this.isSystem = isSystem;
     return this;
   }
 
   /**
-   * True for platform-seeded system rows, which cannot be modified or deleted.
+   * True for platform-seeded system rows: their name and status cannot be modified and they cannot be deleted; their default quote bundle is editable.
    * @return isSystem
    */
   @javax.annotation.Nullable
@@ -287,7 +383,11 @@ public class JobType {
     JobType jobType = (JobType) o;
     return Objects.equals(this.businessId, jobType.businessId) &&
         Objects.equals(this.createdAt, jobType.createdAt) &&
+        Objects.equals(this.defaultDemobilizationMinutes, jobType.defaultDemobilizationMinutes) &&
+        Objects.equals(this.defaultDurationMinutes, jobType.defaultDurationMinutes) &&
+        Objects.equals(this.defaultMobilizationMinutes, jobType.defaultMobilizationMinutes) &&
         Objects.equals(this.id, jobType.id) &&
+        Objects.equals(this.isDefault, jobType.isDefault) &&
         Objects.equals(this.isSystem, jobType.isSystem) &&
         Objects.equals(this.name, jobType.name) &&
         Objects.equals(this.status, jobType.status) &&
@@ -296,7 +396,7 @@ public class JobType {
 
   @Override
   public int hashCode() {
-    return Objects.hash(businessId, createdAt, id, isSystem, name, status, updatedAt);
+    return Objects.hash(businessId, createdAt, defaultDemobilizationMinutes, defaultDurationMinutes, defaultMobilizationMinutes, id, isDefault, isSystem, name, status, updatedAt);
   }
 
   @Override
@@ -305,7 +405,11 @@ public class JobType {
     sb.append("class JobType {\n");
     sb.append("    businessId: ").append(toIndentedString(businessId)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
+    sb.append("    defaultDemobilizationMinutes: ").append(toIndentedString(defaultDemobilizationMinutes)).append("\n");
+    sb.append("    defaultDurationMinutes: ").append(toIndentedString(defaultDurationMinutes)).append("\n");
+    sb.append("    defaultMobilizationMinutes: ").append(toIndentedString(defaultMobilizationMinutes)).append("\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    isDefault: ").append(toIndentedString(isDefault)).append("\n");
     sb.append("    isSystem: ").append(toIndentedString(isSystem)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
@@ -334,7 +438,11 @@ public class JobType {
     openapiFields = new HashSet<String>();
     openapiFields.add("business_id");
     openapiFields.add("created_at");
+    openapiFields.add("default_demobilization_minutes");
+    openapiFields.add("default_duration_minutes");
+    openapiFields.add("default_mobilization_minutes");
     openapiFields.add("id");
+    openapiFields.add("is_default");
     openapiFields.add("is_system");
     openapiFields.add("name");
     openapiFields.add("status");

@@ -27,9 +27,12 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 
 
+import com.crisphive.client.model.CreateServiceArea200Response;
 import com.crisphive.client.model.GetServiceArea200Response;
 import com.crisphive.client.model.ListServiceAreas200Response;
 import com.crisphive.client.model.ResponseEnvelope;
+import com.crisphive.client.model.ServiceAreaCreateRequest;
+import com.crisphive.client.model.ServiceAreaUpdateRequest;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -75,6 +78,309 @@ public class ServiceAreaApi {
     }
 
     /**
+     * Build call for createServiceArea
+     * @param serviceAreaCreateRequest Service area details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createServiceAreaCall(ServiceAreaCreateRequest serviceAreaCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = serviceAreaCreateRequest;
+
+        // create path and map variables
+        String localVarPath = "/service-areas";
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        if (idempotencyKey != null) {
+            localVarHeaderParams.put("Idempotency-Key", localVarApiClient.parameterToString(idempotencyKey));
+        }
+
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "POST", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call createServiceAreaValidateBeforeCall(ServiceAreaCreateRequest serviceAreaCreateRequest, String idempotencyKey, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'serviceAreaCreateRequest' is set
+        if (serviceAreaCreateRequest == null) {
+            throw new ApiException("Missing the required parameter 'serviceAreaCreateRequest' when calling createServiceArea(Async)");
+        }
+
+        return createServiceAreaCall(serviceAreaCreateRequest, idempotencyKey, _callback);
+
+    }
+
+    /**
+     * Define a territory the business serves
+     * Creates a service area: a named region used as a HARD filter when deciding who can take a job. A technician assigned to no area covering the job&#39;s address is never offered by listNearbyTechnicians, listMatchingSlots or listCrewCandidates, and never auto-assigned at confirm, whatever their skills or availability say.  &#x60;name&#x60; is the only required field and must be unique (SERVICE_AREA_DUPLICATE_NAME). Coverage is matched two ways: with a &#x60;boundary&#x60; (GeoJSON polygon), a geocoded address must fall inside the polygon; without one, the area matches addresses by equality on its postal_code, city or district. A polygon is the precise option; the administrative fields are the fallback, and also what matches jobs whose address could not be geocoded. An invalid polygon is refused with SERVICE_AREA_INVALID_BOUNDARY.  Creating the area does not staff it. Assign technicians with replaceTechnicianServiceAreas, or pass &#x60;service_area_ids&#x60; to createTechnician.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retry does not create a duplicate area.
+     * @param serviceAreaCreateRequest Service area details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return CreateServiceArea200Response
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public CreateServiceArea200Response createServiceArea(ServiceAreaCreateRequest serviceAreaCreateRequest, String idempotencyKey) throws ApiException {
+        ApiResponse<CreateServiceArea200Response> localVarResp = createServiceAreaWithHttpInfo(serviceAreaCreateRequest, idempotencyKey);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Define a territory the business serves
+     * Creates a service area: a named region used as a HARD filter when deciding who can take a job. A technician assigned to no area covering the job&#39;s address is never offered by listNearbyTechnicians, listMatchingSlots or listCrewCandidates, and never auto-assigned at confirm, whatever their skills or availability say.  &#x60;name&#x60; is the only required field and must be unique (SERVICE_AREA_DUPLICATE_NAME). Coverage is matched two ways: with a &#x60;boundary&#x60; (GeoJSON polygon), a geocoded address must fall inside the polygon; without one, the area matches addresses by equality on its postal_code, city or district. A polygon is the precise option; the administrative fields are the fallback, and also what matches jobs whose address could not be geocoded. An invalid polygon is refused with SERVICE_AREA_INVALID_BOUNDARY.  Creating the area does not staff it. Assign technicians with replaceTechnicianServiceAreas, or pass &#x60;service_area_ids&#x60; to createTechnician.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retry does not create a duplicate area.
+     * @param serviceAreaCreateRequest Service area details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @return ApiResponse&lt;CreateServiceArea200Response&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<CreateServiceArea200Response> createServiceAreaWithHttpInfo(ServiceAreaCreateRequest serviceAreaCreateRequest, String idempotencyKey) throws ApiException {
+        okhttp3.Call localVarCall = createServiceAreaValidateBeforeCall(serviceAreaCreateRequest, idempotencyKey, null);
+        Type localVarReturnType = new TypeToken<CreateServiceArea200Response>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Define a territory the business serves (asynchronously)
+     * Creates a service area: a named region used as a HARD filter when deciding who can take a job. A technician assigned to no area covering the job&#39;s address is never offered by listNearbyTechnicians, listMatchingSlots or listCrewCandidates, and never auto-assigned at confirm, whatever their skills or availability say.  &#x60;name&#x60; is the only required field and must be unique (SERVICE_AREA_DUPLICATE_NAME). Coverage is matched two ways: with a &#x60;boundary&#x60; (GeoJSON polygon), a geocoded address must fall inside the polygon; without one, the area matches addresses by equality on its postal_code, city or district. A polygon is the precise option; the administrative fields are the fallback, and also what matches jobs whose address could not be geocoded. An invalid polygon is refused with SERVICE_AREA_INVALID_BOUNDARY.  Creating the area does not staff it. Assign technicians with replaceTechnicianServiceAreas, or pass &#x60;service_area_ids&#x60; to createTechnician.  Send an Idempotency-Key header (the &#x60;idempotency_key&#x60; argument over MCP) so a retry does not create a duplicate area.
+     * @param serviceAreaCreateRequest Service area details (required)
+     * @param idempotencyKey Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE. (optional)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> BUSINESS_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call createServiceAreaAsync(ServiceAreaCreateRequest serviceAreaCreateRequest, String idempotencyKey, final ApiCallback<CreateServiceArea200Response> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = createServiceAreaValidateBeforeCall(serviceAreaCreateRequest, idempotencyKey, _callback);
+        Type localVarReturnType = new TypeToken<CreateServiceArea200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for deleteServiceArea
+     * @param id Service Area ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteServiceAreaCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/service-areas/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteServiceAreaValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling deleteServiceArea(Async)");
+        }
+
+        return deleteServiceAreaCall(id, _callback);
+
+    }
+
+    /**
+     * Stop serving a territory
+     * Soft-deletes the service area: it disappears from listServiceAreas and stops counting for coverage immediately. Technician assignments to it are left in place but no longer grant coverage.  The consequence is easy to underestimate: technicians whose only coverage was this area become unmatchable for addresses inside it. Jobs already assigned keep their technician, but any re-plan (reassign, board move, confirm of a pending job, the slot picker) can find no feasible crew there. Before deleting, re-check listCrewCandidates on upcoming jobs in that territory.  If you are reshaping coverage rather than withdrawing from it, edit the polygon or postal/city fields with updateServiceArea instead; that keeps the area and its technician assignments working.
+     * @param id Service Area ID (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope deleteServiceArea(String id) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = deleteServiceAreaWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Stop serving a territory
+     * Soft-deletes the service area: it disappears from listServiceAreas and stops counting for coverage immediately. Technician assignments to it are left in place but no longer grant coverage.  The consequence is easy to underestimate: technicians whose only coverage was this area become unmatchable for addresses inside it. Jobs already assigned keep their technician, but any re-plan (reassign, board move, confirm of a pending job, the slot picker) can find no feasible crew there. Before deleting, re-check listCrewCandidates on upcoming jobs in that territory.  If you are reshaping coverage rather than withdrawing from it, edit the polygon or postal/city fields with updateServiceArea instead; that keeps the area and its technician assignments working.
+     * @param id Service Area ID (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> deleteServiceAreaWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = deleteServiceAreaValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Stop serving a territory (asynchronously)
+     * Soft-deletes the service area: it disappears from listServiceAreas and stops counting for coverage immediately. Technician assignments to it are left in place but no longer grant coverage.  The consequence is easy to underestimate: technicians whose only coverage was this area become unmatchable for addresses inside it. Jobs already assigned keep their technician, but any re-plan (reassign, board move, confirm of a pending job, the slot picker) can find no feasible crew there. Before deleting, re-check listCrewCandidates on upcoming jobs in that territory.  If you are reshaping coverage rather than withdrawing from it, edit the polygon or postal/city fields with updateServiceArea instead; that keeps the area and its technician assignments working.
+     * @param id Service Area ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteServiceAreaAsync(String id, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteServiceAreaValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for getServiceArea
      * @param id Service Area ID (required)
      * @param _callback Callback for upload/download progress
@@ -86,6 +392,7 @@ public class ServiceAreaApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -158,6 +465,7 @@ public class ServiceAreaApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -179,6 +487,7 @@ public class ServiceAreaApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -202,6 +511,7 @@ public class ServiceAreaApi {
         <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
@@ -227,6 +537,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -302,6 +613,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -324,6 +636,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -348,6 +661,7 @@ public class ServiceAreaApi {
         <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
         <tr><td> 400 </td><td> INVALID_REQUEST_BODY </td><td>  -  </td></tr>
         <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
         <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
      </table>
      */
@@ -355,6 +669,167 @@ public class ServiceAreaApi {
 
         okhttp3.Call localVarCall = listServiceAreasValidateBeforeCall(page, limit, _callback);
         Type localVarReturnType = new TypeToken<ListServiceAreas200Response>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
+     * Build call for updateServiceArea
+     * @param id Service Area ID (required)
+     * @param serviceAreaUpdateRequest Service area details (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateServiceAreaCall(String id, ServiceAreaUpdateRequest serviceAreaUpdateRequest, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = serviceAreaUpdateRequest;
+
+        // create path and map variables
+        String localVarPath = "/service-areas/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "PUT", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call updateServiceAreaValidateBeforeCall(String id, ServiceAreaUpdateRequest serviceAreaUpdateRequest, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling updateServiceArea(Async)");
+        }
+
+        // verify the required parameter 'serviceAreaUpdateRequest' is set
+        if (serviceAreaUpdateRequest == null) {
+            throw new ApiException("Missing the required parameter 'serviceAreaUpdateRequest' when calling updateServiceArea(Async)");
+        }
+
+        return updateServiceAreaCall(id, serviceAreaUpdateRequest, _callback);
+
+    }
+
+    /**
+     * Adjust a territory&#39;s details or its boundary
+     * Edits a service area in place, keeping its id and every technician already assigned to it.  Partial update: omit a field to keep it, send \&quot;\&quot; to clear an optional text field; &#x60;name&#x60; rejects \&quot;\&quot;. &#x60;boundary&#x60; is the one to watch: omitting it KEEPS the stored polygon, while sending one REPLACES it outright (no partial merge of geometry). This tool cannot remove a polygon once set.  A boundary or postal/city change takes effect for every NEW matching decision (quote checks, confirm, reassign, board moves, slot pickers), including for jobs already on the calendar when they are next re-planned. Jobs already assigned are not re-evaluated automatically, so after moving an edge, re-check listCrewCandidates on upcoming jobs near it.
+     * @param id Service Area ID (required)
+     * @param serviceAreaUpdateRequest Service area details (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope updateServiceArea(String id, ServiceAreaUpdateRequest serviceAreaUpdateRequest) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = updateServiceAreaWithHttpInfo(id, serviceAreaUpdateRequest);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Adjust a territory&#39;s details or its boundary
+     * Edits a service area in place, keeping its id and every technician already assigned to it.  Partial update: omit a field to keep it, send \&quot;\&quot; to clear an optional text field; &#x60;name&#x60; rejects \&quot;\&quot;. &#x60;boundary&#x60; is the one to watch: omitting it KEEPS the stored polygon, while sending one REPLACES it outright (no partial merge of geometry). This tool cannot remove a polygon once set.  A boundary or postal/city change takes effect for every NEW matching decision (quote checks, confirm, reassign, board moves, slot pickers), including for jobs already on the calendar when they are next re-planned. Jobs already assigned are not re-evaluated automatically, so after moving an edge, re-check listCrewCandidates on upcoming jobs near it.
+     * @param id Service Area ID (required)
+     * @param serviceAreaUpdateRequest Service area details (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> updateServiceAreaWithHttpInfo(String id, ServiceAreaUpdateRequest serviceAreaUpdateRequest) throws ApiException {
+        okhttp3.Call localVarCall = updateServiceAreaValidateBeforeCall(id, serviceAreaUpdateRequest, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Adjust a territory&#39;s details or its boundary (asynchronously)
+     * Edits a service area in place, keeping its id and every technician already assigned to it.  Partial update: omit a field to keep it, send \&quot;\&quot; to clear an optional text field; &#x60;name&#x60; rejects \&quot;\&quot;. &#x60;boundary&#x60; is the one to watch: omitting it KEEPS the stored polygon, while sending one REPLACES it outright (no partial merge of geometry). This tool cannot remove a polygon once set.  A boundary or postal/city change takes effect for every NEW matching decision (quote checks, confirm, reassign, board moves, slot pickers), including for jobs already on the calendar when they are next re-planned. Jobs already assigned are not re-evaluated automatically, so after moving an edge, re-check listCrewCandidates on upcoming jobs near it.
+     * @param id Service Area ID (required)
+     * @param serviceAreaUpdateRequest Service area details (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY | SERVICE_AREA_INVALID_BOUNDARY </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> API_KEY_SCOPE_INSUFFICIENT — the key authenticated but is restricted and does not carry the permission this endpoint requires. data.required_scope names the missing permission code. Mint a key that carries it (a full-access key carries all of them); this is NOT the same as your user account lacking a permission.  PLAN_MODULE_NOT_INCLUDED — the business&#39;s subscription plan does not include the module this endpoint belongs to. data.module names it. This is a BILLING answer, not a credential one: no key, however broad, can reach a module the plan excludes — the business has to upgrade. Distinguish it from API_KEY_SCOPE_INSUFFICIENT by error_code, never by status. </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> SERVICE_AREA_NOT_FOUND </td><td>  -  </td></tr>
+        <tr><td> 409 </td><td> SERVICE_AREA_DUPLICATE_NAME </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call updateServiceAreaAsync(String id, ServiceAreaUpdateRequest serviceAreaUpdateRequest, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = updateServiceAreaValidateBeforeCall(id, serviceAreaUpdateRequest, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
         localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
         return localVarCall;
     }

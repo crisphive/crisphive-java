@@ -20,6 +20,7 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -51,6 +52,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestEmergencyPreviewRequest {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE = "after_hours_override";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverride;
+
   /**
    * Fate of displaced jobs: reschedule (default — pushed to later windows) or reassign (handed to another feasible technician at their ORIGINAL time; no-capacity jobs fall back to reschedule).
    */
@@ -173,7 +179,7 @@ public class JobRequestEmergencyPreviewRequest {
   public static final String SERIALIZED_NAME_START_AT = "start_at";
   @SerializedName(SERIALIZED_NAME_START_AT)
   @javax.annotation.Nonnull
-  private String startAt;
+  private OffsetDateTime startAt;
 
   public static final String SERIALIZED_NAME_TECHNICIAN_ID = "technician_id";
   @SerializedName(SERIALIZED_NAME_TECHNICIAN_ID)
@@ -182,6 +188,25 @@ public class JobRequestEmergencyPreviewRequest {
 
   public JobRequestEmergencyPreviewRequest() {
   }
+
+  public JobRequestEmergencyPreviewRequest afterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+    return this;
+  }
+
+  /**
+   * Place this P0 outside working hours / approved time-off — you have phoned the technician and they agreed. Drops the non-working-day rejection; the response then carries an AFTER_HOURS warning. Double-booking, service area, required skills and the lead-tier rule still reject.
+   * @return afterHoursOverride
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverride() {
+    return afterHoursOverride;
+  }
+
+  public void setAfterHoursOverride(@javax.annotation.Nullable Boolean afterHoursOverride) {
+    this.afterHoursOverride = afterHoursOverride;
+  }
+
 
   public JobRequestEmergencyPreviewRequest displacementMode(@javax.annotation.Nullable DisplacementModeEnum displacementMode) {
     this.displacementMode = displacementMode;
@@ -240,21 +265,21 @@ public class JobRequestEmergencyPreviewRequest {
   }
 
 
-  public JobRequestEmergencyPreviewRequest startAt(@javax.annotation.Nonnull String startAt) {
+  public JobRequestEmergencyPreviewRequest startAt(@javax.annotation.Nonnull OffsetDateTime startAt) {
     this.startAt = startAt;
     return this;
   }
 
   /**
-   * Desired start — business-local naive datetime, no offset. Must be in the future.
+   * Desired start — business-local wall clock. Seconds may be omitted and a space may replace the T; an offset is accepted only when it agrees with the business timezone (a disagreeing one is refused with JOB_REQUEST_INVALID_INPUT rather than guessed). Must be in the future.
    * @return startAt
    */
   @javax.annotation.Nonnull
-  public String getStartAt() {
+  public OffsetDateTime getStartAt() {
     return startAt;
   }
 
-  public void setStartAt(@javax.annotation.Nonnull String startAt) {
+  public void setStartAt(@javax.annotation.Nonnull OffsetDateTime startAt) {
     this.startAt = startAt;
   }
 
@@ -288,7 +313,8 @@ public class JobRequestEmergencyPreviewRequest {
       return false;
     }
     JobRequestEmergencyPreviewRequest jobRequestEmergencyPreviewRequest = (JobRequestEmergencyPreviewRequest) o;
-    return Objects.equals(this.displacementMode, jobRequestEmergencyPreviewRequest.displacementMode) &&
+    return Objects.equals(this.afterHoursOverride, jobRequestEmergencyPreviewRequest.afterHoursOverride) &&
+        Objects.equals(this.displacementMode, jobRequestEmergencyPreviewRequest.displacementMode) &&
         Objects.equals(this.emergencyJobId, jobRequestEmergencyPreviewRequest.emergencyJobId) &&
         Objects.equals(this.mode, jobRequestEmergencyPreviewRequest.mode) &&
         Objects.equals(this.startAt, jobRequestEmergencyPreviewRequest.startAt) &&
@@ -297,13 +323,14 @@ public class JobRequestEmergencyPreviewRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(displacementMode, emergencyJobId, mode, startAt, technicianId);
+    return Objects.hash(afterHoursOverride, displacementMode, emergencyJobId, mode, startAt, technicianId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestEmergencyPreviewRequest {\n");
+    sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    displacementMode: ").append(toIndentedString(displacementMode)).append("\n");
     sb.append("    emergencyJobId: ").append(toIndentedString(emergencyJobId)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
@@ -331,6 +358,7 @@ public class JobRequestEmergencyPreviewRequest {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override");
     openapiFields.add("displacement_mode");
     openapiFields.add("emergency_job_id");
     openapiFields.add("mode");
@@ -388,9 +416,6 @@ public class JobRequestEmergencyPreviewRequest {
       }
       // validate the required field `mode`
       ModeEnum.validateJsonElement(jsonObj.get("mode"));
-      if (!jsonObj.get("start_at").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format("Expected the field `start_at` to be a primitive type in the JSON string but got `%s`", jsonObj.get("start_at").toString()));
-      }
       if (!jsonObj.get("technician_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `technician_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("technician_id").toString()));
       }
