@@ -16,6 +16,7 @@ package com.crisphive.client.model;
 import java.util.Objects;
 import com.crisphive.client.model.InternalJobrequestHttpAddressReq;
 import com.crisphive.client.model.JobRequestBookAndConfirmCustomer;
+import com.crisphive.client.model.JobRequestBookAndConfirmEmergency;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
@@ -71,10 +72,20 @@ public class JobRequestBookAndConfirmRequest {
   @javax.annotation.Nullable
   private UUID customerId;
 
+  public static final String SERIALIZED_NAME_DEMOBILIZATION_MINUTES = "demobilization_minutes";
+  @SerializedName(SERIALIZED_NAME_DEMOBILIZATION_MINUTES)
+  @javax.annotation.Nullable
+  private Integer demobilizationMinutes;
+
   public static final String SERIALIZED_NAME_DESCRIPTION = "description";
   @SerializedName(SERIALIZED_NAME_DESCRIPTION)
   @javax.annotation.Nullable
   private String description;
+
+  public static final String SERIALIZED_NAME_EMERGENCY = "emergency";
+  @SerializedName(SERIALIZED_NAME_EMERGENCY)
+  @javax.annotation.Nullable
+  private JobRequestBookAndConfirmEmergency emergency;
 
   public static final String SERIALIZED_NAME_JOB_DURATION_MINUTES = "job_duration_minutes";
   @SerializedName(SERIALIZED_NAME_JOB_DURATION_MINUTES)
@@ -85,6 +96,11 @@ public class JobRequestBookAndConfirmRequest {
   @SerializedName(SERIALIZED_NAME_JOB_TYPE_ID)
   @javax.annotation.Nullable
   private UUID jobTypeId;
+
+  public static final String SERIALIZED_NAME_MOBILIZATION_MINUTES = "mobilization_minutes";
+  @SerializedName(SERIALIZED_NAME_MOBILIZATION_MINUTES)
+  @javax.annotation.Nullable
+  private Integer mobilizationMinutes;
 
   /**
    * Scheduling priority p0–p3. Optional; omitted &#x3D; the business default.
@@ -171,7 +187,7 @@ public class JobRequestBookAndConfirmRequest {
   }
 
   /**
-   * Service address. REQUIRED with &#x60;customer&#x60;; ignored with &#x60;customer_id&#x60; (the stored customer address is used). Missing coordinates are geocoded.
+   * Service address. REQUIRED with &#x60;customer&#x60;. OPTIONAL with &#x60;customer_id&#x60;: when sent it is used for THIS JOB and the stored customer address is only the fallback when it is omitted — it is never written back to the customer record. Missing coordinates are geocoded.
    * @return address
    */
   @javax.annotation.Nullable
@@ -222,6 +238,26 @@ public class JobRequestBookAndConfirmRequest {
   }
 
 
+  public JobRequestBookAndConfirmRequest demobilizationMinutes(@javax.annotation.Nullable Integer demobilizationMinutes) {
+    this.demobilizationMinutes = demobilizationMinutes;
+    return this;
+  }
+
+  /**
+   * Demobilization (teardown) minutes after the work, min 0 — same rules as mobilization_minutes.
+   * minimum: 0
+   * @return demobilizationMinutes
+   */
+  @javax.annotation.Nullable
+  public Integer getDemobilizationMinutes() {
+    return demobilizationMinutes;
+  }
+
+  public void setDemobilizationMinutes(@javax.annotation.Nullable Integer demobilizationMinutes) {
+    this.demobilizationMinutes = demobilizationMinutes;
+  }
+
+
   public JobRequestBookAndConfirmRequest description(@javax.annotation.Nullable String description) {
     this.description = description;
     return this;
@@ -238,6 +274,25 @@ public class JobRequestBookAndConfirmRequest {
 
   public void setDescription(@javax.annotation.Nullable String description) {
     this.description = description;
+  }
+
+
+  public JobRequestBookAndConfirmRequest emergency(@javax.annotation.Nullable JobRequestBookAndConfirmEmergency emergency) {
+    this.emergency = emergency;
+    return this;
+  }
+
+  /**
+   * P0 dispatch. Present only with priority p0 (or a business whose default priority is p0). See the endpoint description.
+   * @return emergency
+   */
+  @javax.annotation.Nullable
+  public JobRequestBookAndConfirmEmergency getEmergency() {
+    return emergency;
+  }
+
+  public void setEmergency(@javax.annotation.Nullable JobRequestBookAndConfirmEmergency emergency) {
+    this.emergency = emergency;
   }
 
 
@@ -277,6 +332,26 @@ public class JobRequestBookAndConfirmRequest {
 
   public void setJobTypeId(@javax.annotation.Nullable UUID jobTypeId) {
     this.jobTypeId = jobTypeId;
+  }
+
+
+  public JobRequestBookAndConfirmRequest mobilizationMinutes(@javax.annotation.Nullable Integer mobilizationMinutes) {
+    this.mobilizationMinutes = mobilizationMinutes;
+    return this;
+  }
+
+  /**
+   * Mobilization (setup/travel-prep) minutes before the work, min 0 — same meaning as on quoteJobRequest. Optional: omitted, the job type&#39;s default_mobilization_minutes applies when job_duration_minutes is ALSO omitted, and 0 when you sent a duration (an explicit duration is never mixed with the type&#39;s buffers). A value you send always wins. Counted when checking whether a pinned technician_id is free.
+   * minimum: 0
+   * @return mobilizationMinutes
+   */
+  @javax.annotation.Nullable
+  public Integer getMobilizationMinutes() {
+    return mobilizationMinutes;
+  }
+
+  public void setMobilizationMinutes(@javax.annotation.Nullable Integer mobilizationMinutes) {
+    this.mobilizationMinutes = mobilizationMinutes;
   }
 
 
@@ -377,9 +452,12 @@ public class JobRequestBookAndConfirmRequest {
     return Objects.equals(this.address, jobRequestBookAndConfirmRequest.address) &&
         Objects.equals(this.customer, jobRequestBookAndConfirmRequest.customer) &&
         Objects.equals(this.customerId, jobRequestBookAndConfirmRequest.customerId) &&
+        Objects.equals(this.demobilizationMinutes, jobRequestBookAndConfirmRequest.demobilizationMinutes) &&
         Objects.equals(this.description, jobRequestBookAndConfirmRequest.description) &&
+        Objects.equals(this.emergency, jobRequestBookAndConfirmRequest.emergency) &&
         Objects.equals(this.jobDurationMinutes, jobRequestBookAndConfirmRequest.jobDurationMinutes) &&
         Objects.equals(this.jobTypeId, jobRequestBookAndConfirmRequest.jobTypeId) &&
+        Objects.equals(this.mobilizationMinutes, jobRequestBookAndConfirmRequest.mobilizationMinutes) &&
         Objects.equals(this.priority, jobRequestBookAndConfirmRequest.priority) &&
         Objects.equals(this.scheduledAt, jobRequestBookAndConfirmRequest.scheduledAt) &&
         Objects.equals(this.skillIds, jobRequestBookAndConfirmRequest.skillIds) &&
@@ -388,7 +466,7 @@ public class JobRequestBookAndConfirmRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, customer, customerId, description, jobDurationMinutes, jobTypeId, priority, scheduledAt, skillIds, technicianId);
+    return Objects.hash(address, customer, customerId, demobilizationMinutes, description, emergency, jobDurationMinutes, jobTypeId, mobilizationMinutes, priority, scheduledAt, skillIds, technicianId);
   }
 
   @Override
@@ -398,9 +476,12 @@ public class JobRequestBookAndConfirmRequest {
     sb.append("    address: ").append(toIndentedString(address)).append("\n");
     sb.append("    customer: ").append(toIndentedString(customer)).append("\n");
     sb.append("    customerId: ").append(toIndentedString(customerId)).append("\n");
+    sb.append("    demobilizationMinutes: ").append(toIndentedString(demobilizationMinutes)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    emergency: ").append(toIndentedString(emergency)).append("\n");
     sb.append("    jobDurationMinutes: ").append(toIndentedString(jobDurationMinutes)).append("\n");
     sb.append("    jobTypeId: ").append(toIndentedString(jobTypeId)).append("\n");
+    sb.append("    mobilizationMinutes: ").append(toIndentedString(mobilizationMinutes)).append("\n");
     sb.append("    priority: ").append(toIndentedString(priority)).append("\n");
     sb.append("    scheduledAt: ").append(toIndentedString(scheduledAt)).append("\n");
     sb.append("    skillIds: ").append(toIndentedString(skillIds)).append("\n");
@@ -430,9 +511,12 @@ public class JobRequestBookAndConfirmRequest {
     openapiFields.add("address");
     openapiFields.add("customer");
     openapiFields.add("customer_id");
+    openapiFields.add("demobilization_minutes");
     openapiFields.add("description");
+    openapiFields.add("emergency");
     openapiFields.add("job_duration_minutes");
     openapiFields.add("job_type_id");
+    openapiFields.add("mobilization_minutes");
     openapiFields.add("priority");
     openapiFields.add("scheduled_at");
     openapiFields.add("skill_ids");
@@ -476,6 +560,10 @@ public class JobRequestBookAndConfirmRequest {
       }
       if ((jsonObj.get("description") != null && !jsonObj.get("description").isJsonNull()) && !jsonObj.get("description").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `description` to be a primitive type in the JSON string but got `%s`", jsonObj.get("description").toString()));
+      }
+      // validate the optional field `emergency`
+      if (jsonObj.get("emergency") != null && !jsonObj.get("emergency").isJsonNull()) {
+        JobRequestBookAndConfirmEmergency.validateJsonElement(jsonObj.get("emergency"));
       }
       if ((jsonObj.get("job_type_id") != null && !jsonObj.get("job_type_id").isJsonNull()) && !jsonObj.get("job_type_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `job_type_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("job_type_id").toString()));

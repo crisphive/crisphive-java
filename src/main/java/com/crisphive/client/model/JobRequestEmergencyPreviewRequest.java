@@ -14,6 +14,7 @@
 package com.crisphive.client.model;
 
 import java.util.Objects;
+import com.crisphive.client.model.JobRequestEmergencyInlineJob;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
@@ -116,8 +117,13 @@ public class JobRequestEmergencyPreviewRequest {
 
   public static final String SERIALIZED_NAME_EMERGENCY_JOB_ID = "emergency_job_id";
   @SerializedName(SERIALIZED_NAME_EMERGENCY_JOB_ID)
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   private UUID emergencyJobId;
+
+  public static final String SERIALIZED_NAME_JOB = "job";
+  @SerializedName(SERIALIZED_NAME_JOB)
+  @javax.annotation.Nullable
+  private JobRequestEmergencyInlineJob job;
 
   /**
    * Cascade mode: overtime &#x3D; displaced jobs stay same-day (tech works late); next_day &#x3D; overflow rolls to the next working day.
@@ -227,22 +233,41 @@ public class JobRequestEmergencyPreviewRequest {
   }
 
 
-  public JobRequestEmergencyPreviewRequest emergencyJobId(@javax.annotation.Nonnull UUID emergencyJobId) {
+  public JobRequestEmergencyPreviewRequest emergencyJobId(@javax.annotation.Nullable UUID emergencyJobId) {
     this.emergencyJobId = emergencyJobId;
     return this;
   }
 
   /**
-   * ID of the P0 job to insert.
+   * UUID of the P0 job to insert. Send this OR &#x60;job&#x60;, never both and never neither.
    * @return emergencyJobId
    */
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   public UUID getEmergencyJobId() {
     return emergencyJobId;
   }
 
-  public void setEmergencyJobId(@javax.annotation.Nonnull UUID emergencyJobId) {
+  public void setEmergencyJobId(@javax.annotation.Nullable UUID emergencyJobId) {
     this.emergencyJobId = emergencyJobId;
+  }
+
+
+  public JobRequestEmergencyPreviewRequest job(@javax.annotation.Nullable JobRequestEmergencyInlineJob job) {
+    this.job = job;
+    return this;
+  }
+
+  /**
+   * A job that does not exist yet — the wizard&#39;s read-only preview before anything is written. Send this OR &#x60;emergency_job_id&#x60;.
+   * @return job
+   */
+  @javax.annotation.Nullable
+  public JobRequestEmergencyInlineJob getJob() {
+    return job;
+  }
+
+  public void setJob(@javax.annotation.Nullable JobRequestEmergencyInlineJob job) {
+    this.job = job;
   }
 
 
@@ -316,6 +341,7 @@ public class JobRequestEmergencyPreviewRequest {
     return Objects.equals(this.afterHoursOverride, jobRequestEmergencyPreviewRequest.afterHoursOverride) &&
         Objects.equals(this.displacementMode, jobRequestEmergencyPreviewRequest.displacementMode) &&
         Objects.equals(this.emergencyJobId, jobRequestEmergencyPreviewRequest.emergencyJobId) &&
+        Objects.equals(this.job, jobRequestEmergencyPreviewRequest.job) &&
         Objects.equals(this.mode, jobRequestEmergencyPreviewRequest.mode) &&
         Objects.equals(this.startAt, jobRequestEmergencyPreviewRequest.startAt) &&
         Objects.equals(this.technicianId, jobRequestEmergencyPreviewRequest.technicianId);
@@ -323,7 +349,7 @@ public class JobRequestEmergencyPreviewRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(afterHoursOverride, displacementMode, emergencyJobId, mode, startAt, technicianId);
+    return Objects.hash(afterHoursOverride, displacementMode, emergencyJobId, job, mode, startAt, technicianId);
   }
 
   @Override
@@ -333,6 +359,7 @@ public class JobRequestEmergencyPreviewRequest {
     sb.append("    afterHoursOverride: ").append(toIndentedString(afterHoursOverride)).append("\n");
     sb.append("    displacementMode: ").append(toIndentedString(displacementMode)).append("\n");
     sb.append("    emergencyJobId: ").append(toIndentedString(emergencyJobId)).append("\n");
+    sb.append("    job: ").append(toIndentedString(job)).append("\n");
     sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
     sb.append("    startAt: ").append(toIndentedString(startAt)).append("\n");
     sb.append("    technicianId: ").append(toIndentedString(technicianId)).append("\n");
@@ -361,13 +388,13 @@ public class JobRequestEmergencyPreviewRequest {
     openapiFields.add("after_hours_override");
     openapiFields.add("displacement_mode");
     openapiFields.add("emergency_job_id");
+    openapiFields.add("job");
     openapiFields.add("mode");
     openapiFields.add("start_at");
     openapiFields.add("technician_id");
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("emergency_job_id");
     openapiRequiredFields.add("mode");
     openapiRequiredFields.add("start_at");
     openapiRequiredFields.add("technician_id");
@@ -408,8 +435,12 @@ public class JobRequestEmergencyPreviewRequest {
       if (jsonObj.get("displacement_mode") != null && !jsonObj.get("displacement_mode").isJsonNull()) {
         DisplacementModeEnum.validateJsonElement(jsonObj.get("displacement_mode"));
       }
-      if (!jsonObj.get("emergency_job_id").isJsonPrimitive()) {
+      if ((jsonObj.get("emergency_job_id") != null && !jsonObj.get("emergency_job_id").isJsonNull()) && !jsonObj.get("emergency_job_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `emergency_job_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("emergency_job_id").toString()));
+      }
+      // validate the optional field `job`
+      if (jsonObj.get("job") != null && !jsonObj.get("job").isJsonNull()) {
+        JobRequestEmergencyInlineJob.validateJsonElement(jsonObj.get("job"));
       }
       if (!jsonObj.get("mode").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `mode` to be a primitive type in the JSON string but got `%s`", jsonObj.get("mode").toString()));

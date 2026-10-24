@@ -14,6 +14,7 @@
 package com.crisphive.client.model;
 
 import java.util.Objects;
+import com.crisphive.client.model.JobRequestBookAndConfirmEmergencyResult;
 import com.crisphive.client.model.JobRequestBookAndConfirmRefusal;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
@@ -72,6 +73,11 @@ public class JobRequestBookAndConfirmResponse {
   @SerializedName(SERIALIZED_NAME_CUSTOMER_URL)
   @javax.annotation.Nullable
   private String customerUrl;
+
+  public static final String SERIALIZED_NAME_EMERGENCY = "emergency";
+  @SerializedName(SERIALIZED_NAME_EMERGENCY)
+  @javax.annotation.Nullable
+  private JobRequestBookAndConfirmEmergencyResult emergency;
 
   public static final String SERIALIZED_NAME_JOB_ID = "job_id";
   @SerializedName(SERIALIZED_NAME_JOB_ID)
@@ -172,6 +178,25 @@ public class JobRequestBookAndConfirmResponse {
   }
 
 
+  public JobRequestBookAndConfirmResponse emergency(@javax.annotation.Nullable JobRequestBookAndConfirmEmergencyResult emergency) {
+    this.emergency = emergency;
+    return this;
+  }
+
+  /**
+   * The P0 dispatch, echoed back. Present whenever the request carried &#x60;emergency&#x60;.
+   * @return emergency
+   */
+  @javax.annotation.Nullable
+  public JobRequestBookAndConfirmEmergencyResult getEmergency() {
+    return emergency;
+  }
+
+  public void setEmergency(@javax.annotation.Nullable JobRequestBookAndConfirmEmergencyResult emergency) {
+    this.emergency = emergency;
+  }
+
+
   public JobRequestBookAndConfirmResponse jobId(@javax.annotation.Nullable UUID jobId) {
     this.jobId = jobId;
     return this;
@@ -262,6 +287,7 @@ public class JobRequestBookAndConfirmResponse {
         Objects.equals(this.confirmed, jobRequestBookAndConfirmResponse.confirmed) &&
         Objects.equals(this.customerId, jobRequestBookAndConfirmResponse.customerId) &&
         Objects.equals(this.customerUrl, jobRequestBookAndConfirmResponse.customerUrl) &&
+        Objects.equals(this.emergency, jobRequestBookAndConfirmResponse.emergency) &&
         Objects.equals(this.jobId, jobRequestBookAndConfirmResponse.jobId) &&
         Objects.equals(this.refusal, jobRequestBookAndConfirmResponse.refusal) &&
         Objects.equals(this.scheduledAt, jobRequestBookAndConfirmResponse.scheduledAt) &&
@@ -270,7 +296,7 @@ public class JobRequestBookAndConfirmResponse {
 
   @Override
   public int hashCode() {
-    return Objects.hash(assignedTechnicianId, confirmed, customerId, customerUrl, jobId, refusal, scheduledAt, shortCode);
+    return Objects.hash(assignedTechnicianId, confirmed, customerId, customerUrl, emergency, jobId, refusal, scheduledAt, shortCode);
   }
 
   @Override
@@ -281,6 +307,7 @@ public class JobRequestBookAndConfirmResponse {
     sb.append("    confirmed: ").append(toIndentedString(confirmed)).append("\n");
     sb.append("    customerId: ").append(toIndentedString(customerId)).append("\n");
     sb.append("    customerUrl: ").append(toIndentedString(customerUrl)).append("\n");
+    sb.append("    emergency: ").append(toIndentedString(emergency)).append("\n");
     sb.append("    jobId: ").append(toIndentedString(jobId)).append("\n");
     sb.append("    refusal: ").append(toIndentedString(refusal)).append("\n");
     sb.append("    scheduledAt: ").append(toIndentedString(scheduledAt)).append("\n");
@@ -311,6 +338,7 @@ public class JobRequestBookAndConfirmResponse {
     openapiFields.add("confirmed");
     openapiFields.add("customer_id");
     openapiFields.add("customer_url");
+    openapiFields.add("emergency");
     openapiFields.add("job_id");
     openapiFields.add("refusal");
     openapiFields.add("scheduled_at");
@@ -349,6 +377,10 @@ public class JobRequestBookAndConfirmResponse {
       }
       if ((jsonObj.get("customer_url") != null && !jsonObj.get("customer_url").isJsonNull()) && !jsonObj.get("customer_url").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `customer_url` to be a primitive type in the JSON string but got `%s`", jsonObj.get("customer_url").toString()));
+      }
+      // validate the optional field `emergency`
+      if (jsonObj.get("emergency") != null && !jsonObj.get("emergency").isJsonNull()) {
+        JobRequestBookAndConfirmEmergencyResult.validateJsonElement(jsonObj.get("emergency"));
       }
       if ((jsonObj.get("job_id") != null && !jsonObj.get("job_id").isJsonNull()) && !jsonObj.get("job_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `job_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("job_id").toString()));

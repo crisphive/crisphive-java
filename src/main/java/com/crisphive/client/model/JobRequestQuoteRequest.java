@@ -139,7 +139,7 @@ public class JobRequestQuoteRequest {
   }
 
   /**
-   * Schedule the job even when no technician can take it in ANY window the customer asked for (outside working hours, outside every service area, nobody free). Without it that case answers 409 JOB_REQUEST_QUOTE_NOT_SCHEDULABLE with the reason, so the coordinator can agree a different time with the customer first. Send true only after that conversation; the override is recorded in the activity feed.
+   * Schedule the job even when no technician can take it in ANY window the customer asked for (outside working hours, outside every service area, nobody free). Without it that case answers 409 JOB_REQUEST_QUOTE_NOT_SCHEDULABLE with the reason, so the coordinator can agree a different time with the customer first. Send true only after that conversation; the override is recorded in the activity feed. A p0 (emergency) job is EXEMPT: the check never runs for one, because a p0 is placed by the dispatcher (force-assign, displacement, after_hours_override) and never offered through the customer&#39;s slot picker — so &#x60;force&#x60; is neither needed nor recorded there.
    * @return force
    */
   @javax.annotation.Nullable

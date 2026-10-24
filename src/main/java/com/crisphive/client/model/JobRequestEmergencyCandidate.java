@@ -61,6 +61,11 @@ public class JobRequestEmergencyCandidate {
   @javax.annotation.Nullable
   private Integer bookedMinutes;
 
+  public static final String SERIALIZED_NAME_CALENDAR_BUSY = "calendar_busy";
+  @SerializedName(SERIALIZED_NAME_CALENDAR_BUSY)
+  @javax.annotation.Nullable
+  private Boolean calendarBusy;
+
   public static final String SERIALIZED_NAME_DAYS = "days";
   @SerializedName(SERIALIZED_NAME_DAYS)
   @javax.annotation.Nullable
@@ -125,6 +130,25 @@ public class JobRequestEmergencyCandidate {
 
   public void setBookedMinutes(@javax.annotation.Nullable Integer bookedMinutes) {
     this.bookedMinutes = bookedMinutes;
+  }
+
+
+  public JobRequestEmergencyCandidate calendarBusy(@javax.annotation.Nullable Boolean calendarBusy) {
+    this.calendarBusy = calendarBusy;
+    return this;
+  }
+
+  /**
+   * True when this technician overlaps a PERSONAL-calendar window and is offered anyway, flagged and sorted last, for you to decide on. Render it as \&quot;has a personal commitment then — phone them before choosing\&quot;, never as a recommendation. The event&#39;s hours are deliberately NOT disclosed: the platform stores no title and the times are a private commitment.
+   * @return calendarBusy
+   */
+  @javax.annotation.Nullable
+  public Boolean getCalendarBusy() {
+    return calendarBusy;
+  }
+
+  public void setCalendarBusy(@javax.annotation.Nullable Boolean calendarBusy) {
+    this.calendarBusy = calendarBusy;
   }
 
 
@@ -302,7 +326,7 @@ public class JobRequestEmergencyCandidate {
   }
 
   /**
-   * Per-technician warnings, e.g. TIME_OFF_OVERLAP when this technician is on approved leave at the requested time (only reachable with after_hours_override, which stops leave from rejecting).
+   * Per-technician warnings: TIME_OFF_OVERLAP when this technician is on approved leave at the requested time (only reachable with after_hours_override, which stops leave from rejecting), and CALENDAR_OVERLAP alongside calendar_busy above.
    * @return warnings
    */
   @javax.annotation.Nullable
@@ -326,6 +350,7 @@ public class JobRequestEmergencyCandidate {
     }
     JobRequestEmergencyCandidate jobRequestEmergencyCandidate = (JobRequestEmergencyCandidate) o;
     return Objects.equals(this.bookedMinutes, jobRequestEmergencyCandidate.bookedMinutes) &&
+        Objects.equals(this.calendarBusy, jobRequestEmergencyCandidate.calendarBusy) &&
         Objects.equals(this.days, jobRequestEmergencyCandidate.days) &&
         Objects.equals(this.distanceKm, jobRequestEmergencyCandidate.distanceKm) &&
         Objects.equals(this.fullName, jobRequestEmergencyCandidate.fullName) &&
@@ -339,7 +364,7 @@ public class JobRequestEmergencyCandidate {
 
   @Override
   public int hashCode() {
-    return Objects.hash(bookedMinutes, days, distanceKm, fullName, matchedSkills, technicianId, totalMoves, totalScore, travelMinutes, warnings);
+    return Objects.hash(bookedMinutes, calendarBusy, days, distanceKm, fullName, matchedSkills, technicianId, totalMoves, totalScore, travelMinutes, warnings);
   }
 
   @Override
@@ -347,6 +372,7 @@ public class JobRequestEmergencyCandidate {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestEmergencyCandidate {\n");
     sb.append("    bookedMinutes: ").append(toIndentedString(bookedMinutes)).append("\n");
+    sb.append("    calendarBusy: ").append(toIndentedString(calendarBusy)).append("\n");
     sb.append("    days: ").append(toIndentedString(days)).append("\n");
     sb.append("    distanceKm: ").append(toIndentedString(distanceKm)).append("\n");
     sb.append("    fullName: ").append(toIndentedString(fullName)).append("\n");
@@ -379,6 +405,7 @@ public class JobRequestEmergencyCandidate {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
     openapiFields.add("booked_minutes");
+    openapiFields.add("calendar_busy");
     openapiFields.add("days");
     openapiFields.add("distance_km");
     openapiFields.add("full_name");

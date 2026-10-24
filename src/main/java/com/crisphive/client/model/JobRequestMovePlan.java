@@ -58,6 +58,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestMovePlan {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE_REQUIRED = "after_hours_override_required";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE_REQUIRED)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverrideRequired;
+
   public static final String SERIALIZED_NAME_BUSINESS_TIMEZONE = "business_timezone";
   @SerializedName(SERIALIZED_NAME_BUSINESS_TIMEZONE)
   @javax.annotation.Nullable
@@ -177,6 +182,25 @@ public class JobRequestMovePlan {
 
   public JobRequestMovePlan() {
   }
+
+  public JobRequestMovePlan afterHoursOverrideRequired(@javax.annotation.Nullable Boolean afterHoursOverrideRequired) {
+    this.afterHoursOverrideRequired = afterHoursOverrideRequired;
+    return this;
+  }
+
+  /**
+   * True on a PREVIEW that lands a p0 single-person job on a day the business does not work, sent without after_hours_override. The plan is shown as the override would place it; to commit it, ask the coordinator whether they have phoned the technician and send after_hours_override&#x3D;true. Always false on a commit (a commit without the flag refuses instead).
+   * @return afterHoursOverrideRequired
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverrideRequired() {
+    return afterHoursOverrideRequired;
+  }
+
+  public void setAfterHoursOverrideRequired(@javax.annotation.Nullable Boolean afterHoursOverrideRequired) {
+    this.afterHoursOverrideRequired = afterHoursOverrideRequired;
+  }
+
 
   public JobRequestMovePlan businessTimezone(@javax.annotation.Nullable String businessTimezone) {
     this.businessTimezone = businessTimezone;
@@ -467,7 +491,8 @@ public class JobRequestMovePlan {
       return false;
     }
     JobRequestMovePlan jobRequestMovePlan = (JobRequestMovePlan) o;
-    return Objects.equals(this.businessTimezone, jobRequestMovePlan.businessTimezone) &&
+    return Objects.equals(this.afterHoursOverrideRequired, jobRequestMovePlan.afterHoursOverrideRequired) &&
+        Objects.equals(this.businessTimezone, jobRequestMovePlan.businessTimezone) &&
         Objects.equals(this.crewChanges, jobRequestMovePlan.crewChanges) &&
         Objects.equals(this.days, jobRequestMovePlan.days) &&
         Objects.equals(this.jobId, jobRequestMovePlan.jobId) &&
@@ -484,13 +509,14 @@ public class JobRequestMovePlan {
 
   @Override
   public int hashCode() {
-    return Objects.hash(businessTimezone, crewChanges, days, jobId, members, mode, newEnd, newStart, previousTechnicianId, shortCode, technicianId, totalMoves, warnings);
+    return Objects.hash(afterHoursOverrideRequired, businessTimezone, crewChanges, days, jobId, members, mode, newEnd, newStart, previousTechnicianId, shortCode, technicianId, totalMoves, warnings);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestMovePlan {\n");
+    sb.append("    afterHoursOverrideRequired: ").append(toIndentedString(afterHoursOverrideRequired)).append("\n");
     sb.append("    businessTimezone: ").append(toIndentedString(businessTimezone)).append("\n");
     sb.append("    crewChanges: ").append(toIndentedString(crewChanges)).append("\n");
     sb.append("    days: ").append(toIndentedString(days)).append("\n");
@@ -526,6 +552,7 @@ public class JobRequestMovePlan {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override_required");
     openapiFields.add("business_timezone");
     openapiFields.add("crew_changes");
     openapiFields.add("days");

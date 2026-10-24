@@ -236,6 +236,153 @@ public class TechnicianTimeOffApi {
         return localVarCall;
     }
     /**
+     * Build call for deleteTechnicianTimeOff
+     * @param id Time Off ID (required)
+     * @param _callback Callback for upload/download progress
+     * @return Call to execute
+     * @throws ApiException If fail to serialize the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY (the id is not a UUID) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN | API_KEY_SCOPE_INSUFFICIENT (missing schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TIME_OFF_NOT_FOUND (no such record in this business and environment, or already deleted) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteTechnicianTimeOffCall(String id, final ApiCallback _callback) throws ApiException {
+        String basePath = null;
+        // Operation Servers
+        String[] localBasePaths = new String[] {  };
+
+        // Determine Base Path to Use
+        if (localCustomBaseUrl != null){
+            basePath = localCustomBaseUrl;
+        } else if ( localBasePaths.length > 0 ) {
+            basePath = localBasePaths[localHostIndex];
+        } else {
+            basePath = null;
+        }
+
+        Object localVarPostBody = null;
+
+        // create path and map variables
+        String localVarPath = "/technician-time-off/{id}"
+            .replace("{" + "id" + "}", localVarApiClient.escapeString(id.toString()));
+
+        List<Pair> localVarQueryParams = new ArrayList<Pair>();
+        List<Pair> localVarCollectionQueryParams = new ArrayList<Pair>();
+        Map<String, String> localVarHeaderParams = new HashMap<String, String>();
+        Map<String, String> localVarCookieParams = new HashMap<String, String>();
+        Map<String, Object> localVarFormParams = new HashMap<String, Object>();
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final String localVarAccept = localVarApiClient.selectHeaderAccept(localVarAccepts);
+        if (localVarAccept != null) {
+            localVarHeaderParams.put("Accept", localVarAccept);
+        }
+
+        final String[] localVarContentTypes = {
+        };
+        final String localVarContentType = localVarApiClient.selectHeaderContentType(localVarContentTypes);
+        if (localVarContentType != null) {
+            localVarHeaderParams.put("Content-Type", localVarContentType);
+        }
+
+        String[] localVarAuthNames = new String[] { "ApiKeyAuth" };
+        return localVarApiClient.buildCall(basePath, localVarPath, "DELETE", localVarQueryParams, localVarCollectionQueryParams, localVarPostBody, localVarHeaderParams, localVarCookieParams, localVarFormParams, localVarAuthNames, _callback);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private okhttp3.Call deleteTechnicianTimeOffValidateBeforeCall(String id, final ApiCallback _callback) throws ApiException {
+        // verify the required parameter 'id' is set
+        if (id == null) {
+            throw new ApiException("Missing the required parameter 'id' when calling deleteTechnicianTimeOff(Async)");
+        }
+
+        return deleteTechnicianTimeOffCall(id, _callback);
+
+    }
+
+    /**
+     * Delete a technician&#39;s time off (e.g. back from a sick day)
+     * Removes a time-off record, in ANY status (pending, approved, rejected or cancelled). This is the \&quot;the technician can come in after all\&quot; call: once an approved record is deleted the technician is bookable again in that window for NEW bookings and schedule moves. It does NOT move any job back — jobs that &#x60;commitAbsenceResolve&#x60; already re-assigned to other technicians stay where they are (their customers may already have been told), and a job flagged as needing attention when the record was created keeps that flag until it is moved or re-assigned. To give the technician work again, book or move jobs onto them explicitly. The record is soft-deleted (it no longer appears in &#x60;GET /technicians/{id}/time-off&#x60;); deleting it again answers &#x60;TIME_OFF_NOT_FOUND&#x60;. A sandbox (&#x60;chsk_test_&#x60;) key can only delete sandbox records — a live record id answers &#x60;TIME_OFF_NOT_FOUND&#x60;, and the reverse holds for a live key.
+     * @param id Time Off ID (required)
+     * @return ResponseEnvelope
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY (the id is not a UUID) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN | API_KEY_SCOPE_INSUFFICIENT (missing schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TIME_OFF_NOT_FOUND (no such record in this business and environment, or already deleted) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ResponseEnvelope deleteTechnicianTimeOff(String id) throws ApiException {
+        ApiResponse<ResponseEnvelope> localVarResp = deleteTechnicianTimeOffWithHttpInfo(id);
+        return localVarResp.getData();
+    }
+
+    /**
+     * Delete a technician&#39;s time off (e.g. back from a sick day)
+     * Removes a time-off record, in ANY status (pending, approved, rejected or cancelled). This is the \&quot;the technician can come in after all\&quot; call: once an approved record is deleted the technician is bookable again in that window for NEW bookings and schedule moves. It does NOT move any job back — jobs that &#x60;commitAbsenceResolve&#x60; already re-assigned to other technicians stay where they are (their customers may already have been told), and a job flagged as needing attention when the record was created keeps that flag until it is moved or re-assigned. To give the technician work again, book or move jobs onto them explicitly. The record is soft-deleted (it no longer appears in &#x60;GET /technicians/{id}/time-off&#x60;); deleting it again answers &#x60;TIME_OFF_NOT_FOUND&#x60;. A sandbox (&#x60;chsk_test_&#x60;) key can only delete sandbox records — a live record id answers &#x60;TIME_OFF_NOT_FOUND&#x60;, and the reverse holds for a live key.
+     * @param id Time Off ID (required)
+     * @return ApiResponse&lt;ResponseEnvelope&gt;
+     * @throws ApiException If fail to call the API, e.g. server error or cannot deserialize the response body
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY (the id is not a UUID) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN | API_KEY_SCOPE_INSUFFICIENT (missing schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TIME_OFF_NOT_FOUND (no such record in this business and environment, or already deleted) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public ApiResponse<ResponseEnvelope> deleteTechnicianTimeOffWithHttpInfo(String id) throws ApiException {
+        okhttp3.Call localVarCall = deleteTechnicianTimeOffValidateBeforeCall(id, null);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        return localVarApiClient.execute(localVarCall, localVarReturnType);
+    }
+
+    /**
+     * Delete a technician&#39;s time off (e.g. back from a sick day) (asynchronously)
+     * Removes a time-off record, in ANY status (pending, approved, rejected or cancelled). This is the \&quot;the technician can come in after all\&quot; call: once an approved record is deleted the technician is bookable again in that window for NEW bookings and schedule moves. It does NOT move any job back — jobs that &#x60;commitAbsenceResolve&#x60; already re-assigned to other technicians stay where they are (their customers may already have been told), and a job flagged as needing attention when the record was created keeps that flag until it is moved or re-assigned. To give the technician work again, book or move jobs onto them explicitly. The record is soft-deleted (it no longer appears in &#x60;GET /technicians/{id}/time-off&#x60;); deleting it again answers &#x60;TIME_OFF_NOT_FOUND&#x60;. A sandbox (&#x60;chsk_test_&#x60;) key can only delete sandbox records — a live record id answers &#x60;TIME_OFF_NOT_FOUND&#x60;, and the reverse holds for a live key.
+     * @param id Time Off ID (required)
+     * @param _callback The callback to be executed when the API call finishes
+     * @return The request call
+     * @throws ApiException If fail to process the API call, e.g. serializing the request body object
+     * @http.response.details
+     <table border="1">
+       <caption>Response Details</caption>
+        <tr><td> Status Code </td><td> Description </td><td> Response Headers </td></tr>
+        <tr><td> 200 </td><td> OK </td><td>  -  </td></tr>
+        <tr><td> 400 </td><td> INVALID_REQUEST_BODY (the id is not a UUID) </td><td>  -  </td></tr>
+        <tr><td> 401 </td><td> API_KEY_INVALID | UNAUTHORIZED </td><td>  -  </td></tr>
+        <tr><td> 403 </td><td> FORBIDDEN | API_KEY_SCOPE_INSUFFICIENT (missing schedule_manage permission/scope) </td><td>  -  </td></tr>
+        <tr><td> 404 </td><td> TIME_OFF_NOT_FOUND (no such record in this business and environment, or already deleted) </td><td>  -  </td></tr>
+        <tr><td> 429 </td><td> TOO_MANY_REQUESTS — per-key rate limit exceeded (240 requests/min, shared across /v1 and /mcp). Back off for the number of seconds in the Retry-After header; every response also carries X-RateLimit-Limit / X-RateLimit-Remaining / X-RateLimit-Reset. </td><td>  -  </td></tr>
+     </table>
+     */
+    public okhttp3.Call deleteTechnicianTimeOffAsync(String id, final ApiCallback<ResponseEnvelope> _callback) throws ApiException {
+
+        okhttp3.Call localVarCall = deleteTechnicianTimeOffValidateBeforeCall(id, _callback);
+        Type localVarReturnType = new TypeToken<ResponseEnvelope>(){}.getType();
+        localVarApiClient.executeAsync(localVarCall, localVarReturnType, _callback);
+        return localVarCall;
+    }
+    /**
      * Build call for listTechnicianTimeOff
      * @param id Technician ID (required)
      * @param page Page number (default 1) (optional)

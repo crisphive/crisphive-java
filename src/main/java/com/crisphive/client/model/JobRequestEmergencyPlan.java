@@ -58,6 +58,11 @@ import com.crisphive.client.JSON;
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.11.0")
 public class JobRequestEmergencyPlan {
+  public static final String SERIALIZED_NAME_AFTER_HOURS_OVERRIDE_REQUIRED = "after_hours_override_required";
+  @SerializedName(SERIALIZED_NAME_AFTER_HOURS_OVERRIDE_REQUIRED)
+  @javax.annotation.Nullable
+  private Boolean afterHoursOverrideRequired;
+
   public static final String SERIALIZED_NAME_BUSINESS_TIMEZONE = "business_timezone";
   @SerializedName(SERIALIZED_NAME_BUSINESS_TIMEZONE)
   @javax.annotation.Nullable
@@ -168,6 +173,25 @@ public class JobRequestEmergencyPlan {
   public JobRequestEmergencyPlan() {
   }
 
+  public JobRequestEmergencyPlan afterHoursOverrideRequired(@javax.annotation.Nullable Boolean afterHoursOverrideRequired) {
+    this.afterHoursOverrideRequired = afterHoursOverrideRequired;
+    return this;
+  }
+
+  /**
+   * True on a PREVIEW onto a day the business does not work, sent without after_hours_override. The cascade is shown as the override would place it; to commit, confirm the coordinator has phoned the technician and send after_hours_override&#x3D;true. Always false on a commit.
+   * @return afterHoursOverrideRequired
+   */
+  @javax.annotation.Nullable
+  public Boolean getAfterHoursOverrideRequired() {
+    return afterHoursOverrideRequired;
+  }
+
+  public void setAfterHoursOverrideRequired(@javax.annotation.Nullable Boolean afterHoursOverrideRequired) {
+    this.afterHoursOverrideRequired = afterHoursOverrideRequired;
+  }
+
+
   public JobRequestEmergencyPlan businessTimezone(@javax.annotation.Nullable String businessTimezone) {
     this.businessTimezone = businessTimezone;
     return this;
@@ -239,7 +263,7 @@ public class JobRequestEmergencyPlan {
   }
 
   /**
-   * ID of the inserted P0 job.
+   * ID of the inserted P0 job. Absent for a probe -- a &#x60;job&#x60; that does not exist yet.
    * @return emergencyJobId
    */
   @javax.annotation.Nullable
@@ -419,7 +443,8 @@ public class JobRequestEmergencyPlan {
       return false;
     }
     JobRequestEmergencyPlan jobRequestEmergencyPlan = (JobRequestEmergencyPlan) o;
-    return Objects.equals(this.businessTimezone, jobRequestEmergencyPlan.businessTimezone) &&
+    return Objects.equals(this.afterHoursOverrideRequired, jobRequestEmergencyPlan.afterHoursOverrideRequired) &&
+        Objects.equals(this.businessTimezone, jobRequestEmergencyPlan.businessTimezone) &&
         Objects.equals(this.days, jobRequestEmergencyPlan.days) &&
         Objects.equals(this.emergencyEnd, jobRequestEmergencyPlan.emergencyEnd) &&
         Objects.equals(this.emergencyJobId, jobRequestEmergencyPlan.emergencyJobId) &&
@@ -434,13 +459,14 @@ public class JobRequestEmergencyPlan {
 
   @Override
   public int hashCode() {
-    return Objects.hash(businessTimezone, days, emergencyEnd, emergencyJobId, emergencyStart, mode, reassignFallbacks, reassignments, technicianId, totalMoves, warnings);
+    return Objects.hash(afterHoursOverrideRequired, businessTimezone, days, emergencyEnd, emergencyJobId, emergencyStart, mode, reassignFallbacks, reassignments, technicianId, totalMoves, warnings);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class JobRequestEmergencyPlan {\n");
+    sb.append("    afterHoursOverrideRequired: ").append(toIndentedString(afterHoursOverrideRequired)).append("\n");
     sb.append("    businessTimezone: ").append(toIndentedString(businessTimezone)).append("\n");
     sb.append("    days: ").append(toIndentedString(days)).append("\n");
     sb.append("    emergencyEnd: ").append(toIndentedString(emergencyEnd)).append("\n");
@@ -474,6 +500,7 @@ public class JobRequestEmergencyPlan {
   static {
     // a set of all properties/fields (JSON key names)
     openapiFields = new HashSet<String>();
+    openapiFields.add("after_hours_override_required");
     openapiFields.add("business_timezone");
     openapiFields.add("days");
     openapiFields.add("emergency_end");

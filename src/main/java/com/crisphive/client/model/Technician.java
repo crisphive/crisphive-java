@@ -139,6 +139,21 @@ public class Technician {
   @javax.annotation.Nullable
   private UUID businessId;
 
+  public static final String SERIALIZED_NAME_CALENDAR_NUDGE_DUE_AT = "calendar_nudge_due_at";
+  @SerializedName(SERIALIZED_NAME_CALENDAR_NUDGE_DUE_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime calendarNudgeDueAt;
+
+  public static final String SERIALIZED_NAME_CALENDAR_NUDGED_AT = "calendar_nudged_at";
+  @SerializedName(SERIALIZED_NAME_CALENDAR_NUDGED_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime calendarNudgedAt;
+
+  public static final String SERIALIZED_NAME_CALENDAR_REQUESTED_AT = "calendar_requested_at";
+  @SerializedName(SERIALIZED_NAME_CALENDAR_REQUESTED_AT)
+  @javax.annotation.Nullable
+  private OffsetDateTime calendarRequestedAt;
+
   public static final String SERIALIZED_NAME_CREATED_AT = "created_at";
   @SerializedName(SERIALIZED_NAME_CREATED_AT)
   @javax.annotation.Nullable
@@ -457,6 +472,63 @@ public class Technician {
 
   public void setBusinessId(@javax.annotation.Nullable UUID businessId) {
     this.businessId = businessId;
+  }
+
+
+  public Technician calendarNudgeDueAt(@javax.annotation.Nullable OffsetDateTime calendarNudgeDueAt) {
+    this.calendarNudgeDueAt = calendarNudgeDueAt;
+    return this;
+  }
+
+  /**
+   * Precomputed deadline for the single calendar-connect nudge -- CalendarRequestedAt plus the sweep&#39;s three-day window -- so the dashboard never has to add three days and guess (the &#x60;is_fallback&#x60; / &#x60;token_stale&#x60; convention: the server computes the table state). Omitted, never null, whenever nothing is due: never requested, or already nudged.
+   * @return calendarNudgeDueAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getCalendarNudgeDueAt() {
+    return calendarNudgeDueAt;
+  }
+
+  public void setCalendarNudgeDueAt(@javax.annotation.Nullable OffsetDateTime calendarNudgeDueAt) {
+    this.calendarNudgeDueAt = calendarNudgeDueAt;
+  }
+
+
+  public Technician calendarNudgedAt(@javax.annotation.Nullable OffsetDateTime calendarNudgedAt) {
+    this.calendarNudgedAt = calendarNudgedAt;
+    return this;
+  }
+
+  /**
+   * Set (RFC3339) once the one-time unanswered-request reminder has been sent (calendarsync.nudge_sweep); omitted otherwise -- either because the technician answered, or because the three-day window has not elapsed yet. The sweep never nudges twice.
+   * @return calendarNudgedAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getCalendarNudgedAt() {
+    return calendarNudgedAt;
+  }
+
+  public void setCalendarNudgedAt(@javax.annotation.Nullable OffsetDateTime calendarNudgedAt) {
+    this.calendarNudgedAt = calendarNudgedAt;
+  }
+
+
+  public Technician calendarRequestedAt(@javax.annotation.Nullable OffsetDateTime calendarRequestedAt) {
+    this.calendarRequestedAt = calendarRequestedAt;
+    return this;
+  }
+
+  /**
+   * Set (RFC3339) when the business asked this technician to connect a personal calendar (calendarsync&#39;s invite flow, CALENDAR_SYNC_DESIGN.md §5); omitted if never asked. This is the ONLY surface that reports it for a technician who has not yet connected -- calendarsync&#39;s own connections list has no row for them at all.
+   * @return calendarRequestedAt
+   */
+  @javax.annotation.Nullable
+  public OffsetDateTime getCalendarRequestedAt() {
+    return calendarRequestedAt;
+  }
+
+  public void setCalendarRequestedAt(@javax.annotation.Nullable OffsetDateTime calendarRequestedAt) {
+    this.calendarRequestedAt = calendarRequestedAt;
   }
 
 
@@ -898,6 +970,9 @@ public class Technician {
         Objects.equals(this.buddyIds, technician.buddyIds) &&
         Objects.equals(this.businessGroupId, technician.businessGroupId) &&
         Objects.equals(this.businessId, technician.businessId) &&
+        Objects.equals(this.calendarNudgeDueAt, technician.calendarNudgeDueAt) &&
+        Objects.equals(this.calendarNudgedAt, technician.calendarNudgedAt) &&
+        Objects.equals(this.calendarRequestedAt, technician.calendarRequestedAt) &&
         Objects.equals(this.createdAt, technician.createdAt) &&
         Objects.equals(this.deletedAt, technician.deletedAt) &&
         Objects.equals(this.email, technician.email) &&
@@ -923,7 +998,7 @@ public class Technician {
 
   @Override
   public int hashCode() {
-    return Objects.hash(address, assignmentTier, buddyIds, businessGroupId, businessId, createdAt, deletedAt, email, fullName, id, jobTitle, joinDate, lastLoginAt, leads, leftAt, phone, role, roleKey, serviceAreas, startLocationLat, startLocationLong, startLocationType, status, updatedAt, userId, vehicleIds);
+    return Objects.hash(address, assignmentTier, buddyIds, businessGroupId, businessId, calendarNudgeDueAt, calendarNudgedAt, calendarRequestedAt, createdAt, deletedAt, email, fullName, id, jobTitle, joinDate, lastLoginAt, leads, leftAt, phone, role, roleKey, serviceAreas, startLocationLat, startLocationLong, startLocationType, status, updatedAt, userId, vehicleIds);
   }
 
   @Override
@@ -935,6 +1010,9 @@ public class Technician {
     sb.append("    buddyIds: ").append(toIndentedString(buddyIds)).append("\n");
     sb.append("    businessGroupId: ").append(toIndentedString(businessGroupId)).append("\n");
     sb.append("    businessId: ").append(toIndentedString(businessId)).append("\n");
+    sb.append("    calendarNudgeDueAt: ").append(toIndentedString(calendarNudgeDueAt)).append("\n");
+    sb.append("    calendarNudgedAt: ").append(toIndentedString(calendarNudgedAt)).append("\n");
+    sb.append("    calendarRequestedAt: ").append(toIndentedString(calendarRequestedAt)).append("\n");
     sb.append("    createdAt: ").append(toIndentedString(createdAt)).append("\n");
     sb.append("    deletedAt: ").append(toIndentedString(deletedAt)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
@@ -983,6 +1061,9 @@ public class Technician {
     openapiFields.add("buddy_ids");
     openapiFields.add("business_group_id");
     openapiFields.add("business_id");
+    openapiFields.add("calendar_nudge_due_at");
+    openapiFields.add("calendar_nudged_at");
+    openapiFields.add("calendar_requested_at");
     openapiFields.add("created_at");
     openapiFields.add("deleted_at");
     openapiFields.add("email");

@@ -67,13 +67,15 @@ public class JobRequestBookAndConfirmRefusal {
   private String message;
 
   /**
-   * Which step refused: quote or confirm.
+   * Which step refused: quote, confirm, or dispatch (the P0 cascade).
    */
   @JsonAdapter(StageEnum.Adapter.class)
   public enum StageEnum {
     QUOTE("quote"),
     
-    CONFIRM("confirm");
+    CONFIRM("confirm"),
+    
+    DISPATCH("dispatch");
 
     private String value;
 
@@ -189,7 +191,7 @@ public class JobRequestBookAndConfirmRefusal {
   }
 
   /**
-   * Which step refused: quote or confirm.
+   * Which step refused: quote, confirm, or dispatch (the P0 cascade).
    * @return stage
    */
   @javax.annotation.Nullable

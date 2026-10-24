@@ -16,6 +16,7 @@ package com.crisphive.client.model;
 import java.util.Objects;
 import com.crisphive.client.model.CustomerContact;
 import com.crisphive.client.model.CustomerProfile;
+import com.crisphive.client.model.CustomerQuickBooksLink;
 import com.crisphive.client.model.CustomerSpending;
 import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
@@ -63,6 +64,11 @@ public class Customer {
   @javax.annotation.Nullable
   private CustomerProfile profile;
 
+  public static final String SERIALIZED_NAME_QUICKBOOKS = "quickbooks";
+  @SerializedName(SERIALIZED_NAME_QUICKBOOKS)
+  @javax.annotation.Nullable
+  private CustomerQuickBooksLink quickbooks;
+
   public static final String SERIALIZED_NAME_SPENDING = "spending";
   @SerializedName(SERIALIZED_NAME_SPENDING)
   @javax.annotation.Nullable
@@ -109,6 +115,25 @@ public class Customer {
   }
 
 
+  public Customer quickbooks(@javax.annotation.Nullable CustomerQuickBooksLink quickbooks) {
+    this.quickbooks = quickbooks;
+    return this;
+  }
+
+  /**
+   * The customer&#39;s QuickBooks Online counterpart; null when this customer is not linked to one, and for every business without the integration.
+   * @return quickbooks
+   */
+  @javax.annotation.Nullable
+  public CustomerQuickBooksLink getQuickbooks() {
+    return quickbooks;
+  }
+
+  public void setQuickbooks(@javax.annotation.Nullable CustomerQuickBooksLink quickbooks) {
+    this.quickbooks = quickbooks;
+  }
+
+
   public Customer spending(@javax.annotation.Nullable CustomerSpending spending) {
     this.spending = spending;
     return this;
@@ -140,12 +165,13 @@ public class Customer {
     Customer customer = (Customer) o;
     return Objects.equals(this.contact, customer.contact) &&
         Objects.equals(this.profile, customer.profile) &&
+        Objects.equals(this.quickbooks, customer.quickbooks) &&
         Objects.equals(this.spending, customer.spending);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(contact, profile, spending);
+    return Objects.hash(contact, profile, quickbooks, spending);
   }
 
   @Override
@@ -154,6 +180,7 @@ public class Customer {
     sb.append("class Customer {\n");
     sb.append("    contact: ").append(toIndentedString(contact)).append("\n");
     sb.append("    profile: ").append(toIndentedString(profile)).append("\n");
+    sb.append("    quickbooks: ").append(toIndentedString(quickbooks)).append("\n");
     sb.append("    spending: ").append(toIndentedString(spending)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -179,6 +206,7 @@ public class Customer {
     openapiFields = new HashSet<String>();
     openapiFields.add("contact");
     openapiFields.add("profile");
+    openapiFields.add("quickbooks");
     openapiFields.add("spending");
 
     // a set of required properties/fields (JSON key names)
@@ -213,6 +241,10 @@ public class Customer {
       // validate the optional field `profile`
       if (jsonObj.get("profile") != null && !jsonObj.get("profile").isJsonNull()) {
         CustomerProfile.validateJsonElement(jsonObj.get("profile"));
+      }
+      // validate the optional field `quickbooks`
+      if (jsonObj.get("quickbooks") != null && !jsonObj.get("quickbooks").isJsonNull()) {
+        CustomerQuickBooksLink.validateJsonElement(jsonObj.get("quickbooks"));
       }
       // validate the optional field `spending`
       if (jsonObj.get("spending") != null && !jsonObj.get("spending").isJsonNull()) {

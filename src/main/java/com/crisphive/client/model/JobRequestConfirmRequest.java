@@ -162,7 +162,7 @@ public class JobRequestConfirmRequest {
   }
 
   /**
-   * TechnicianID (BUSINESS confirm only — ignored on the customer surface): force-assign the job to this technician instead of the ranked auto-pick. Ranking is bypassed; feasibility (hours/time-off/geo/skills), the TierLead rule and the double-booking guard still apply — an infeasible forced tech rejects the confirm (P0 gets the displacement hint).
+   * TechnicianID (BUSINESS confirm only — ignored on the customer surface): force-assign the job to this technician instead of the ranked auto-pick. Ranking is bypassed; feasibility (hours/time-off/geo/skills), the TierLead rule and the double-booking guard still apply — an infeasible forced tech rejects the confirm (P0 gets the displacement hint). ⚠️ One exception: for a SINGLE-PERSON p0 job, a PERSONAL-CALENDAR overlap on this exact technician no longer rejects — naming them here is treated as having already phoned them, so the confirm succeeds and the override is recorded on the business&#39;s activity feed (this response has no warnings array to carry it). A multi-member crew still rejects on it.
    * @return technicianId
    */
   @javax.annotation.Nullable

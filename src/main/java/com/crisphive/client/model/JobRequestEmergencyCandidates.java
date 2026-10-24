@@ -236,7 +236,7 @@ public class JobRequestEmergencyCandidates {
   }
 
   /**
-   * ID of the P0 job being placed.
+   * ID of the P0 job being placed. Absent for a probe -- a &#x60;job&#x60; that does not exist yet.
    * @return emergencyJobId
    */
   @javax.annotation.Nullable

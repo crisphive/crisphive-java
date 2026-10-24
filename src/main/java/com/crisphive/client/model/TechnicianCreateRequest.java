@@ -62,7 +62,7 @@ public class TechnicianCreateRequest {
   private TechnicianAddressInput address;
 
   /**
-   * Crew tier the matching engine assigns by: lead (can head a job), buddy (crew helper), float (excluded from auto crew-assign).
+   * Crew tier the matching engine assigns by: lead (can head a job), buddy (crew helper), float (excluded from auto crew-assign). IGNORED — stored empty, no error — when the role is Booking Coordinator, Administrator or Viewer: office roles are never assigned jobs. Technician, Owner, Supervisor and custom roles keep the tier.
    */
   @JsonAdapter(AssignmentTierEnum.Adapter.class)
   public enum AssignmentTierEnum {
@@ -127,7 +127,7 @@ public class TechnicianCreateRequest {
 
   public static final String SERIALIZED_NAME_BUSINESS_GROUP_ID = "business_group_id";
   @SerializedName(SERIALIZED_NAME_BUSINESS_GROUP_ID)
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   private UUID businessGroupId;
 
   public static final String SERIALIZED_NAME_EMAIL = "email";
@@ -265,7 +265,7 @@ public class TechnicianCreateRequest {
   }
 
   /**
-   * Crew tier the matching engine assigns by: lead (can head a job), buddy (crew helper), float (excluded from auto crew-assign).
+   * Crew tier the matching engine assigns by: lead (can head a job), buddy (crew helper), float (excluded from auto crew-assign). IGNORED — stored empty, no error — when the role is Booking Coordinator, Administrator or Viewer: office roles are never assigned jobs. Technician, Owner, Supervisor and custom roles keep the tier.
    * @return assignmentTier
    */
   @javax.annotation.Nullable
@@ -305,21 +305,21 @@ public class TechnicianCreateRequest {
   }
 
 
-  public TechnicianCreateRequest businessGroupId(@javax.annotation.Nonnull UUID businessGroupId) {
+  public TechnicianCreateRequest businessGroupId(@javax.annotation.Nullable UUID businessGroupId) {
     this.businessGroupId = businessGroupId;
     return this;
   }
 
   /**
-   * Role group for the new member. Discover IDs via GET /permission/groups (Owner/Administrator groups are rejected in sandbox mode).
+   * Role group for the new member. Optional: omitted or empty assigns the business&#39;s Technician group. To assign another group, copy its ID from the dashboard (Settings → Permissions) or from an existing member&#39;s &#x60;business_group_id&#x60;. Owner/Administrator groups are rejected in sandbox mode and for API-key callers.
    * @return businessGroupId
    */
-  @javax.annotation.Nonnull
+  @javax.annotation.Nullable
   public UUID getBusinessGroupId() {
     return businessGroupId;
   }
 
-  public void setBusinessGroupId(@javax.annotation.Nonnull UUID businessGroupId) {
+  public void setBusinessGroupId(@javax.annotation.Nullable UUID businessGroupId) {
     this.businessGroupId = businessGroupId;
   }
 
@@ -644,7 +644,6 @@ public class TechnicianCreateRequest {
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>();
-    openapiRequiredFields.add("business_group_id");
     openapiRequiredFields.add("full_name");
   }
 
@@ -691,7 +690,7 @@ public class TechnicianCreateRequest {
       if (jsonObj.get("buddy_ids") != null && !jsonObj.get("buddy_ids").isJsonNull() && !jsonObj.get("buddy_ids").isJsonArray()) {
         throw new IllegalArgumentException(String.format("Expected the field `buddy_ids` to be an array in the JSON string but got `%s`", jsonObj.get("buddy_ids").toString()));
       }
-      if (!jsonObj.get("business_group_id").isJsonPrimitive()) {
+      if ((jsonObj.get("business_group_id") != null && !jsonObj.get("business_group_id").isJsonNull()) && !jsonObj.get("business_group_id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `business_group_id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("business_group_id").toString()));
       }
       if ((jsonObj.get("email") != null && !jsonObj.get("email").isJsonNull()) && !jsonObj.get("email").isJsonPrimitive()) {

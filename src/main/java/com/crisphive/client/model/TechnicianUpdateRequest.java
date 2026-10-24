@@ -60,7 +60,7 @@ public class TechnicianUpdateRequest {
   private TechnicianAddressInput address;
 
   /**
-   * Crew tier: lead / buddy / float (float &#x3D; excluded from auto crew-assign).
+   * Crew tier: lead / buddy / float (float &#x3D; excluded from auto crew-assign). IGNORED (stored empty, no error) for Booking Coordinator, Administrator and Viewer — office roles are never assigned jobs, so moving a member into one of them clears the tier.
    */
   @JsonAdapter(AssignmentTierEnum.Adapter.class)
   public enum AssignmentTierEnum {
@@ -243,7 +243,7 @@ public class TechnicianUpdateRequest {
   }
 
   /**
-   * Crew tier: lead / buddy / float (float &#x3D; excluded from auto crew-assign).
+   * Crew tier: lead / buddy / float (float &#x3D; excluded from auto crew-assign). IGNORED (stored empty, no error) for Booking Coordinator, Administrator and Viewer — office roles are never assigned jobs, so moving a member into one of them clears the tier.
    * @return assignmentTier
    */
   @javax.annotation.Nullable
